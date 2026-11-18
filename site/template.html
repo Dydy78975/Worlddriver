@@ -340,6 +340,11 @@ ol.sources li span:first-child{font-family:var(--font-data);color:var(--accent)}
 .nc-cd b{font-size:1.4rem;font-family:var(--font-data);color:var(--accent)}
 @media (max-width:560px){.nextcard{grid-template-columns:auto minmax(0,1fr)}.nc-cd{grid-column:1/-1;text-align:left;display:flex;gap:10px;align-items:baseline}}
 .rows.compact .prow{grid-template-columns:minmax(78px,1fr) auto auto}.rows.compact .hide-s{display:none}
+.bigstat.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:760px){.bigstat.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mx.flat .mx-cell,.mx.flat .mx-self{aspect-ratio:auto;height:40px}
+.mx{max-width:720px}
+@media (max-width:640px){td.hide-s,th.hide-s{display:none}}
 </style>
 
 <header class="top">
@@ -1060,6 +1065,8 @@ function pairCheck(pair) {
     <div class="checklist">
       <div class="ckrow">${icon(Math.abs(dist) >= 10 ? (Math.sign(dist) === dir ? "ok" : "no") : "neutral")}<div><b>Fundament (Bias)</b><span>${b} ${bb} gegen ${q} ${bq} · Abstand ${Math.abs(dist)} Punkte${Math.abs(dist) < 10 ? " · knapp" : ""}</span></div></div>
       ${Object.entries(p.factors).map(([k, v]) => `<div class="ckrow">${icon(st(v.signal))}<div><b>${names[k]}</b><span>${esc(v.text)}</span></div></div>`).join("")}
+      ${(() => { const rc = R().currencies, cb = (rc[b] || {}).short, cq = (rc[q] || {}).short; if (!cb || !cq) return "";
+        const cd = cb.value - cq.value; return `<div class="ckrow"><span class="ck">i</span><div><b>Zinsdifferenz (Carry)</b><span>${b} ${fmt(cb.value, 2)} % gegen ${q} ${fmt(cq.value, 2)} % · ${cd > 0 ? "+" : ""}${fmt(cd, 2)} Prozentpunkte – ${dir > 0 ? (cd > 0 ? "Long bringt eher Swap" : "Long kostet eher Swap") : dir < 0 ? (cd < 0 ? "Short bringt eher Swap" : "Short kostet eher Swap") : "nur zur Information"}</span></div></div>`; })()}
       <div class="ckrow">${icon(reds.length ? "warn" : "ok")}<div><b>Event-Lage</b><span>${reds.length ? reds.slice(0, 3).map((e) => `${e.wd.slice(0, 2)} ${e.time} ${e.currency} ${esc(e.title)}`).join(" · ") + (reds.length > 3 ? ` · +${reds.length - 3}` : "") : "keine roten Ordner für beide Währungen"}</span></div></div>
     </div>
     ${p.against.length ? `<div class="label" style="margin:12px 0 4px">Gegenargumente</div><p class="muted" style="font-size:.88rem">${p.against.map((k) => names[k]).join(", ")} ${p.against.length > 1 ? "sprechen" : "spricht"} gegen die Richtung.</p>` : ""}
@@ -1317,6 +1324,64 @@ function startTicker() {
 }
 function bindCalendarV2() { bindCalendar(); startTicker(); }
 
+/* Zinsen & Notenbanken */
+const R = () => (X().rates || {currencies: {}, carry: {}});
+const bp = (x) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "±") + nf(0).format(Math.abs(x * 100)) + " bp";
+function viewRates() {
+  const r = R().currencies, sel = state.rateSel || "USD", e = r[sel] || {};
+  const order = [...D.majors].sort((a, b) => ((r[b] || {}).short || {}).value - ((r[a] || {}).short || {}).value);
+  const tile = (lab, val, sub, cls = "") => `<div class="panel tile"><span class="eyebrow">${lab}</span><span class="big num ${cls}" style="font-size:2.1rem">${val}</span><span class="faint" style="font-size:.78rem">${sub}</span></div>`;
+  const inf = e.inflation;
+  const lastWithStale = Object.values(r).filter((x) => x.inflation && x.inflation.stale).length;
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Makro · Zinsen & Notenbanken</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Zinsen & Notenbanken</h1>
+      <p class="brief" style="font-size:1.05rem">Zinsniveau, Zinsrichtung und Renditen der acht Währungsräume. Zinsunterschiede bestimmen, was es kostet oder bringt, ein Paar zu halten (Carry).</p></div>
+    <div class="chips" role="group" aria-label="Währung">${D.majors.map((c) => `<button type="button" data-rate="${c}" aria-pressed="${sel === c}">${c}</button>`).join("")}</div>
+    <article class="panel"><div class="section-title"><h2>${sel} · ${esc(e.bank || "")}</h2><span class="chip"><span class="dot live"></span>Stand ${e.short ? dateDe(e.short.date) : "–"}</span></div>
+      <div class="bigstat four" style="margin-top:12px">
+        ${tile("Kurzfristzins", e.short ? fmt(e.short.value, 2) + " %" : "–", e.short ? `12 Monate ${bp(e.short.chg_12m)} · 3 Monate ${bp(e.short.chg_3m)}` : "")}
+        ${tile("Inflation J/J", inf ? fmt(inf.value, 1) + " %" : "–", inf ? (inf.stale ? `<span style="color:var(--yellow)">veraltet · Stand ${inf.date}</span>` : `Stand ${inf.date}`) : "keine Quelle", inf && inf.stale ? "faint" : "")}
+        ${tile("10J-Rendite", e.y10 ? fmt(e.y10.value, 2) + " %" : "–", e.y10 ? `12 Monate ${bp(e.y10.chg_12m)}` : "")}
+        ${tile("Zinskurve 10J − kurz", e.curve == null ? "–" : (e.curve > 0 ? "+" : "") + fmt(e.curve, 2), e.curve == null ? "" : e.curve >= 0 ? "normal (steigend)" : "invers – oft Signal für erwartete Zinssenkungen", e.curve < 0 ? "y" : "")}
+      </div>
+      <div class="label" style="margin:14px 0 6px">Verlauf 5 Jahre</div>${rateChart(e)}
+      <div class="legend-s" style="margin-top:6px"><span><i style="background:var(--accent)"></i>Kurzfristzins</span><span><i style="background:var(--weak)"></i>10J-Rendite</span></div>
+      <p class="faint" style="font-size:.76rem;margin-top:6px">${esc((e.short || {}).source ? e.short.source.description : "")} · ${esc((e.y10 || {}).source ? e.y10.source.description : "")}</p></article>
+    <article class="panel"><h2 style="margin-bottom:6px">Alle Notenbanken</h2><div class="tbl-wrap"><table><thead><tr><th>Währung</th><th class="hide-s">Notenbank</th><th class="num">Zins</th><th class="num">12 M</th><th class="num">10J</th><th class="num">Kurve</th><th class="num">Inflation</th><th class="num">Realzins</th></tr></thead><tbody>
+      ${order.map((c) => { const x = r[c] || {}; const ch = (x.short || {}).chg_12m;
+        return `<tr><td><b class="num">${c}</b></td><td class="faint hide-s">${esc(x.bank)}</td><td class="num">${x.short ? fmt(x.short.value, 2) + " %" : "–"}</td>
+          <td class="num" style="color:${ch > 0.05 ? "var(--strong)" : ch < -0.05 ? "var(--weak)" : "var(--fg-3)"}">${ch > 0.05 ? "▲" : ch < -0.05 ? "▼" : "■"} ${bp(ch)}</td>
+          <td class="num">${x.y10 ? fmt(x.y10.value, 2) + " %" : "–"}</td><td class="num">${x.curve == null ? "–" : (x.curve > 0 ? "+" : "") + fmt(x.curve, 2)}</td>
+          <td class="num">${x.inflation ? (x.inflation.stale ? `<span class="faint">${fmt(x.inflation.value, 1)} % (${x.inflation.date})</span>` : fmt(x.inflation.value, 1) + " %") : "–"}</td>
+          <td class="num">${x.real == null ? "–" : (x.real > 0 ? "+" : "") + fmt(x.real, 2) + " %"}</td></tr>`; }).join("")}</tbody></table></div>
+      ${lastWithStale ? `<div class="honest" style="margin-top:12px">${INFO_ICON}<span>Für ${lastWithStale} Länder liefert die bisherige Quelle (OECD über FRED) keine aktuellen Inflationszahlen mehr. Sie sind grau markiert und fließen in keinen Realzins ein. Aktuelle Werte von den nationalen Statistikämtern folgen.</span></div>` : ""}</article>
+    <article class="panel"><div class="section-title"><h2>Zinsdifferenz-Matrix</h2><span class="faint num" style="font-size:.74rem">Zeile minus Spalte · Prozentpunkte</span></div>${carryMatrix(order)}
+      <p class="faint" style="font-size:.78rem;margin-top:8px">Positiv: Die Zeilenwährung bringt mehr Zins. Wer sie gegen die Spaltenwährung kauft, erhält meist Swap (Carry). Der genaue Swap hängt vom Broker ab.</p></article>
+  </section>`;
+}
+function rateChart(e) {
+  const a = (e.short || {}).history || [], b = (e.y10 || {}).history || [];
+  if (a.length < 2) return '<p class="faint">Keine Daten.</p>';
+  const W = Math.max(320, Math.min(980, ($("#app").clientWidth || 360) - 40)), H = 200, pl = 40, pr = 10, pt = 10, pb = 22;
+  const all = a.concat(b).map((r) => r[1]).filter((v) => v != null), mn = Math.min(0, ...all), mx = Math.max(...all) * 1.08;
+  const n = Math.max(a.length, b.length), xs = (i, len) => pl + (i + (n - len)) / (n - 1) * (W - pl - pr), ys = (v) => pt + (1 - (v - mn) / (mx - mn)) * (H - pt - pb);
+  const path = (h) => h.map((r, i) => `${i ? "L" : "M"}${xs(i, h.length).toFixed(1)},${ys(r[1]).toFixed(1)}`).join("");
+  const ticks = [mn, (mn + mx) / 2, mx];
+  const yrs = a.filter((r, i) => r[0].endsWith("-01")).map((r) => [r[0].slice(0, 4), a.indexOf(r)]);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Zinsverlauf">
+    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${ys(t)}" y2="${ys(t)}" stroke="var(--line-soft)"/><text x="${pl - 6}" y="${ys(t) + 4}" text-anchor="end">${fmt(t, 1)} %</text>`).join("")}
+    ${mn < 0 ? `<line x1="${pl}" x2="${W - pr}" y1="${ys(0)}" y2="${ys(0)}" stroke="var(--fg-3)"/>` : ""}
+    <path d="${path(b)}" fill="none" stroke="var(--weak)" stroke-width="1.6"/><path d="${path(a)}" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+    ${yrs.map(([y, i]) => `<text x="${xs(i, a.length)}" y="${H - 6}" text-anchor="middle">${y}</text>`).join("")}</svg>`;
+}
+function carryMatrix(order) {
+  const r = R().currencies, v = (c) => ((r[c] || {}).short || {}).value;
+  return `<div class="mx-wrap"><div class="mx flat" style="grid-template-columns:54px repeat(${order.length},minmax(34px,1fr))"><span></span>${order.map((q) => `<span class="mx-h">${q}<small>${fmt(v(q), 2)}</small></span>`).join("")}
+    ${order.map((b) => `<span class="mx-r">${b}</span>${order.map((q) => b === q ? `<span class="mx-self">${b}</span>` : (() => { const d = v(b) - v(q);
+      return `<a class="mx-cell" href="#paar-${marketPair(b, q)}" style="background:${heat(d, 4)};text-decoration:none" aria-label="${b} minus ${q}: ${fmt(d, 2)}">${d > 0 ? "+" : ""}${fmt(d, 1)}</a>`; })()).join("")}`).join("")}</div></div>`;
+}
+function bindRates() { document.querySelectorAll("[data-rate]").forEach((b) => b.onclick = () => { state.rateSel = b.dataset.rate; route(); }); }
+
 /* ---------- Menü ---------- */
 const NAV = [
   ["cockpit", "Cockpit", "M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z"],
@@ -1328,6 +1393,7 @@ const NAV = [
   ["saisonalitaet", "Saisonalität", "M3 4h14v13H3zM3 8h14M7 2v4M13 2v4M7 12h2M11 12h2M7 15h2"],
   ["prognosen", "Prognosen", "M3 16l4-5 3 3 7-8"],
   ["tracker", "Forecast-Tracker", "M3 17V9M8 17V5M13 17v-6M18 17V3"],
+  ["zinsen", "Zinsen & Notenbanken", "M3 17h14M4 8l6-5 6 5M5 9v6M8 9v6M12 9v6M15 9v6"],
   ["makro", "Makro & Beziehungen", "M3 15c3-6 5-6 7-2s4 4 7-4"],
   ["rechner", "Rechner", "M5 2h10v16H5zM7 5h6v3H7zM7 11h1M10 11h1M13 11h1M7 14h1M10 14h1M13 14h1"],
   ["weltkarte", "Weltkarte", "M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 10h16M10 2c2.5 2.5 2.5 13.5 0 16M10 2c-2.5 2.5-2.5 13.5 0 16"],
@@ -1365,7 +1431,7 @@ const VIEWS = {
   cockpit: ["Wochenvorbereitung", viewCockpit, () => {}], heute: ["Tages-Update", viewToday, () => {}], waehrungen: ["Währungen", viewCurrencies, bindCurrencies], paare: ["Paare", viewPairs, bindPairs],
   kalender: ["Kalender", viewCalendarV2, bindCalendarV2], cot: ["Positionierung", viewCot, bindCot], saisonalitaet: ["Saisonalität", viewSeason, bindSeason],
   prognosen: ["Prognosen", viewForecasts, bindForecasts], tracker: ["Forecast-Tracker", viewTracker, bindTracker],
-  makro: ["Makro", viewMakro, bindMakro], rechner: ["Rechner", viewCalc, bindCalc], weltkarte: ["Weltkarte", viewMap, bindMap], daten: ["Daten", viewData, () => {}]};
+  makro: ["Makro", viewMakro, bindMakro], rechner: ["Rechner", viewCalc, bindCalc], zinsen: ["Zinsen & Notenbanken", viewRates, bindRates], weltkarte: ["Weltkarte", viewMap, bindMap], daten: ["Daten", viewData, () => {}]};
 function route() {
   clearInterval(ticker);
   const name = (location.hash || "#cockpit").slice(1);

@@ -151,12 +151,12 @@ def pair_view(pair: str, cot_now: pd.DataFrame, trend: pd.Series, season: dict, 
     td = trend.get(b, np.nan) - trend.get(q, np.nan)
     sig = 0 if np.isnan(td) else (1 if td >= TREND_MIN else -1 if td <= -TREND_MIN else 0)
     f["trend"] = {"signal": sig, "value": None if np.isnan(td) else float(td),
-                  "text": "keine Daten" if np.isnan(td) else f"Stärke 20 Tage: {b} {trend.get(b):+.2f} %, {q} {trend.get(q):+.2f} %"}
+                  "text": "keine Daten" if np.isnan(td) else f"Stärke 20 Tage: {b} {trend.get(b):+.2f} %, {q} {trend.get(q):+.2f} %".replace(".", ",")}
     st = season.get(pair, {}).get(month)
     sig = season_signal(st)
     f["season"] = {"signal": sig, "value": None if not st else float(st["mean"]),
                    "text": "zu wenige Jahre" if not st else
-                   f"{MONTHS_DE[month - 1]}: in {st['hit'] * 100:.0f} % von {st['n']} Jahren gestiegen, Ø {st['mean'] * 100:+.2f} %"}
+                   f"{MONTHS_DE[month - 1]}: in {st['hit'] * 100:.0f} % von {st['n']} Jahren gestiegen, Ø {st['mean'] * 100:+.2f} %".replace(".", ",")}
     total = sum(x["signal"] for x in f.values())
     direction = int(np.sign(total))
     confluence = sum(1 for x in f.values() if direction and x["signal"] == direction)

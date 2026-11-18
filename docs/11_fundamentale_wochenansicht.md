@@ -55,3 +55,12 @@ Die Website zeigt diese Ergebnisse neben den Signalen. Die fundamentale Wochenan
 | Makro | Marktstimmung Risk-on/Risk-off (VIX gegen Jahresmittel, AUD/JPY-Trend, US-Dollar), Quadrant Trend × Positionierung, Stärke-Heatmap |
 | Rechner | Positionsgröße aus Risiko, Pip-Wert in Kontowährung, Chance-Risiko-Verhältnis, Warnung bei zu engem Stop im Verhältnis zur typischen Tagesbewegung |
 | Kalender | Countdown zum nächsten roten Ordner |
+
+## Zinsen & Notenbanken (18.11.2026)
+
+* Kurzfristzins nahe am Leitzins für alle 8 Währungen (Fed Funds, EZB-Einlagesatz, OECD-Tagesgeldsätze;
+  Neuseeland: 3-Monats-Interbankensatz), 10-jährige Renditen (Eurozone: Bundesanleihe), Veränderung über 3 und
+  12 Monate, Zinskurve (10 Jahre minus kurz), Zinsdifferenz-Matrix (Carry) und Zinsdifferenz in der Checkliste.
+* **Inflation:** aktuell nur für USA und Eurozone. Die OECD-Reihen für GB, JP, CH, CA, AU, NZ enden auf FRED
+  2021–2025; sie werden als „veraltet“ angezeigt und nicht für den Realzins verwendet. Nächster Schritt:
+  nationale Statistikämter anbinden.

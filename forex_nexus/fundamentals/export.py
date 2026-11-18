@@ -146,6 +146,7 @@ def build(conn, closes: pd.DataFrame, strength: pd.DataFrame, forecasts: list[di
         "season_paths": extras.seasonal_paths(closes, now.year),
         "screener": extras.season_screener(closes, now.date()),
         "strength_windows": extras.strength_windows(strength),
+        "rates": __import__("forex_nexus.fundamentals.rates", fromlist=["build"]).build(conn, now),
         "mood": extras.market_mood(vix_s, closes, strength) if vix_s is not None and len(vix_s) > 260 and "AUDJPY" in closes else None,
     }
     return {

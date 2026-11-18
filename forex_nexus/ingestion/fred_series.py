@@ -21,20 +21,21 @@ from forex_nexus.ingestion.http import fetch_text
 def period_end(d, frequency: str):
     if frequency == "M":
         return (pd.Timestamp(d) + pd.offsets.MonthEnd(0)).date()
+    if frequency == "Q":
+        return (pd.Timestamp(d) + pd.offsets.QuarterEnd(0)).date()
     if frequency == "W":
         return d + timedelta(days=6)
     return d
 
 
-def ingest(conninfo: str, pause: float = 1.0) -> list[dict]:
+def ingest(conninfo: str, pause: float = 1.0, sources=("FRED_COMMODITY", "FRED_RATES")) -> list[dict]:
     results = []
     with connect(conninfo) as conn:
         series = conn.execute(
-            """SELECT s.series_id, s.source_code, s.frequency, extract(epoch FROM s.publication_lag)::int
+            """SELECT s.series_id, s.source_code, s.frequency, extract(epoch FROM s.publication_lag)::int, s.source_id
                FROM ref.series s JOIN ref.data_source d USING (source_id)
-               WHERE d.name = 'FRED_COMMODITY' ORDER BY s.series_id""").fetchall()
-        src = conn.execute("SELECT source_id FROM ref.data_source WHERE name = 'FRED_COMMODITY'").fetchone()[0]
-    for series_id, code, freq, lag_seconds in series:
+               WHERE d.name = ANY(%s) ORDER BY s.series_id""", (list(sources),)).fetchall()
+    for series_id, code, freq, lag_seconds, src in series:
         values = parse_fred_csv(fetch_text(FRED_URL.format(series=code)), require_positive=False)
         lag = timedelta(seconds=lag_seconds or 0)
         rows = [(series_id, d, datetime.combine(period_end(d, freq), datetime.min.time(), timezone.utc)
