@@ -157,6 +157,10 @@ def collect(conninfo: str) -> dict:
                                                                   "lead_months": lead},
                          "priced_in": priced})
 
+        from forex_nexus.fundamentals.export import build as build_fund
+        fund_strength = strength.copy()
+        fund = build_fund(conn, closes, fund_strength, forecasts)
+
         economies = [dict(zip(["code", "name", "currency", "notes"], r)) for r in
                      conn.execute("SELECT economy_code, name_de, currency, notes_de FROM dep.economy").fetchall()]
 
@@ -173,11 +177,11 @@ def collect(conninfo: str) -> dict:
 
     return {
         "meta": {"generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"), "as_of": str(last),
-                 "code_commit": code_commit(), "price_basis": "FRED H.10 Mittagskurse New York (vorläufig)",
+                 "code_commit": code_commit(), "price_basis": "FRED H.10 Mittagskurse New York (vorläufig)", "calendar_source": "Forex Factory",
                  "vix": _r(vix_last, 2)},
         "pairs": ALL_PAIRS, "majors": MAJORS, "prices": prices, "strength": strength_out,
         "forecasts": forecasts, "ledger": ledger, "backtest": backtest, "promotions": promotions,
-        "dependencies": deps, "economies": economies, "quality": quality, "sources": sources, "series_last": last_obs,
+        "dependencies": deps, "economies": economies, "fund": fund, "quality": quality, "sources": sources, "series_last": last_obs,
     }
 
 

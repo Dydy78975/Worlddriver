@@ -13,10 +13,11 @@ Stand: 18.11.2026
 | Auswertung fälliger Prognosen | läuft, sobald die Kurse des Zieltags vorliegen |
 | Forecast-Tracker | läuft: Backtest je Jahr, Hold-out, je Währung, je Regime, Live-Bilanz |
 | Dependency Engine | läuft: 21 von 28 Beziehungen statistisch geprüft, 7 warten auf Daten |
-| Website WorlᗡDriver | läuft: Übersicht, Prognosen, Tracker, Weltkarte, Beziehungen, Daten |
+| Website WorlᗡDriver | läuft: Cockpit, Währungen, Paare (Woche + Tage), Kalender, COT, Saisonalität, Prognosen, Tracker, Makro, Weltkarte, Daten |
+| COT (CFTC) und Wirtschaftskalender | läuft, siehe `11_fundamentale_wochenansicht.md` |
 | Täglicher Fehler-Check 6:00 Uhr | eingerichtet (siehe unten) |
 | Dukascopy (Hoch/Tief, 17:00 New York) | Code fertig; Abruf aus der Cloud-Umgebung blockiert → eigener Server nötig |
-| Zinsen, Inflation, COT | nächste Phase |
+| Zinsen, Inflation | nächste Phase |
 | A+-Regel-Engine | wartet auf deine 6 Kriterien |
 
 ## Wichtigste Ergebnisse (ehrlich)

@@ -32,8 +32,9 @@ Planungsdokumente:
 8. [Quantitative Forecasting Engine](docs/08_quantitative_forecasting.md)
 9. [Global Economic Dependency Engine](docs/09_dependency_engine.md)
 10. [Stand der Software und Bedienung](docs/10_stand_und_bedienung.md)
+11. [Fundamentale Wochenansicht: Cockpit, Paare, Kalender, COT, Saisonalität](docs/11_fundamentale_wochenansicht.md)
 
-Die Website selbst: `site/index.html` (wird mit `python -m forex_nexus daily` erzeugt).
+Die Website wird mit `python -m forex_nexus daily` erzeugt (`site/index.html`, nicht im Repository, da sie Kalenderdaten zur persönlichen Nutzung enthält).
 
 Weitere Dokumente: – Wissensbasis: [`knowledge/relationships.yaml`](knowledge/relationships.yaml)
 

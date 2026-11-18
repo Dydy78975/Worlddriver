@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily | ingest-cot | ingest-calendar"""
 
 import sys
 
@@ -61,6 +61,14 @@ def main(argv: list[str]) -> int:
         from forex_nexus.ledger.pipeline import evaluate_due
         evaluate_due(url)
         return 0
+    if cmd == "ingest-cot":
+        from forex_nexus.ingestion.cot import ingest
+        print(ingest(url))
+        return 0
+    if cmd == "ingest-calendar":
+        from forex_nexus.ingestion.calendar import ingest
+        print(ingest(url))
+        return 0
     if cmd == "daily":
         # Kompletter Tagesablauf: Daten laden, prüfen, prognostizieren, auswerten, Website bauen
         from datetime import date
@@ -75,6 +83,9 @@ def main(argv: list[str]) -> int:
         for r in ingest_all(url):
             print(f"{r['source']}: {r['inserted']} neue Kurse")
         print(f"Makro/Rohstoffe: {len(ingest_series(url))} Reihen aktualisiert")
+        from forex_nexus.ingestion import calendar as cal, cot
+        print(f"COT: {cot.ingest(url)}")
+        print(f"Kalender: {cal.ingest(url)}")
         result = run_checks(url, date.today())
         print(f"Qualitätsprüfung: {result['new_in_db']} neue Befunde")
         out = Path("reports/phase1")

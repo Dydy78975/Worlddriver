@@ -3,29 +3,34 @@
 <meta name="description" content="WorlᗡDriver – Prognosen und Wirtschaftsbeziehungen für die 8 Hauptwährungen und ihre 28 Paare">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: Kopfzeile mit Logo + Status, darunter Reiter; Inhalt als ruhige Spalte (max. 1100px), Karten nur wo sie Objekte trennen */
+/* Layout: Kopfleiste mit Menü-Knopf und Seitentitel, ausklappbares Seitenmenü; Inhalt als ruhige Spalte bis 1100px.
+   Ton: redaktionell – große Aussage oben, darunter belegte Fakten mit Quellen-Verweisen [1]. */
 :root{
   color-scheme:dark;
-  --bg:#0a101c; --surface:#101828; --surface-2:#162036; --line:#243150; --line-soft:#1b2640;
-  --fg:#e7ecf5; --fg-2:#a9b5cb; --fg-3:#7c89a3;
-  --accent:#4c93ec; --accent-ink:#0a101c;
-  --bull:#20a87c; --bear:#e0712f; --neutral:#7f8aa1;
-  --good:#2fae6b; --warn:#d9a12a; --bad:#e0563f;
-  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --bg:#0c0e13; --surface:#13161d; --surface-2:#1a1e27; --line:#272c38; --line-soft:#1d212b;
+  --fg:#eef0f4; --fg-2:#a7adbb; --fg-3:#767d8e;
+  --accent:#7b93ff; --accent-ink:#0c0e13;
+  --strong:#7cb6ff; --weak:#f2a65e; --bull:#4fb3a4; --bear:#ef8d4f; --neutral:#7f8697;
+  --red:#e5484d; --orange:#f0913a; --yellow:#e2b43c; --holiday:#8a90a0;
+  --good:#3fb97e; --warn:#e2b43c; --bad:#e5484d;
+  --font-display:"Inter Tight","Inter",ui-sans-serif,system-ui,sans-serif;
   --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-data:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --r:12px;
+  --font-data:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:14px;
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  color-scheme:light;--bg:#f4f6fa;--surface:#ffffff;--surface-2:#eef2f8;--line:#d5dceb;--line-soft:#e4e9f2;
-  --fg:#111827;--fg-2:#45526b;--fg-3:#6a7690;--accent:#2a6fd0;--accent-ink:#ffffff;
-  --bull:#127f5d;--bear:#c25717;--neutral:#7a8499;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}}
+  color-scheme:light;--bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
+  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--accent-ink:#ffffff;
+  --strong:#2367c9;--weak:#c0661c;--bull:#17806f;--bear:#c25a1a;--neutral:#7a8090;
+  --red:#d1343a;--orange:#d9761e;--yellow:#b88a0e;--holiday:#7a8090;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}}
 :root[data-theme="light"]{
-  color-scheme:light;--bg:#f4f6fa;--surface:#ffffff;--surface-2:#eef2f8;--line:#d5dceb;--line-soft:#e4e9f2;
-  --fg:#111827;--fg-2:#45526b;--fg-3:#6a7690;--accent:#2a6fd0;--accent-ink:#ffffff;
-  --bull:#127f5d;--bear:#c25717;--neutral:#7a8499;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}
+  color-scheme:light;--bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
+  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--accent-ink:#ffffff;
+  --strong:#2367c9;--weak:#c0661c;--bull:#17806f;--bear:#c25a1a;--neutral:#7a8090;
+  --red:#d1343a;--orange:#d9761e;--yellow:#b88a0e;--holiday:#7a8090;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
@@ -38,27 +43,38 @@ p{margin:0}
 .muted{color:var(--fg-2)} .faint{color:var(--fg-3)}
 .wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
-/* Kopf */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
-.top-row{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;padding-block:12px 8px;flex-wrap:wrap}
-@media (max-width:760px){.top-row .status{width:100%;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.status::-webkit-scrollbar{display:none}}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg)}
-.brand svg{height:26px;width:auto;display:block}
-.status{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.78rem;color:var(--fg-2);white-space:nowrap;background:var(--surface)}
+/* Kopf und Seitenmenü */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
+.top-row{display:flex;align-items:center;gap:12px;padding-block:10px}
+.iconbtn{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:12px;color:var(--fg);flex:none}
+.iconbtn:hover{background:var(--surface-2)}
+.top-title{font-weight:600;font-size:1rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.brand{display:flex;align-items:center;text-decoration:none;color:var(--fg)}
+.brand svg{height:22px;width:auto;display:block}
+.status{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.76rem;color:var(--fg-2);white-space:nowrap;background:var(--surface);font-family:var(--font-data)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--fg-3);flex:none}
-.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
-nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:0 8px}
-nav.tabs::-webkit-scrollbar{display:none}
-nav.tabs a{flex:none;text-decoration:none;color:var(--fg-2);font-weight:500;font-size:.92rem;padding:7px 12px;border-radius:8px}
-nav.tabs a[aria-current="page"]{background:var(--surface-2);color:var(--fg)}
-nav.tabs a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
+.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)} .dot.live{background:var(--accent)}
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .45);z-index:40}
+aside.drawer{position:fixed;top:0;bottom:0;left:0;width:min(340px,88vw);z-index:50;background:var(--surface);border-right:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 18px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px;overflow-y:auto;transform:translateX(-102%);transition:transform .2s ease}
+aside.drawer.open{transform:none}
+@media (prefers-reduced-motion:reduce){aside.drawer{transition:none}}
+.drawer-head{display:flex;justify-content:space-between;align-items:center}
+.drawer nav{display:grid;gap:2px}
+.drawer nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--fg);padding:10px 12px;border-radius:10px;font-size:1rem}
+.drawer nav a svg{width:20px;height:20px;color:var(--fg-2);flex:none}
+.drawer nav a[aria-current="page"]{background:var(--surface-2)}
+.drawer nav a span.k{margin-left:auto;font-family:var(--font-data);font-size:.72rem;color:var(--fg-3)}
+.drawer .sep{height:1px;background:var(--line-soft)}
+.next-ev{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;text-decoration:none;color:var(--fg)}
+.next-ev small{grid-column:2;color:var(--fg-3);font-family:var(--font-data);font-size:.76rem}
+.folder{display:inline-block;width:16px;height:12px;flex:none;vertical-align:middle}
 main{padding-block:20px 48px}
 section.view{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
 section.view>*,.grid-2>*,.grid-3>*,.kpis>*{min-width:0}
 .lede{display:grid;gap:6px}
-.lede h1{font-size:clamp(1.5rem,4vw,2.1rem)}
+.lede h1{font-size:clamp(2.1rem,7.5vw,3.4rem);font-weight:800;letter-spacing:-.04em;line-height:1.04}
 .lede p{max-width:68ch;color:var(--fg-2)}
 .panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:16px}
 .panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -175,33 +191,104 @@ details summary{cursor:pointer;color:var(--fg-2);font-size:.86rem}
 .empty{padding:22px;border:1px dashed var(--line);border-radius:var(--r);color:var(--fg-2);display:grid;gap:6px}
 footer{border-top:1px solid var(--line-soft);padding-block:20px 32px;color:var(--fg-3);font-size:.8rem;display:grid;gap:6px}
 @media (prefers-reduced-motion:no-preference){.fc-detail{animation:open .18s ease-out}@keyframes open{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}}
+
+/* Redaktionelle Seiten (Cockpit, Paare, Kalender, COT, Saisonalität) */
+h1,h2,h3{font-family:var(--font-display)}
+.eyebrow{font-family:var(--font-data);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-3)}
+.eyebrow b{color:var(--accent);font-weight:600}
+.hero{display:grid;gap:18px;padding-block:6px 4px}
+.hero h1{font-weight:800;font-size:clamp(2.5rem,10.5vw,5rem);line-height:1;letter-spacing:-.045em}
+.hero h1 .s{color:var(--strong)} .hero h1 .w{color:var(--weak)}
+.brief{font-family:var(--font-display);font-weight:500;font-size:clamp(1.12rem,4.4vw,1.55rem);line-height:1.5;color:var(--fg-2);max-width:42ch;letter-spacing:-.01em}
+.brief b{color:var(--fg);font-weight:600} .brief .s{color:var(--strong)} .brief .w{color:var(--weak)} .brief .y{color:var(--yellow)}
+sup.ref{font-family:var(--font-data);font-size:.58em;margin-left:2px}
+sup.ref a{color:var(--accent);text-decoration:none}
+.srcline{display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--fg-3)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{display:grid;gap:4px}
+.tile .big{font-family:var(--font-display);font-weight:700;font-size:clamp(2.2rem,9vw,3.2rem);letter-spacing:-.03em;line-height:1}
+.honest{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:.88rem;color:var(--fg-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface)}
+.honest svg{color:var(--accent);margin-top:2px}
+ol.sources{margin:0;padding-left:0;list-style:none;display:grid;gap:6px;font-size:.84rem;color:var(--fg-2)}
+ol.sources li{display:grid;grid-template-columns:30px 1fr;gap:6px}
+ol.sources li span:first-child{font-family:var(--font-data);color:var(--accent)}
+.section-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.dir{display:inline-flex;align-items:center;justify-content:center;min-width:76px;font-family:var(--font-data);font-weight:600;font-size:.78rem;letter-spacing:.06em;border-radius:999px;padding:4px 10px;border:1px solid var(--line);color:var(--fg-3)}
+.dir.long{color:var(--strong);border-color:color-mix(in srgb,var(--strong) 50%,transparent);background:color-mix(in srgb,var(--strong) 12%,transparent)}
+.dir.short{color:var(--weak);border-color:color-mix(in srgb,var(--weak) 50%,transparent);background:color-mix(in srgb,var(--weak) 12%,transparent)}
+.cdots{display:inline-flex;gap:4px;align-items:center;vertical-align:middle}
+.cdots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--fg-3)}
+.cdots i.on{background:var(--fg);border-color:var(--fg)}
+.rows{display:grid}
+.prow{display:grid;grid-template-columns:minmax(84px,1.1fr) auto minmax(70px,.8fr) minmax(56px,.6fr) minmax(70px,.7fr);gap:12px;align-items:center;padding:13px 4px;border-bottom:1px dashed var(--line-soft);text-decoration:none;color:var(--fg)}
+.prow:hover{background:var(--surface)}
+.prow .pair{font-family:var(--font-display);font-weight:700;font-size:1.05rem}
+.prow.head{font-family:var(--font-data);font-size:.7rem;letter-spacing:.1em;color:var(--fg-3);text-transform:uppercase;border-bottom:1px solid var(--line)}
+.prow .val{font-family:var(--font-data);font-size:.86rem}
+.prow .val.s{color:var(--strong)} .prow .val.w{color:var(--weak)}
+@media (max-width:560px){.prow{grid-template-columns:minmax(78px,1fr) auto auto;}.prow .hide-s{display:none}}
+.ev{display:grid;grid-template-columns:72px 18px 38px minmax(0,1fr);gap:10px;align-items:center;padding:10px 4px;border-bottom:1px dashed var(--line-soft)}
+.ev.past{opacity:.5}
+.ev .t{font-family:var(--font-data);font-size:.82rem;color:var(--fg-2);white-space:nowrap;min-width:44px}
+.ev .c{font-family:var(--font-data);font-weight:600;font-size:.82rem}
+.ev.nodate{grid-template-columns:48px 18px 38px minmax(0,1fr)}
+.ev .vals span{white-space:nowrap}
+.ev .vals{grid-column:4;display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--font-data);font-size:.76rem;color:var(--fg-3)}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;padding:16px 4px 6px;border-bottom:1px solid var(--line)}
+.dayhead h3{font-size:1.05rem}
+.dayhead.today h3::after{content:"heute";margin-left:8px;font-family:var(--font-data);font-size:.68rem;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;vertical-align:middle}
+.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media (max-width:760px){.days{grid-template-columns:minmax(0,1fr)}}
+.daycard{border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;display:grid;gap:6px;align-content:start;background:var(--surface)}
+.daycard .d{font-family:var(--font-data);font-size:.74rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.06em}
+.daycard .e{display:grid;grid-template-columns:auto 1fr;gap:6px;font-size:.84rem;align-items:start}
+.factor{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-bottom:1px dashed var(--line-soft)}
+.factor:last-child{border-bottom:0}
+.sig{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-data);font-weight:700;font-size:.8rem;border:1px solid var(--line);color:var(--fg-3)}
+.sig.up{color:var(--strong);border-color:color-mix(in srgb,var(--strong) 50%,transparent)}
+.sig.down{color:var(--weak);border-color:color-mix(in srgb,var(--weak) 50%,transparent)}
+.cotgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cotgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:330px){.cotgrid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.cot .idx{font-size:2.1rem}.cot .nums{font-size:.74rem}.cot{padding:12px}}
+.cot{display:grid;gap:10px;align-content:start}
+.cot .top{display:flex;justify-content:space-between;align-items:baseline}
+.cot .ccy{font-family:var(--font-data);font-weight:600;font-size:1.05rem}
+.cot .idx{font-family:var(--font-display);font-weight:800;font-size:2.6rem;line-height:1;letter-spacing:-.03em}
+.cot .idx.hi{color:var(--strong)} .cot .idx.lo{color:var(--weak)}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--surface-2);overflow:hidden}
+.meter .z{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--yellow) 18%,transparent)}
+.meter .m{position:absolute;top:-2px;width:3px;height:18px;border-radius:2px;transform:translateX(-1.5px)}
+.mlabels{display:flex;justify-content:space-between;font-family:var(--font-data);font-size:.66rem;color:var(--fg-3)}
+.cot .nums{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.8rem;color:var(--fg-2)}
+.cot .nums b{font-family:var(--font-data);font-weight:500;color:var(--fg);text-align:right}
+.legend-s{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2);align-items:center}
+.legend-s i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.bigstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.bigstat{grid-template-columns:minmax(0,1fr)}}
+.bigstat .tile .big{font-size:2.2rem}
 </style>
 
 <header class="top">
-  <div class="wrap">
-    <div class="top-row">
-      <a class="brand" href="#uebersicht" aria-label="WorlᗡDriver Startseite">
-        <svg viewBox="0 0 470 84" role="img" aria-hidden="true">
-          <g font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="64" font-weight="700" fill="currentColor">
-            <text x="0" y="62" textLength="146" lengthAdjust="spacingAndGlyphs">Worl</text>
-            <g transform="translate(198 0) scale(-1 1)"><text x="0" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text></g>
-            <text x="202" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text>
-            <text x="250" y="62" textLength="200" lengthAdjust="spacingAndGlyphs">river</text>
-          </g>
-        </svg>
-      </a>
-      <div class="status" id="status"></div>
-    </div>
-    <nav class="tabs" aria-label="Bereiche">
-      <a href="#uebersicht">Übersicht</a>
-      <a href="#prognosen">Prognosen</a>
-      <a href="#tracker">Forecast-Tracker</a>
-      <a href="#weltkarte">Weltkarte</a>
-      <a href="#beziehungen">Wirtschaftsbeziehungen</a>
-      <a href="#daten">Daten</a>
-    </nav>
+  <div class="wrap top-row">
+    <button class="iconbtn" type="button" id="menu-btn" aria-label="Menü öffnen" aria-controls="drawer" aria-expanded="false">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <span class="top-title" id="top-title">Cockpit</span>
+    <a class="brand" href="#cockpit" aria-label="WorlᗡDriver Startseite">
+      <svg viewBox="0 0 470 84" role="img" aria-hidden="true">
+        <g font-family="Inter Tight, Inter, Arial, sans-serif" font-size="64" font-weight="800" fill="currentColor">
+          <text x="0" y="62" textLength="146" lengthAdjust="spacingAndGlyphs">Worl</text>
+          <g transform="translate(198 0) scale(-1 1)"><text x="0" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text></g>
+          <text x="202" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text>
+          <text x="250" y="62" textLength="200" lengthAdjust="spacingAndGlyphs">river</text>
+        </g>
+      </svg>
+    </a>
   </div>
 </header>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Menü"></aside>
 
 <main class="wrap" id="app"></main>
 <footer class="wrap" id="foot"></footer>
@@ -246,12 +333,6 @@ function horizonVerdict(h) {
 
 /* ---------- Kopf und Fuß ---------- */
 function renderChrome() {
-  const vix = D.meta.vix, reg = regimeOf(vix);
-  const pending = D.promotions.filter((p) => p.needs_confirmation).length;
-  $("#status").innerHTML = `
-    <span class="chip"><span class="dot good"></span>Kurse bis ${dateDe(D.meta.as_of)}</span>
-    <span class="chip"><span class="dot ${reg === "Stress" ? "bad" : reg === "normal" ? "warn" : "good"}"></span>VIX ${fmt(vix, 1)} · ${reg}</span>
-    ${pending ? `<a class="chip" href="#uebersicht" style="text-decoration:none"><span class="dot warn"></span>${pending} Freigaben offen</a>` : ""}`;
   $("#foot").innerHTML = `
     <div>WorlᗡDriver · Prognose-Engine FOREX NEXUS AI · Version ${esc(D.meta.code_commit)} · erzeugt ${new Date(D.meta.generated_at).toLocaleString("de-DE")}</div>
     <div>Kursbasis: ${esc(D.meta.price_basis)}. ${esc(D.map.attribution)}.</div>
@@ -292,7 +373,7 @@ function viewOverview() {
         <div class="panel-head"><h2>Deine Entscheidungen</h2><span class="pill ${pend.length ? "warn" : "good"}">${pend.length ? pend.length + " offen" : "nichts offen"}</span></div>
         <div style="display:grid;gap:12px">
           ${pend.length ? `<div class="note"><b>Modelle bestätigen:</b> Zur Inbetriebnahme wurden die Testsieger eingesetzt – ${pend.map((p) => `${HZ[p.horizon]}: ${esc(p.model)}`).join(", ")}. Sie laufen, bis du sie bestätigst oder änderst. <a href="#tracker">Ergebnisse ansehen</a></div>` : ""}
-          <div class="note"><b>${explain.length} Wirtschaftsbeziehungen</b> sind statistisch als gleichzeitiger Zusammenhang belegt und warten auf deine Prüfung. Keine davon hat bisher einen nachweisbaren Vorlauf. <a href="#beziehungen">Ansehen</a></div>
+          <div class="note"><b>${explain.length} Wirtschaftsbeziehungen</b> sind statistisch als gleichzeitiger Zusammenhang belegt und warten auf deine Prüfung. Keine davon hat bisher einen nachweisbaren Vorlauf. <a href="#makro">Ansehen</a></div>
           <div class="note"><b>Deine 6 A+-Kriterien</b> fehlen noch. Die Regel-Engine ist vorbereitet und bleibt streng getrennt von den Prognosen.</div>
         </div>
       </article>
@@ -319,11 +400,21 @@ function spark(vals, w, h) {
 }
 
 /* ---------- Prognosen ---------- */
+function hzCard(h) {
+  const b = D.backtest[h], v = horizonVerdict(h), m = (b.models[b.champion] || {});
+  const val = m.validation || {}, hold = m.holdout || {};
+  return `<article class="panel hz">
+    <div class="panel-head"><h3>${HZ[h]} <span class="faint">· ${HZ_LONG[h]}</span></h3><span class="pill ${v.cls}">${v.short}</span></div>
+    <p class="verdict muted">${v.text}</p>
+    <dl class="kv"><dt>Angezeigtes Modell</dt><dd>${esc(m.label || "–")}</dd><dt>Trefferquote Richtung</dt><dd class="num">${pp(val.hit_rate, 1)}</dd>
+      <dt>80-%-Intervall traf</dt><dd class="num">${pp(val.coverage_80, 1)}</dd><dt>Hold-out ab 2022 (BSS)</dt><dd class="num">${pct(hold.bss, 2)}</dd></dl></article>`;
+}
 function viewForecasts() {
   const ccys = ["ALLE", ...D.majors];
   return `<section class="view">
     <div class="lede"><h1>Prognosen</h1>
       <p>Wahrscheinlichkeit für fallend, seitwärts und steigend, das 80-%-Prognoseintervall und die Konfidenz – je Horizont aus einem eigenen Modell. Tippe ein Paar an für Einflussfaktoren, Ungültigkeitsbedingungen und Modellgüte.</p></div>
+    <div class="grid-3">${["1D", "1W", "1M"].map(hzCard).join("")}</div>
     <div class="toolbar">
       <div class="seg" role="group" aria-label="Horizont">${Object.keys(HZ).map((h) => `<button type="button" data-hz="${h}" aria-pressed="${state.horizon === h}">${HZ[h]}</button>`).join("")}</div>
       <label class="faint" style="font-size:.84rem">Sortieren <select id="sort">
@@ -576,7 +667,7 @@ function bindMap() {
   $("#map-detail").innerHTML = `<div class="panel-head"><h2>${esc(e.name || "")} ${e.currency ? `<span class="faint">· ${e.currency}</span>` : ""}</h2></div>
     <p class="muted" style="margin-bottom:12px">${esc(e.notes || "")}</p>
     ${deps.length ? `<div style="display:grid;gap:8px">${deps.map((d) => `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line-soft);padding-bottom:8px"><span>${esc(d.driver)} <span class="faint">→ ${d.currency} ${d.expected_sign > 0 ? "▲" : d.expected_sign < 0 ? "▼" : "?"}</span></span><span class="pill ${(VERDICT_STYLE[d.verdict] || ["plain"])[0]}">${esc(d.verdict)}</span></div>`).join("")}</div>` : `<p class="faint">China ist hier als Handelspartner erfasst und keine der acht Währungen.</p>`}
-    ${e.currency ? `<p style="margin-top:12px"><a href="#beziehungen" data-goto="${e.currency}">Alle Details zu ${e.currency}</a></p>` : ""}`;
+    ${e.currency ? `<p style="margin-top:12px"><a href="#makro" data-goto="${e.currency}">Alle Details zu ${e.currency}</a></p>` : ""}`;
   const g = $("[data-goto]"); if (g) g.onclick = () => { state.depCcy = g.dataset.goto; };
 }
 
@@ -638,15 +729,321 @@ function viewData() {
   </section>`;
 }
 
+/* ---------- Fundamentale Seiten ---------- */
+const F = () => D.fund;
+const CCY = {USD: "US-Dollar", EUR: "Euro", JPY: "Yen", GBP: "Pfund", CHF: "Franken", CAD: "Kanadischer Dollar", AUD: "Australischer Dollar", NZD: "Neuseeland-Dollar"};
+const IMPACT = {High: ["var(--red)", "Hoch (roter Ordner)"], Medium: ["var(--orange)", "Mittel"], Low: ["var(--yellow)", "Niedrig"], Holiday: ["var(--holiday)", "Feiertag"]};
+const folder = (imp) => `<svg class="folder" viewBox="0 0 16 12" aria-label="${(IMPACT[imp] || IMPACT.Low)[1]}" role="img"><path d="M1 2.2C1 1.5 1.5 1 2.2 1h3.6l1.5 1.6h6.5c.7 0 1.2.5 1.2 1.2v6c0 .7-.5 1.2-1.2 1.2H2.2C1.5 11 1 10.5 1 9.8z" fill="${(IMPACT[imp] || IMPACT.Low)[0]}"/></svg>`;
+const dirChip = (d) => `<span class="dir ${d > 0 ? "long" : d < 0 ? "short" : ""}">${d > 0 ? "LONG" : d < 0 ? "SHORT" : "NEUTRAL"}</span>`;
+const dots = (k) => `<span class="cdots" aria-label="${k} von 3 Faktoren">${[0, 1, 2].map((i) => `<i class="${i < k ? "on" : ""}"></i>`).join("")}</span>`;
+const bias = (score) => Math.round(50 + 50 * (score || 0));
+const fmtK = (x) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "") + nf(1).format(Math.abs(x) / 1000) + "K";
+const dayName = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", {weekday: "long", day: "2-digit", month: "2-digit"});
+const shortDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", {weekday: "short", day: "2-digit", month: "2-digit"});
+const todayIso = () => new Date().toLocaleDateString("sv-SE", {timeZone: "Europe/Berlin"});
+const nowIso = () => new Date().toISOString();
+const valText = (v) => v == null ? "" : `${pp(v.hit_rate, 1)} Treffer (n = ${nf(0).format(v.n)})`;
+const verdictOf = (v) => !v || v.hit_rate == null ? "noch nicht messbar" : (v.ci && v.ci[0] > 0.5) ? "kleiner, aber messbarer Vorteil" : "keine verlässliche Vorhersagekraft";
+const INFO_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7v4M8 4.6v.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function nextHigh() { return (F().events || []).find((e) => e.impact === "High" && e.at >= nowIso()); }
+function untilText(iso) {
+  const ms = new Date(iso) - new Date(); if (ms < 0) return "läuft";
+  const h = Math.floor(ms / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+  return h >= 24 ? `in ${Math.floor(h / 24)} T ${h % 24} h` : `in ${h} h ${m} min`;
+}
+
+function viewCockpit() {
+  const f = F(), h = f.headline, conf = f.validation.confluence || {}, c3 = conf[3] || conf["3"];
+  const cs = Object.fromEntries(f.currencies.map((c) => [c.ccy, c]));
+  const s = cs[h.strong], w = cs[h.weak], ev = h.top_event;
+  const bp = f.pairs.find((p) => p.pair === h.best_pair);
+  const highs = f.events.filter((e) => e.impact === "High");
+  const top = [...f.pairs].filter((p) => p.direction).sort((a, b) => b.confluence - a.confluence || Math.abs(b.cot_diff || 0) - Math.abs(a.cot_diff || 0)).slice(0, 6);
+  return `<section class="view">
+    <div class="hero">
+      <div class="eyebrow">Cockpit · KW ${f.week.kw} · Was ist diese Woche wichtig?</div>
+      <h1>Diese Woche: ${esc(h.strong_name)} <span class="s">stark</span>, ${esc(h.weak_name)} <span class="w">schwach.</span></h1>
+      <div class="eyebrow"><b>Die Woche in Kürze</b> · ${dateDe(f.week.start)} – ${dateDe(f.week.end)}</div>
+      <p class="brief">Der <b class="s">${esc(h.strong_name)}</b> wird von den Faktoren am stärksten gestützt<sup class="ref"><a href="#quellen">[1]</a></sup>, der <b class="w">${esc(h.weak_name)}</b> liegt hinten<sup class="ref"><a href="#quellen">[2]</a></sup>.
+        ${ev ? `Wichtigster Termin: <b class="y">${esc(CCY[ev.currency])} – ${esc(ev.title)}, ${shortDay(ev.day)} um ${ev.time}</b><sup class="ref"><a href="#quellen">[3]</a></sup>.` : "Diese Woche stehen keine roten Ordner mehr an."}
+        ${bp ? `Stärkste Übereinstimmung: <b>${pairName(bp.pair)} ${bp.direction > 0 ? "long" : "short"}</b> (${bp.confluence}/3)<sup class="ref"><a href="#quellen">[4]</a></sup>${bp.day_range_pips ? `, typische Tagesbewegung ±${bp.day_range_pips} Pips` : ""}.` : ""}</p>
+      <div style="display:grid;gap:4px">
+        <div class="srcline"><span class="dot live"></span>COT · Bericht vom ${dateDe((f.cot[h.strong] || {}).report_date)}, veröffentlicht ${dateDe(((f.cot[h.strong] || {}).released || "").slice(0, 10))}</div>
+        <div class="srcline"><span class="dot live"></span>Kalender · ${esc(D.meta.calendar_source)} · Stand ${new Date(D.meta.generated_at).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})}</div>
+        <div class="srcline"><span class="dot live"></span>Kurse · bis ${dateDe(D.meta.as_of)}</div>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="panel tile"><span class="eyebrow"><b>[1]</b> ${h.strong}-Bias</span><span class="big num" style="color:var(--strong)">${bias(s.score)}</span><span class="faint" style="font-size:.8rem">von 100 · COT, Trend und Saison</span></div>
+      <div class="panel tile"><span class="eyebrow"><b>[2]</b> ${h.weak}-Bias</span><span class="big num" style="color:var(--weak)">${bias(w.score)}</span><span class="faint" style="font-size:.8rem">von 100 · COT, Trend und Saison</span></div>
+    </div>
+    <div class="honest">${INFO_ICON}<span>Ehrlich geprüft: Mit genau diesen Regeln lag die Richtung bei voller Übereinstimmung (3/3) seit 2008 in ${c3 ? pp(c3.hit_rate, 0) : "–"} der Wochen richtig – <b>${verdictOf(c3)}</b>. Nutze die Faktoren als Überblick über die Fundamentaldaten, nicht als Signal. <a href="#paare">Details je Paar</a></span></div>
+    <div class="grid-2">
+      <article class="panel">
+        <div class="section-title"><h2>Rote Ordner diese Woche</h2><a href="#kalender" class="faint" style="font-size:.84rem">Kalender</a></div>
+        <div class="rows" style="margin-top:6px">${highs.length ? highs.map((e) => evRow(e, true)).join("") : '<p class="faint" style="padding:10px 0">Keine Termine mit hoher Wichtigkeit.</p>'}</div>
+      </article>
+      <article class="panel">
+        <div class="section-title"><h2>Höchste Übereinstimmung</h2><a href="#paare" class="faint" style="font-size:.84rem">Alle 28 Paare</a></div>
+        <div class="rows" style="margin-top:6px">${top.map(pairRow).join("")}</div>
+      </article>
+    </div>
+    <article class="panel">
+      <div class="section-title"><h2>Währungen dieser Woche</h2><a href="#waehrungen" class="faint" style="font-size:.84rem">Details</a></div>
+      <div style="display:grid;gap:8px;margin-top:10px">${f.currencies.map(ccyBar).join("")}</div>
+    </article>
+    <article class="panel" id="quellen">
+      <h3 style="margin-bottom:10px">Quellen und Belege</h3>
+      <ol class="sources">
+        <li><span>[1]</span><span>${esc(h.strong_name)}: COT-Index Commercials ${fmt(s.cot_idx, 0)}, Stärke 20 Tage ${pct((s.trend_pct || 0) / 100)}, ${esc(f.season.month_name)} im Schnitt ${pct(s.season_mean)} (in ${pp(s.season_hit, 0)} der Jahre gestiegen).</span></li>
+        <li><span>[2]</span><span>${esc(h.weak_name)}: COT-Index Commercials ${fmt(w.cot_idx, 0)}, Stärke 20 Tage ${pct((w.trend_pct || 0) / 100)}, ${esc(f.season.month_name)} im Schnitt ${pct(w.season_mean)} (in ${pp(w.season_hit, 0)} der Jahre gestiegen).</span></li>
+        <li><span>[3]</span><span>${ev ? `${esc(D.meta.calendar_source)}-Kalender, Wichtigkeit hoch. Vorher: ${esc(ev.previous || "–")}, Prognose: ${esc(ev.forecast || "–")}.` : "–"}</span></li>
+        <li><span>[4]</span><span>Regel: Mehrheit aus COT-Differenz (≥ ${f.rules.cot_diff} Punkte), Trend (≥ ${fmt(f.rules.trend_min, 1)} %) und Saison (≥ ${pp(f.rules.season_hit, 0)} der Jahre). Historisch 3/3: ${valText(c3)}. Tagesbewegung aus dem 80-%-Intervall der Tagesprognose.</span></li>
+      </ol>
+    </article>
+  </section>`;
+}
+function evRow(e, withDay = true) {
+  const past = e.at < nowIso();
+  const wd = new Date(e.day + "T12:00:00").toLocaleDateString("de-DE", {weekday: "short"}).replace(".", "");
+  return `<div class="ev ${past ? "past" : ""} ${withDay ? "" : "nodate"}"><span class="t">${withDay ? wd + " " : ""}${e.time}</span>${folder(e.impact)}<span class="c">${e.currency}</span><span>${esc(e.title)}</span>
+    ${(e.forecast || e.previous || e.actual) ? `<span class="vals">${e.actual ? `<span>Ist ${esc(e.actual)}</span>` : ""}${e.forecast ? `<span>Prog. ${esc(e.forecast)}</span>` : ""}${e.previous ? `<span>Vorher ${esc(e.previous)}</span>` : ""}</span>` : ""}</div>`;
+}
+function pairRow(p) {
+  const d = p.cot_diff;
+  return `<a class="prow" href="#paar-${p.pair}"><span class="pair">${pairName(p.pair)}</span>${dirChip(p.direction)}<span class="val">${dots(p.confluence)} ${p.confluence}/3</span>
+    <span class="val hide-s ${d > 0 ? "s" : d < 0 ? "w" : ""}">${d == null ? "–" : (d > 0 ? "+" : "") + fmt(d, 0)}</span><span class="val hide-s">${p.day_range_pips ? "±" + p.day_range_pips : "–"}</span></a>`;
+}
+function ccyBar(c) {
+  const b = bias(c.score), col = b >= 50 ? "var(--strong)" : "var(--weak)";
+  return `<div style="display:grid;grid-template-columns:46px minmax(0,1fr) 34px;gap:10px;align-items:center">
+    <span class="ccy" style="font-family:var(--font-data);font-weight:600">${c.ccy}</span>
+    <div class="meter" style="height:10px" role="img" aria-label="${c.ccy} Bias ${b}"><span class="z" style="left:50%;width:1px;background:var(--line)"></span><span style="position:absolute;top:0;bottom:0;border-radius:5px;background:${col};left:${Math.min(b, 50)}%;width:${Math.abs(b - 50)}%"></span></div>
+    <span class="num" style="text-align:right">${b}</span></div>`;
+}
+
+function viewCurrencies() {
+  const f = F();
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Währungen · KW ${f.week.kw}</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Wer ist stark, wer schwach?</h1>
+      <p class="brief" style="font-size:1.1rem">Jede Währung bekommt einen Bias von 0 bis 100 aus drei Faktoren: Positionierung der Commercials (COT), Stärke der letzten 20 Tage gegen die anderen sieben und die Saison des Monats.</p></div>
+    <div class="rows">
+      <div class="prow head" style="grid-template-columns:minmax(120px,1.4fr) 60px repeat(3,minmax(60px,1fr))"><span>Währung</span><span>Bias</span><span>COT</span><span>Trend 20 T</span><span>Saison</span></div>
+      ${f.currencies.map((c) => `<div class="prow" style="grid-template-columns:minmax(120px,1.4fr) 60px repeat(3,minmax(60px,1fr))">
+        <span><span class="pair">${c.ccy}</span><br><span class="faint" style="font-size:.78rem">${esc(c.name)}</span></span>
+        <span class="val ${bias(c.score) >= 50 ? "s" : "w"}" style="font-size:1.1rem">${bias(c.score)}</span>
+        <span class="val">${fmt(c.cot_idx, 0)}</span><span class="val ${c.trend_pct > 0 ? "s" : "w"}">${pct((c.trend_pct || 0) / 100)}</span>
+        <span class="val">${c.season_hit == null ? "–" : pp(c.season_hit, 0)}</span></div>`).join("")}
+    </div>
+    <article class="panel">
+      <div class="panel-head"><h2>Währungsstärke</h2>
+        <div class="seg" role="group" aria-label="Zeitraum">${[["chg_5d", "5 T"], ["chg_20d", "20 T"], ["chg_60d", "60 T"]].map(([k, l]) => `<button type="button" data-sk="${k}" aria-pressed="${(state.sk || "chg_20d") === k}">${l}</button>`).join("")}</div></div>
+      <p class="faint" style="font-size:.8rem;margin-bottom:8px">Veränderung gegen den Korb der anderen sieben, in Prozent.</p>
+      <div class="strength" id="strength"></div>
+    </article>
+    <p class="faint" style="font-size:.82rem">COT = Commercials-Index (0–100) aus dem letzten veröffentlichten CFTC-Bericht. Saison = Anteil der Jahre, in denen die Währung im ${esc(f.season.month_name)} zulegte.</p>
+  </section>`;
+}
+
+function viewPairs() {
+  const f = F();
+  let rows = f.pairs.filter((p) => state.ccy === "ALLE" || p.pair.includes(state.ccy));
+  rows = [...rows].sort((a, b) => b.confluence - a.confluence || Math.abs(b.cot_diff || 0) - Math.abs(a.cot_diff || 0));
+  const conf = f.validation.confluence || {};
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Paare · KW ${f.week.kw} · sortiert nach Konfluenz</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Die 28 Paare diese Woche</h1></div>
+    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-ccy="${c}" aria-pressed="${state.ccy === c}">${c === "ALLE" ? "Alle 28" : c}</button>`).join("")}</div>
+    <div class="rows">
+      <div class="prow head"><span>Paar</span><span>Richtung</span><span>Konfluenz</span><span class="hide-s">COT-Diff.</span><span class="hide-s">Tag ±Pips</span></div>
+      ${rows.map(pairRow).join("")}
+    </div>
+    <div class="honest">${INFO_ICON}<span>Historische Trefferquote der Regel (Richtung der Folgewoche, seit 2008): 1/3 ${valText(conf[1] || conf["1"])} · 2/3 ${valText(conf[2] || conf["2"])} · 3/3 ${valText(conf[3] || conf["3"])}. Ergebnis: <b>${verdictOf(conf[3] || conf["3"])}</b>.</span></div>
+  </section>`;
+}
+function bindPairs() { document.querySelectorAll("[data-ccy]").forEach((b) => b.onclick = () => { state.ccy = b.dataset.ccy; route(); }); }
+
+function viewPair(pair) {
+  const f = F(), p = f.pairs.find((x) => x.pair === pair);
+  if (!p) return `<section class="view"><div class="empty"><b>Paar nicht gefunden.</b><a href="#paare">Zur Übersicht</a></div></section>`;
+  const b = pair.slice(0, 3), q = pair.slice(3), w1 = D.forecasts.find((x) => x.pair === pair && x.horizon === "1W"), d1 = D.forecasts.find((x) => x.pair === pair && x.horizon === "1D");
+  const names = {cot: "Positionierung (COT)", trend: "Trend (Stärke 20 Tage)", season: `Saison (${f.season.month_name})`};
+  const verdict = p.direction > 0 ? `leicht <span class="s">long</span>` : p.direction < 0 ? `leicht <span class="w">short</span>` : "ohne klare Richtung";
+  const today = todayIso();
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow"><a href="#paare" style="color:inherit">Paare</a> · ${pairName(pair)} · KW ${f.week.kw}</div>
+      <h1 style="font-size:clamp(2.3rem,9vw,4rem)">${pairName(pair)} diese Woche: ${verdict}.</h1>
+      <p class="brief" style="font-size:1.15rem">${p.confluence}/3 Faktoren zeigen in diese Richtung${p.against.length ? `, ${p.against.length} dagegen` : ""}. ${p.week_range_pips ? `In 80 % der Wochen bewegte sich das Paar um weniger als <b>±${p.week_range_pips} Pips</b>, an einem Tag um weniger als <b>±${p.day_range_pips} Pips</b>.` : ""} ${p.high_events ? `<b class="y">${p.high_events} rote Ordner</b> betreffen ${b} oder ${q}.` : "Keine roten Ordner für dieses Paar."}</p>
+      <div>${dirChip(p.direction)} <span class="val" style="margin-left:8px">${dots(p.confluence)} ${p.confluence}/3</span></div></div>
+    <article class="panel"><h2 style="margin-bottom:6px">Die Woche Tag für Tag</h2>
+      <div class="days">${p.days.map((d) => `<div class="daycard" ${d.date === today ? 'style="border-color:var(--accent)"' : ""}><span class="d">${esc(d.weekday)} · ${dateDe(d.date).slice(0, 5)}</span>
+        ${d.events.length ? d.events.map((e) => `<div class="e">${folder(e.impact)}<span><span class="num faint">${e.time}</span> ${e.currency} ${esc(e.title)}</span></div>`).join("") : '<span class="faint" style="font-size:.84rem">keine wichtigen Termine</span>'}
+        ${p.day_range_pips ? `<span class="faint num" style="font-size:.76rem">typisch ±${p.day_range_pips} Pips</span>` : ""}</div>`).join("")}</div>
+    </article>
+    <div class="grid-2">
+      <article class="panel"><h2 style="margin-bottom:4px">Faktoren</h2>
+        ${Object.entries(p.factors).map(([k, x]) => `<div class="factor"><span class="sig ${x.signal > 0 ? "up" : x.signal < 0 ? "down" : ""}">${x.signal > 0 ? "▲" : x.signal < 0 ? "▼" : "–"}</span>
+          <span><b>${names[k]}</b> <span class="faint">· ${x.signal > 0 ? "spricht für " + b : x.signal < 0 ? "spricht für " + q : "neutral"}</span><br><span class="muted" style="font-size:.88rem">${esc(x.text)}</span></span></div>`).join("")}
+      </article>
+      <article class="panel"><h2 style="margin-bottom:8px">Kurs und Wochenfächer</h2>${w1 ? fanChart(w1) : '<p class="faint">Keine Wochenprognose.</p>'}
+        <p class="faint" style="font-size:.8rem;margin-top:6px">Fächer = 80-/90-%-Intervall der validierten Wochenprognose. <a href="#prognosen">Zu den Prognosen</a></p></article>
+    </div>
+    <div class="grid-2">
+      <article class="panel"><h2 style="margin-bottom:8px">Saisonalität ${pairName(pair)}</h2>${seasonChart(f.season.pairs[pair], f.season.month)}</article>
+      <article class="panel"><h2 style="margin-bottom:10px">Positionierung</h2><div style="display:grid;gap:16px">${[b, q].map((c) => cotMini(c)).join("")}</div></article>
+    </div>
+  </section>`;
+}
+function cotMini(c) {
+  const x = F().cot[c]; if (!x) return `<div class="faint">${c}: keine COT-Daten</div>`;
+  return `<div style="display:grid;gap:6px"><div style="display:flex;justify-content:space-between"><span class="num"><b>${c}</b> Commercials</span><span class="num">${fmt(x.comm_idx, 0)} · Spekulanten ${fmt(x.spec_idx, 0)}</span></div>${meter(x)}</div>`;
+}
+function meter(x) {
+  const [lo, hi] = F().rules.cot_extreme;
+  return `<div class="meter" role="img" aria-label="Commercials ${x.comm_idx}, Spekulanten ${x.spec_idx}">
+    <span class="z" style="left:0;width:${lo}%"></span><span class="z" style="left:${hi}%;width:${100 - hi}%"></span>
+    ${x.spec_idx != null ? `<span class="m" style="left:${x.spec_idx}%;background:var(--weak)"></span>` : ""}
+    ${x.comm_idx != null ? `<span class="m" style="left:${x.comm_idx}%;background:var(--strong);width:4px"></span>` : ""}</div>
+    <div class="mlabels"><span>0</span><span>${lo}</span><span>50</span><span>${hi}</span><span>100</span></div>`;
+}
+function seasonChart(st, curMonth) {
+  if (!st) return '<p class="faint">Keine Daten.</p>';
+  const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const vals = months.map((_, i) => st[i + 1] || st[String(i + 1)] || null);
+  const W = Math.max(300, Math.min(520, innerWidth - 64)), H = 170, pl = 34, pr = 6, pt = 18, pb = 22;
+  const lim = Math.max(0.003, ...vals.map((v) => Math.abs(v ? v.mean : 0))) * 1.15;
+  const bw = (W - pl - pr) / 12, y = (v) => pt + (1 - (v + lim) / (2 * lim)) * (H - pt - pb);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Durchschnittliche Monatsrendite">
+    <line x1="${pl}" x2="${W - pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>
+    <text x="${pl - 4}" y="${y(lim * 0.8) + 4}" text-anchor="end">${pct(lim * 0.8, 1)}</text><text x="${pl - 4}" y="${y(-lim * 0.8) + 4}" text-anchor="end">${pct(-lim * 0.8, 1)}</text>
+    ${vals.map((v, i) => { if (!v) return ""; const x = pl + i * bw + bw * 0.18, top = Math.min(y(v.mean), y(0)), h = Math.max(1.5, Math.abs(y(v.mean) - y(0)));
+      const col = v.mean >= 0 ? "var(--strong)" : "var(--weak)", cur = i + 1 === curMonth;
+      return `<rect x="${x}" y="${top}" width="${bw * 0.64}" height="${h}" rx="2" fill="${col}" opacity="${cur ? 1 : 0.55}"><title>${months[i]}: Ø ${pct(v.mean, 2)}, ${pp(v.hit, 0)} der Jahre positiv (n = ${v.n})</title></rect>
+        ${cur ? `<text x="${x + bw * 0.32}" y="${v.mean >= 0 ? top - 4 : top + h + 11}" text-anchor="middle" style="fill:var(--fg)">${pp(v.hit, 0)}</text>` : ""}`; }).join("")}
+    ${months.map((m, i) => `<text x="${pl + i * bw + bw / 2}" y="${H - 6}" text-anchor="middle" ${i + 1 === curMonth ? 'style="fill:var(--fg);font-weight:600"' : ""}>${m}</text>`).join("")}
+  </svg><p class="faint" style="font-size:.78rem;margin-top:4px">Ø Monatsrendite ${F().season.years[0]}–${F().season.years[1]}; Zahl über dem aktuellen Monat = Anteil positiver Jahre.</p>`;
+}
+
+function viewCalendar() {
+  const f = F(), imp = state.imp || ["High", "Medium"], ccys = state.calCcy || "ALLE", today = todayIso();
+  const evs = f.events.filter((e) => imp.includes(e.impact) && (ccys === "ALLE" || e.currency === ccys));
+  const byDay = {}; evs.forEach((e) => (byDay[e.day] = byDay[e.day] || []).push(e));
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Kalender · KW ${f.week.kw} · Zeiten in deutscher Zeit</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Termine der Woche</h1></div>
+    <div class="toolbar"><div class="chips" role="group" aria-label="Wichtigkeit">${["High", "Medium", "Low", "Holiday"].map((k) => `<button type="button" data-imp="${k}" aria-pressed="${imp.includes(k)}">${folder(k)} ${IMPACT[k][1].replace(" (roter Ordner)", "")}</button>`).join("")}</div></div>
+    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-cal="${c}" aria-pressed="${ccys === c}">${c === "ALLE" ? "Alle" : c}</button>`).join("")}</div>
+    <div>${Object.keys(byDay).sort().map((d) => `<div class="dayhead ${d === today ? "today" : ""}"><h3>${dayName(d)}</h3><span class="faint num" style="font-size:.78rem">${byDay[d].length} Termine</span></div>${byDay[d].map((e) => evRow(e, false)).join("")}`).join("") || '<div class="empty"><b>Keine Termine für diese Auswahl.</b></div>'}</div>
+    <p class="faint" style="font-size:.8rem">Quelle: ${esc(D.meta.calendar_source)}. Nur zur persönlichen Nutzung. Ist-Werte erscheinen, sobald der Kalender sie meldet.</p>
+  </section>`;
+}
+function bindCalendar() {
+  document.querySelectorAll("[data-imp]").forEach((b) => b.onclick = () => { const k = b.dataset.imp, cur = state.imp || ["High", "Medium"]; state.imp = cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]; route(); });
+  document.querySelectorAll("[data-cal]").forEach((b) => b.onclick = () => { state.calCcy = b.dataset.cal; route(); });
+}
+
+function viewCot() {
+  const f = F(), v = f.validation.cot || {}, any = Object.values(f.cot)[0] || {};
+  const order = [...D.majors].sort((a, b) => (f.cot[b] || {}).comm_idx - (f.cot[a] || {}).comm_idx);
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Positionierung · CFTC Commitments of Traders</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Wie sind die großen Marktteilnehmer positioniert?</h1>
+      <p class="brief" style="font-size:1.08rem">Der COT-Index zeigt, wo die Netto-Position heute innerhalb der letzten 3 Jahre liegt: 0 = so niedrig wie nie, 100 = so hoch wie nie. <b>Commercials</b> sind Absicherer und Banken, <b>Spekulanten</b> sind große Fonds. Über 80 oder unter 20 gilt als extrem.</p>
+      <div class="srcline"><span class="dot live"></span>Bericht vom ${dateDe(any.report_date)} (Dienstag), veröffentlicht ${dateDe((any.released || "").slice(0, 10))} · nächster Bericht am Freitag</div></div>
+    <div class="legend-s"><span><i style="background:var(--strong)"></i>Commercials</span><span><i style="background:var(--weak)"></i>Spekulanten</span><span><i style="background:color-mix(in srgb,var(--yellow) 30%,transparent)"></i>Extremzone</span></div>
+    <div class="cotgrid">${order.map((c) => { const x = f.cot[c]; if (!x) return ""; const cls = x.comm_idx >= 80 ? "hi" : x.comm_idx <= 20 ? "lo" : "";
+      return `<article class="panel cot"><div class="top"><span class="ccy">${c}</span>${x.label !== "neutral" ? `<span class="pill warn">Extrem</span>` : `<span class="pill plain">neutral</span>`}</div>
+        <span class="idx ${cls}">${fmt(x.comm_idx, 0)}</span>${meter(x)}
+        <div class="nums"><span>Commercials netto</span><b>${fmtK(x.comm_net)}</b><span>4 Wochen</span><b>${fmtK(x.comm_chg_4w)}</b><span>Spekulanten netto</span><b>${fmtK(x.spec_net)}</b><span>Spekulanten-Index</span><b>${fmt(x.spec_idx, 0)}</b></div>
+        ${cotLine(x.history)}<span class="faint" style="font-size:.74rem">${esc(x.contract)}</span></article>`; }).join("")}</div>
+    <div class="honest">${INFO_ICON}<span>Ehrlich geprüft (seit 2005, Wirkung über 4 Wochen ab Veröffentlichung): Commercials-Index über 80 → Währung danach stärker in ${valText(v.hoch)} (<b>${verdictOf(v.hoch)}</b>); unter 20 → schwächer in ${valText(v.tief)} (<b>${verdictOf(v.tief)}</b>). Ein Extremwert ist ein Hinweis auf die Positionierung, kein verlässliches Signal.</span></div>
+  </section>`;
+}
+function cotLine(hist) {
+  if (!hist || hist.length < 2) return "";
+  const W = 260, H = 54, n = hist.length, x = (i) => i / (n - 1) * W, y = (v) => H - 2 - (v / 100) * (H - 4);
+  const path = (k) => hist.map((r, i) => r[k] == null ? "" : `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join("");
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="COT-Index der letzten 3 Jahre" preserveAspectRatio="none" style="height:54px">
+    <rect x="0" y="${y(100)}" width="${W}" height="${y(80) - y(100)}" fill="color-mix(in srgb,var(--yellow) 12%,transparent)"/><rect x="0" y="${y(20)}" width="${W}" height="${y(0) - y(20)}" fill="color-mix(in srgb,var(--yellow) 12%,transparent)"/>
+    <path d="${path(2)}" fill="none" stroke="var(--weak)" stroke-width="1.3" opacity=".8"/><path d="${path(1)}" fill="none" stroke="var(--strong)" stroke-width="1.8"/></svg>`;
+}
+
+function viewSeason() {
+  const f = F(), v = f.validation.season || {}, m = f.season.month, sel = state.seasonSel || "EURUSD";
+  const isCcy = sel.length === 3, st = isCcy ? f.season.currencies[sel] : f.season.pairs[sel];
+  const rank = D.pairs.map((p) => ({p, s: (f.season.pairs[p] || {})[m] || (f.season.pairs[p] || {})[String(m)]})).filter((x) => x.s).sort((a, b) => Math.abs(b.s.hit - 0.5) - Math.abs(a.s.hit - 0.5));
+  return `<section class="view">
+    <div class="hero"><div class="eyebrow">Saisonalität · ${esc(f.season.month_name)} · Daten ${f.season.years[0]}–${f.season.years[1]}</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Wie liefen die Paare in früheren Jahren?</h1>
+      <p class="brief" style="font-size:1.08rem">Durchschnittliche Monatsrendite und der Anteil der Jahre, in denen ein Paar im jeweiligen Monat gestiegen ist.</p></div>
+    <div class="honest">${INFO_ICON}<span>Ehrlich geprüft: Hätte man jedes Jahr nur mit den Vorjahren gearbeitet, lag die Saisonalität in ${valText(v)} richtig – <b>${verdictOf(v)}</b>. Muster, die sich in der Vergangenheit „zeigen“, wiederholen sich meist nicht.</span></div>
+    <article class="panel"><div class="panel-head"><h2>${isCcy ? esc(CCY[sel]) + " (gegen den Korb)" : pairName(sel)}</h2>
+      <select id="season-sel" aria-label="Paar oder Währung">${D.majors.map((c) => `<option value="${c}">${c} – Währung</option>`).join("")}${D.pairs.map((p) => `<option value="${p}">${pairName(p)}</option>`).join("")}</select></div>
+      ${seasonChart(st, m)}</article>
+    <article class="panel"><h2 style="margin-bottom:6px">${esc(f.season.month_name)}: deutlichste Muster</h2>
+      <div class="rows"><div class="prow head" style="grid-template-columns:minmax(84px,1fr) 90px 90px 50px"><span>Paar</span><span>Jahre positiv</span><span>Ø Rendite</span><span>n</span></div>
+      ${rank.slice(0, 12).map((x) => `<a class="prow" href="#paar-${x.p}" style="grid-template-columns:minmax(84px,1fr) 90px 90px 50px"><span class="pair">${pairName(x.p)}</span><span class="val ${x.s.hit >= 0.5 ? "s" : "w"}">${pp(x.s.hit, 0)}</span><span class="val">${pct(x.s.mean, 2)}</span><span class="val">${x.s.n}</span></a>`).join("")}</div></article>
+  </section>`;
+}
+function bindSeason() { const s = $("#season-sel"); s.value = state.seasonSel || "EURUSD"; s.onchange = () => { state.seasonSel = s.value; route(); }; }
+
+/* ---------- Menü ---------- */
+const NAV = [
+  ["cockpit", "Cockpit", "M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z"],
+  ["waehrungen", "Währungen", "M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM7 8h6M7 12h6M10 5v10"],
+  ["paare", "Paare", "M3 7h12l-3-3M17 13H5l3 3"],
+  ["kalender", "Kalender", "M3 5h14v12H3zM3 9h14M7 3v4M13 3v4"],
+  ["cot", "Positionierung (COT)", "M7 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM14 9a2.5 2.5 0 1 0 0-5M2 17c0-3 2.5-5 5-5s5 2 5 5M13 12c2.5 0 5 2 5 5"],
+  ["saisonalitaet", "Saisonalität", "M3 4h14v13H3zM3 8h14M7 2v4M13 2v4M7 12h2M11 12h2M7 15h2"],
+  ["prognosen", "Prognosen", "M3 16l4-5 3 3 7-8"],
+  ["tracker", "Forecast-Tracker", "M3 17V9M8 17V5M13 17v-6M18 17V3"],
+  ["makro", "Makro & Beziehungen", "M3 15c3-6 5-6 7-2s4 4 7-4"],
+  ["weltkarte", "Weltkarte", "M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 10h16M10 2c2.5 2.5 2.5 13.5 0 16M10 2c-2.5 2.5-2.5 13.5 0 16"],
+  ["daten", "Daten", "M4 4c0-1 12-1 12 0v12c0 1-12 1-12 0zM4 8c0 1 12 1 12 0M4 12c0 1 12 1 12 0"],
+];
+function renderDrawer(cur) {
+  const ev = nextHigh();
+  $("#drawer").innerHTML = `<div class="drawer-head"><span class="eyebrow">KW ${F().week.kw}</span><button class="iconbtn" type="button" id="close-btn" aria-label="Menü schließen">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <nav aria-label="Bereiche">${NAV.map(([id, label, d]) => `<a href="#${id}" ${cur === id ? 'aria-current="page"' : ""}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>${label}</a>`).join("")}</nav>
+    <div class="sep"></div>
+    ${ev ? `<a class="next-ev" href="#kalender">${folder("High")}<span><b>${ev.currency}</b> · ${esc(ev.title)}</span><small>${shortDay(ev.day)} ${ev.time} · ${untilText(ev.at)}</small></a>` : '<span class="faint" style="font-size:.86rem">Keine roten Ordner mehr diese Woche.</span>'}
+    <div class="sep"></div>
+    <div class="status" id="status"></div>`;
+  $("#close-btn").onclick = closeDrawer;
+  renderStatus();
+}
+function openDrawer() { renderDrawer(curView); $("#drawer").classList.add("open"); $("#scrim").hidden = false; $("#menu-btn").setAttribute("aria-expanded", "true"); $("#close-btn").focus(); }
+function closeDrawer() { $("#drawer").classList.remove("open"); $("#scrim").hidden = true; $("#menu-btn").setAttribute("aria-expanded", "false"); }
+function renderStatus() {
+  const vix = D.meta.vix, reg = regimeOf(vix), pending = D.promotions.filter((p) => p.needs_confirmation).length;
+  const el = $("#status"); if (!el) return;
+  el.innerHTML = `<span class="chip"><span class="dot good"></span>Kurse bis ${dateDe(D.meta.as_of)}</span>
+    <span class="chip"><span class="dot ${reg === "Stress" ? "bad" : reg === "normal" ? "warn" : "good"}"></span>VIX ${fmt(vix, 1)} · ${reg}</span>
+    ${pending ? `<span class="chip"><span class="dot warn"></span>${pending} Freigaben offen</span>` : ""}`;
+}
+
 /* ---------- Routing ---------- */
-const VIEWS = {uebersicht: [viewOverview, renderStrength], prognosen: [viewForecasts, bindForecasts], tracker: [viewTracker, bindTracker],
-  weltkarte: [viewMap, bindMap], beziehungen: [viewDeps, bindDeps], daten: [viewData, () => {}]};
+let curView = "cockpit";
+const VIEWS = {
+  cockpit: ["Cockpit", viewCockpit, () => {}], waehrungen: ["Währungen", viewCurrencies, renderStrength], paare: ["Paare", viewPairs, bindPairs],
+  kalender: ["Kalender", viewCalendar, bindCalendar], cot: ["Positionierung", viewCot, () => {}], saisonalitaet: ["Saisonalität", viewSeason, bindSeason],
+  prognosen: ["Prognosen", viewForecasts, bindForecasts], tracker: ["Forecast-Tracker", viewTracker, bindTracker],
+  makro: ["Makro & Beziehungen", viewDeps, bindDeps], weltkarte: ["Weltkarte", viewMap, bindMap], daten: ["Daten", viewData, () => {}]};
 function route() {
-  const name = (location.hash || "#uebersicht").slice(1);
-  const [view, bind] = VIEWS[name] || VIEWS.uebersicht;
-  $("#app").innerHTML = view(); bind();
-  document.querySelectorAll("nav.tabs a").forEach((a) => { if (a.getAttribute("href") === "#" + (VIEWS[name] ? name : "uebersicht")) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  const name = (location.hash || "#cockpit").slice(1);
+  if (name.startsWith("paar-")) {
+    curView = "paare"; $("#top-title").textContent = pairName(name.slice(5)); $("#app").innerHTML = viewPair(name.slice(5));
+  } else {
+    curView = VIEWS[name] ? name : "cockpit";
+    const [title, view, bind] = VIEWS[curView];
+    $("#top-title").textContent = title; $("#app").innerHTML = view(); bind();
+  }
+  document.title = `${$("#top-title").textContent} · WorlᗡDriver`;
+  closeDrawer();
 }
 if (!D) { document.getElementById("app").innerHTML = '<div class="empty"><b>Keine Daten eingebettet.</b><span>Die Seite wird mit „python -m forex_nexus build-site“ erzeugt.</span></div>'; }
-else { renderChrome(); route(); window.addEventListener("hashchange", () => { state.open = null; route(); window.scrollTo(0, 0); }); }
+else {
+  renderChrome(); renderDrawer("cockpit"); route();
+  $("#menu-btn").onclick = openDrawer; $("#scrim").onclick = closeDrawer;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+  window.addEventListener("hashchange", () => { state.open = null; route(); window.scrollTo(0, 0); });
+}
 </script>
