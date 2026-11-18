@@ -164,7 +164,7 @@ def test_migrate_works_on_non_utf8_database(admin_url):
         c.execute(f'DROP DATABASE IF EXISTS "{name}"')
         c.execute(f"CREATE DATABASE \"{name}\" ENCODING 'SQL_ASCII' LC_COLLATE 'C' LC_CTYPE 'C' TEMPLATE template0")
     try:
-        assert migrate(psycopg.conninfo.make_conninfo(admin_url, dbname=name)) == ["0001"]
+        assert migrate(psycopg.conninfo.make_conninfo(admin_url, dbname=name))[0] == "0001"
     finally:
         with psycopg.connect(admin_url, autocommit=True) as c:
             c.execute(f'DROP DATABASE "{name}" WITH (FORCE)')

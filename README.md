@@ -1,4 +1,6 @@
-# FOREX NEXUS AI (Arbeitstitel)
+# WorlDDriver
+
+**Website:** WorlDDriver · **Prognose-Engine:** FOREX NEXUS AI (Arbeitstitel)
 
 Predictive Forex Intelligence Plattform für die 8 Hauptwährungen
 (USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD) und ihre 28 Paare.
@@ -9,7 +11,9 @@ gegen die tatsächliche Entwicklung gemessen.
 
 ## Status
 
-**Phase 0 (Fundament) abgeschlossen.** Planung freigegeben am 18.11.2026.
+**Phase 1a (Kursdaten FRED + EZB) abgeschlossen.** Planung freigegeben am 18.11.2026.
+
+→ [Ergebnis Phase 1: Kursdiagramme und Datenqualität](reports/phase1/README.md)
 
 → [Anleitung für dich (iPhone)](docs/ANLEITUNG.md)
 

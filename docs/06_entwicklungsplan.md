@@ -1,6 +1,6 @@
 # 06 – Entwicklungsplan
 
-Stand: 18.11.2026 · Status: **freigegeben** · Phase 0 abgeschlossen
+Stand: 18.11.2026 · Status: **freigegeben** · Phase 0 und 1a abgeschlossen
 
 ## Arbeitsweise
 
@@ -66,9 +66,19 @@ weil jede Zentralbank und jedes Statistikamt Daten anders bereitstellt.
 * `docker-compose.yml` für den späteren Server (noch nicht auf einem Server erprobt)
 * [Anleitung für iPhone-Nutzung](ANLEITUNG.md)
 
-## Nächster Schritt: Phase 1 – Kursdaten
+## Phase 1a – erledigt (18.11.2026)
 
-1. Tageskurse der 7 USD-Paare von FRED laden, Kreuzkurse für die übrigen 21 Paare berechnen.
-2. EZB-Referenzkurse als zweite Quelle zur Kontrolle.
-3. Qualitätsprüfungen (Lücken, Ausreißer, Abweichung zwischen Quellen).
-4. Ergebnis für dich: Kursdiagramme aller 28 Paare und eine Liste gefundener Datenprobleme.
+* FRED H.10: 7 Dollar-Paare ab 1971, daraus 21 Kreuzkurse → alle 28 Paare
+* EZB-Referenzkurse: 7 Euro-Paare ab 1999 als unabhängige Kontrolle
+* Qualitätsprüfungen: Lücken, extreme Bewegungen vs. Datenfehler-Verdacht (Spike), Quellenvergleich, Aktualität
+* Kurse werden nie überschrieben; abweichende Neulieferungen werden als Befund gespeichert
+* Ergebnis: [reports/phase1/README.md](../reports/phase1/README.md), Auswertung: [07_phase1_ergebnisse.md](07_phase1_ergebnisse.md)
+
+## Nächster Schritt: Phase 1b – Dukascopy (Hoch/Tief/Schlusskurs 17:00 New York)
+
+1. Stundenkerzen aller 28 Paare von Dukascopy laden (ca. 7.700 Monatsdateien, langsam wegen Abrufbegrenzung).
+2. Daraus Tageskerzen mit Schluss 17:00 New York bilden (Marktstandard).
+3. Vergleich mit FRED und EZB; Entscheidung, welche Quelle Hauptquelle für Modelle wird.
+4. Nutzungsbedingungen von Dukascopy prüfen (nur persönliche Nutzung erlaubt?).
+
+Danach Phase 2 – Makrodaten point-in-time.

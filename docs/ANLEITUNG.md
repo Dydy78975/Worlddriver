@@ -14,6 +14,8 @@ Dein alter Mac wird nicht benötigt.
 
 ## Fortschritt prüfen
 
+**Aktuelle Ergebnisse:** Datei `reports/phase1/README.md` – dort siehst du alle 28 Kursdiagramme.
+
 1. GitHub-App öffnen → Repository **Worlddriver**.
 2. Branch `claude/forex-nexus-ai-platform-6ez50s` auswählen.
 3. **Dokumente lesen:** Ordner `docs/` – alle Dateien sind auf Deutsch.
@@ -21,7 +23,7 @@ Dein alter Mac wird nicht benötigt.
    * ✅ grüner Haken = alle automatischen Prüfungen bestanden
    * ❌ rotes Kreuz = etwas ist kaputt → sag es mir einfach in der Claude-App
 
-## Was die Tests aktuell prüfen
+## Was die Tests aktuell prüfen (39 Tests)
 
 * Die Datenbank enthält genau 8 Währungen und 28 Paare in Marktschreibweise.
 * Die drei Horizonte 1 Woche / 1 Monat / 3 Monate sind angelegt.
@@ -32,6 +34,9 @@ Dein alter Mac wird nicht benötigt.
 * Wahrscheinlichkeiten müssen zusammen 100 % ergeben.
 * Ein A+-Setup erscheint nur, wenn alle 6 Regeln geprüft **und** bestanden sind.
 * Einmal eingespielte Datenbank-Änderungen dürfen nicht nachträglich verändert werden.
+* Kreuzkurse werden korrekt berechnet (z. B. EUR/JPY = EUR/USD × USD/JPY) und sind in sich stimmig.
+* Gespeicherte Kurse werden nie überschrieben; geänderte Neulieferungen werden gemeldet.
+* Die Qualitätsprüfungen erkennen Lücken, Datenfehler (Spikes) und echte Marktereignisse.
 
 ## Für später (nur zur Information)
 
