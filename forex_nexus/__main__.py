@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner]"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge"""
 
 import sys
 
@@ -32,6 +32,16 @@ def main(argv: list[str]) -> int:
         from forex_nexus.ingestion.fx_daily import ingest_all
         for r in ingest_all(url):
             print(f"{r['source']}: {r['rows']} Werte geliefert, {r['inserted']} neu, {r['revisions']} abweichend")
+        return 0
+    if cmd == "load-knowledge":
+        from forex_nexus.dependencies.knowledge import load
+        r = load(url)
+        print(f"Wissensbasis {r.version}: {r.drivers} Treiber, {r.new_relationships} neue und "
+              f"{r.updated_relationships} aktualisierte Beziehungen")
+        for x in r.reset_to_testing:
+            print(f"  zurück auf 'testing' (Vorzeichen geändert): {x}")
+        for x in r.missing_in_file:
+            print(f"  Hinweis: {x} steht nicht mehr in der Datei (wird nicht gelöscht)")
         return 0
     if cmd in ("check-fx", "report-fx"):
         from datetime import date

@@ -90,6 +90,19 @@ erscheint kein Setup. Die A+-Tabellen haben keine Verbindung zu `ml.forecast`;
 falls eines deiner Kriterien die Prognose nutzt, wird das als Beleg (`evidence`)
 in der jeweiligen Regelprüfung festgehalten.
 
+## Erweiterung durch Migration 0003
+
+| Bereich | Neu |
+|---|---|
+| Horizonte | `1D` (1 Tag), `1W` (5), `1M` (20); `3M` inaktiv |
+| Eigenes Modell je Horizont | Fremdschlüssel (Modell, Horizont): Tagesprognose nur aus Tagesmodell |
+| Quantitative Felder | `expected_return`, `expected_range_high/low`, `confidence`, `perf_snapshot` |
+| Auswertung | `return_error`, `pinball_loss`, `crps`, `in_interval_80/90`, tatsächliche Spanne |
+| Erklärungen | `ml.forecast_driver` – Einflussfaktoren je Prognose, verknüpft mit Wirtschaftsbeziehungen |
+| Forecast-Tracker | Sichten `ml.v_forecast_tracker` (alle Prognosen + Vergleich zur vorherigen) und `ml.v_performance_monthly` |
+| Dependency Engine | Schema `dep`: `economy`, `driver`, `trade_exposure`, `relationship`, `analysis_run`, `relationship_test`, `relationship_status_log`, Sicht `v_relationship_overview` |
+| Schutzregeln | Status nur über Protokoll änderbar; „validiert“ nur durch eine Person mit bestandenem Test; Tests und Protokolle unveränderlich |
+
 ## Offene Punkte
 
 * Speicherung von Intraday-Kursen (falls deine A+-Kriterien sie brauchen).

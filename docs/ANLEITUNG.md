@@ -23,7 +23,7 @@ Dein alter Mac wird nicht benötigt.
    * ✅ grüner Haken = alle automatischen Prüfungen bestanden
    * ❌ rotes Kreuz = etwas ist kaputt → sag es mir einfach in der Claude-App
 
-## Was die Tests aktuell prüfen (39 Tests)
+## Was die Tests aktuell prüfen (54 Tests)
 
 * Die Datenbank enthält genau 8 Währungen und 28 Paare in Marktschreibweise.
 * Die drei Horizonte 1 Woche / 1 Monat / 3 Monate sind angelegt.
@@ -37,6 +37,10 @@ Dein alter Mac wird nicht benötigt.
 * Kreuzkurse werden korrekt berechnet (z. B. EUR/JPY = EUR/USD × USD/JPY) und sind in sich stimmig.
 * Gespeicherte Kurse werden nie überschrieben; geänderte Neulieferungen werden gemeldet.
 * Die Qualitätsprüfungen erkennen Lücken, Datenfehler (Spikes) und echte Marktereignisse.
+* Eine Tagesprognose kann nur von einem Tagesmodell stammen (nicht aus der Monatsprognose abgeleitet).
+* Der Forecast-Tracker zeigt die Veränderung zur vorherigen Prognose und die Güte je Monat.
+* Wirtschaftsbeziehungen starten als Hypothese; nur du kannst sie als „validiert“ freigeben,
+  und nur mit bestandenem Test. Änderungen am erwarteten Vorzeichen setzen die Prüfung zurück.
 
 ## Für später (nur zur Information)
 

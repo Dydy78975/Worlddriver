@@ -1,6 +1,12 @@
 # 03 – Technische Architektur
 
-Stand: 18.11.2026 · Status: Entwurf zur Freigabe
+Stand: 18.11.2026 · Status: freigegeben, erweitert um Quantitative Forecasting Engine und Dependency Engine
+
+> **Erweiterung 18.11.2026:** Details zu den neuen Kernmodulen stehen in
+> [08 – Quantitative Forecasting Engine](08_quantitative_forecasting.md) und
+> [09 – Global Economic Dependency Engine](09_dependency_engine.md).
+> Horizonte jetzt: **täglich (1 Tag), wöchentlich (5 Tage), monatlich (20 Tage)** – je ein eigenes Modell.
+> Umfang: ausschließlich USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
 
 ## Leitprinzipien
 
@@ -60,6 +66,12 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
  └─────────────────────────────────────────────────────────────┘
 
  ┌─────────────────────────────────────────────────────────────┐
+ │ (12) GLOBAL ECONOMIC DEPENDENCY ENGINE – Rohstoffe, Handel,   │
+ │ Geopolitik → Hypothesen, Tests, Status; liefert Merkmale an   │
+ │ (3) und Wirkungsketten an (9)/(10)  → siehe 09_dependency_engine│
+ └─────────────────────────────────────────────────────────────┘
+
+ ┌─────────────────────────────────────────────────────────────┐
  │ (11) A+-REGEL-ENGINE – eigener Bereich, liest Prognosen nur  │
  │ als eine von mehreren Eingaben, schreibt in eigene Tabellen   │
  └─────────────────────────────────────────────────────────────┘
@@ -78,8 +90,9 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
   zwischen zwei Kursquellen, verspätete Daten.
 * Bei Fehlern: keine Prognose für das betroffene Paar, Warnung im Bericht.
 
-### (3) Predictive Engine
-* **Zielgröße:** Rendite des Paares über 5, 21 bzw. 63 Handelstage.
+### (3) Predictive Engine → ausführlich in `08_quantitative_forecasting.md`
+* **Zielgröße:** Rendite des Paares über 1, 5 bzw. 20 Handelstage – je Horizont ein eigenes Modell.
+* **Quantitativ:** erwartete Rendite in %, Handelsspanne, Prognoseintervall, Konfidenz, Vergleich zur Vorprognose.
 * **Drei Szenarien:** bullisch / neutral / bärisch. „Neutral“ = Rendite innerhalb
   ±k × erwartete Volatilität des Horizonts (k wird einmal festgelegt, z. B. 0,5,
   und versioniert). So bedeutet „neutral“ bei allen Paaren und Horizonten dasselbe.
@@ -146,9 +159,23 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
 * Fakten kommen ausschließlich aus der Datenbank. Optional formuliert ein
   Sprachmodell den Fließtext, darf aber keine Zahlen erfinden.
 
-### (10) Dashboard
-* Start: **Streamlit** (Python, schnell, ohne Web-Programmierung).
-* Später bei Bedarf: FastAPI + Web-Frontend.
+### (10) Website WorlᗡDriver
+Die Oberfläche wird eine eigene Web-App (dunkles, klares Design, zuerst für das iPhone optimiert).
+Module, abgeleitet aus deiner Vision:
+
+| Modul | Inhalt | Datenbasis |
+|---|---|---|
+| **Global Map** | Weltkarte: Handelsströme, Rohstoffabhängigkeiten, Zentralbanken, Konflikte | Dependency Engine, `ref.event` |
+| **AI Predictions** | Tag / Woche / Monat für 28 Paare: Rendite, Spanne, Wahrscheinlichkeiten, Konfidenz | Prognose-Ledger |
+| **Forecast-Tracker** | alle bisherigen Prognosen, Treffer, Fehler, „wird das System besser?“ | `ml.v_forecast_tracker` |
+| **Market Intelligence** | 28 Paare, Währungsstärke, Kapitalflüsse, COT | Kurse, COT |
+| **Macro Center** | Zentralbanken, Zinsen, Inflation | Makrodaten (Phase 2) |
+| **Historical Intelligence** | vergleichbare Situationen der Vergangenheit | Analogie-Engine |
+| **News Intelligence** | Nachrichten und ihre gemessene Marktwirkung | später; braucht Nachrichtenquelle |
+
+Technik: Backend **FastAPI** (Python, liest die Datenbank), Frontend **Next.js/React** mit
+**MapLibre** für die Karte. Bis dahin dienen die automatisch erzeugten Berichte als Ansicht.
+Gestaltung eigenständig – fremde Plattformen dienen nur als Anregung, nicht als Vorlage.
 
 ### (11) A+-Regel-Engine
 * Deine sechs Kriterien als einzelne, testbare Regeln.
@@ -170,7 +197,7 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
 | Zeitsteuerung | zuerst cron, später Prefect | einfach starten |
 | Tests | pytest | jede Leakage-Regel bekommt einen Test |
 | Laufzeitumgebung | Docker Compose | gleiche Umgebung auf PC und Server |
-| Dashboard | Streamlit | schnell sichtbare Ergebnisse |
+| Website | FastAPI + Next.js/React + MapLibre | eigenständiges, mobiles Design mit Weltkarte |
 | Versionskontrolle | Git / GitHub | jede Änderung nachvollziehbar |
 
 ## Ordnerstruktur (geplant)
@@ -188,7 +215,10 @@ forex_nexus/
   registry/        # Champion/Challenger, Freigaben
   reports/         # Wochenbericht
   setups/          # A+-Regel-Engine (getrennt)
-  dashboard/       # Streamlit-App
+  dependencies/    # Global Economic Dependency Engine
+  fx/              # Paare, Kreuzkurse
+  dashboard/       # API für die Website
+knowledge/         # Wissensbasis der Wirtschaftsbeziehungen (YAML)
 db/migrations/     # nummerierte Datenbank-Migrationen
 tests/
 docs/

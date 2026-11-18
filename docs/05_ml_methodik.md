@@ -5,7 +5,8 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
 ## Zielgröße (was genau vorhergesagt wird)
 
 * Logarithmische Rendite des Paares vom Prognosetag bis zum Ende des Horizonts
-  (1W = 5, 1M = 21, 3M = 63 Handelstage), Schlusskurs 17:00 New York.
+  (**1D = 1, 1W = 5, 1M = 20 Handelstage**; 3M = 63 vorerst inaktiv), Schlusskurs 17:00 New York.
+* Jeder Horizont hat ein eigenes Modell (von der Datenbank erzwungen). Details: `08_quantitative_forecasting.md`.
 * Einteilung in drei Klassen anhand der erwarteten Volatilität σₕ des Horizonts:
   * **bullisch:** Rendite > +k · σₕ
   * **neutral:** dazwischen
@@ -44,7 +45,7 @@ messbaren Beitrag leisten.
 | 2 | **XGBoost** | Vergleich zu LightGBM |
 | 3 | weitere (z. B. Ensemble) | nur bei messbarem Mehrwert |
 
-Panel-Ansatz: ein Modell je Horizont über alle 28 Paare. Zusätzlich ein Modell für
+Panel-Ansatz: ein Modell je Horizont über alle 28 Paare (Tag, Woche, Monat getrennt trainiert und validiert). Zusätzlich ein Modell für
 die 8 Einzelwährungen (Stärke gegenüber dem Korb) als Konsistenzprüfung.
 
 ## Validierung gegen Leakage

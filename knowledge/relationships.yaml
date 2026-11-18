@@ -1,0 +1,331 @@
+# WorlᗡDriver – Wissensbasis der Wirtschaftsbeziehungen
+#
+# Alle Einträge starten als HYPOTHESE. Eine Beziehung gilt erst als "validiert", wenn sie
+# historische Tests, Out-of-Sample-Tests und Stabilitätsprüfungen bestanden hat UND von dir
+# freigegeben wurde. Ein steigender Rohstoffpreis stärkt eine Währung NICHT automatisch.
+#
+# Währungsstärke wird gegen einen Korb der anderen 7 Hauptwährungen gemessen (gleich gewichtet),
+# damit z. B. "AUD stärker" nicht nur "USD schwächer" bedeutet.
+#
+# Felder:
+#   expected_sign: +1 = Treiber steigt -> Währung tendenziell stärker; -1 = schwächer; null = unklar/wechselnd
+#   causal_chain:  die Wirkungskette Schritt für Schritt
+#   conditions:    wann die Beziehung typischerweise gilt bzw. nicht gilt
+
+version: "2026.11-1"
+
+drivers:
+  energy:oil_wti:
+    name: Rohöl WTI (USA)
+    category: energy
+    fred: {series: DCOILWTICO, frequency: D, publication_lag_days: 7}
+    notes: Tagesdaten der US-Energiebehörde EIA, erscheinen mit einigen Tagen Verzögerung.
+  energy:oil_brent:
+    name: Rohöl Brent (Nordsee)
+    category: energy
+    fred: {series: DCOILBRENTEU, frequency: D, publication_lag_days: 7}
+  energy:natgas_us:
+    name: Erdgas Henry Hub (USA)
+    category: energy
+    fred: {series: DHHNGSP, frequency: D, publication_lag_days: 7}
+  energy:natgas_eu:
+    name: Erdgas Europa
+    category: energy
+    fred: {series: PNGASEUUSDM, frequency: M, publication_lag_days: 45}
+  energy:lng_asia:
+    name: Flüssiggas (LNG) Japan/Asien
+    category: energy
+    fred: {series: PNGASJPUSDM, frequency: M, publication_lag_days: 45}
+  energy:coal_au:
+    name: Kraftwerkskohle Australien
+    category: energy
+    fred: {series: PCOALAUUSDM, frequency: M, publication_lag_days: 45}
+  metals:iron_ore:
+    name: Eisenerz
+    category: metals
+    fred: {series: PIORECRUSDM, frequency: M, publication_lag_days: 45}
+  metals:copper:
+    name: Kupfer
+    category: metals
+    fred: {series: PCOPPUSDM, frequency: M, publication_lag_days: 45}
+  metals:aluminium:
+    name: Aluminium
+    category: metals
+    fred: {series: PALUMUSDM, frequency: M, publication_lag_days: 45}
+  agriculture:beef:
+    name: Rindfleisch
+    category: agriculture
+    fred: {series: PBEEFUSDM, frequency: M, publication_lag_days: 45}
+  agriculture:logs:
+    name: Rundholz (Weichholz)
+    category: agriculture
+    fred: {series: PLOGSKUSDM, frequency: M, publication_lag_days: 45}
+  agriculture:wheat:
+    name: Weizen
+    category: agriculture
+    fred: {series: PWHEAMTUSDM, frequency: M, publication_lag_days: 45}
+  dairy:whole_milk_powder:
+    name: Vollmilchpulver (Global Dairy Trade)
+    category: dairy
+    notes: Nicht auf FRED. Quelle offen (Global Dairy Trade Auktionen, alle 2 Wochen).
+  precious:gold:
+    name: Gold
+    category: precious
+    notes: Nicht mehr auf FRED. Quelle offen (z. B. Weltbank-Rohstoffpreise, monatlich).
+  industry:china_activity:
+    name: Industrieaktivität China
+    category: industry
+    notes: Quelle offen (z. B. Einkaufsmanagerindex, Industrieproduktion, Kreditwachstum).
+  risk:vix:
+    name: Volatilitätsindex VIX (Risikostimmung)
+    category: risk
+    fred: {series: VIXCLS, frequency: D, publication_lag_days: 1}
+  trade:usd_broad:
+    name: Breiter Dollar-Index der US-Notenbank
+    category: trade
+    fred: {series: DTWEXBGS, frequency: D, publication_lag_days: 7}
+
+relationships:
+  # ------------------------------------------------------------------ NZD
+  - currency: NZD
+    driver: dairy:whole_milk_powder
+    expected_sign: 1
+    mechanism: Höhere Milchpreise erhöhen Neuseelands Exporterlöse.
+    causal_chain:
+      - Milchprodukte sind Neuseelands größte Exportgruppe.
+      - Steigende Weltmarktpreise erhöhen die Erlöse der Exporteure (v. a. Fonterra).
+      - Exporteure tauschen mehr Fremdwährung in NZD; Austauschverhältnis (Terms of Trade) verbessert sich.
+      - Höhere Einkommen der Landwirtschaft stützen Wachstum und Zinserwartungen der RBNZ.
+    conditions: Am stärksten, wenn die Preisänderung überraschend ist; schwächer, wenn globale Risikostimmung dominiert.
+  - currency: NZD
+    driver: agriculture:beef
+    expected_sign: 1
+    mechanism: Fleischexporte sind die zweitwichtigste Agrarexportgruppe.
+    causal_chain:
+      - Höhere Fleischpreise erhöhen Exporterlöse.
+      - Verbesserte Terms of Trade stützen den NZD.
+    conditions: Kleinerer Effekt als Milch.
+  - currency: NZD
+    driver: agriculture:logs
+    expected_sign: 1
+    mechanism: Holzexporte, vor allem nach China.
+    causal_chain:
+      - Chinas Baubranche fragt neuseeländisches Rundholz nach.
+      - Höhere Preise erhöhen Exporterlöse und stützen den NZD.
+    conditions: Abhängig von Chinas Bausektor.
+  - currency: NZD
+    driver: industry:china_activity
+    expected_sign: 1
+    mechanism: China ist Neuseelands wichtigster Exportmarkt.
+    causal_chain:
+      - Stärkere Industrie- und Konsumnachfrage in China.
+      - Mehr Nachfrage nach Milch, Fleisch, Holz aus Neuseeland.
+      - Höhere Exportvolumen und -preise stützen den NZD.
+  - currency: NZD
+    driver: risk:vix
+    expected_sign: -1
+    mechanism: NZD gilt als risikoabhängige Währung.
+    causal_chain:
+      - Steigende Unsicherheit (VIX steigt) führt zur Auflösung risikoreicher Positionen.
+      - Carry-Trades in höher verzinsten Währungen wie NZD werden geschlossen.
+      - Kapital fließt ab, der NZD fällt.
+    conditions: Besonders stark in Krisen (2008, 2020); schwach in ruhigen Phasen.
+
+  # ------------------------------------------------------------------ AUD
+  - currency: AUD
+    driver: metals:iron_ore
+    expected_sign: 1
+    mechanism: Eisenerz ist Australiens wichtigstes Exportgut.
+    causal_chain:
+      - Chinas Stahlindustrie kauft den Großteil des australischen Eisenerzes.
+      - Höhere Preise erhöhen Exporterlöse, Unternehmensgewinne und Steuereinnahmen.
+      - Terms of Trade verbessern sich; Nachfrage nach AUD steigt.
+    conditions: Abhängig von Chinas Bau- und Infrastrukturpolitik; Preisspitzen durch Angebotsausfälle wirken schwächer.
+  - currency: AUD
+    driver: energy:coal_au
+    expected_sign: 1
+    mechanism: Kohle ist eine der größten Exportgruppen.
+    causal_chain:
+      - Asien (China, Japan, Indien, Korea) importiert australische Kohle.
+      - Höhere Preise erhöhen Exporterlöse und stützen den AUD.
+    conditions: 2022 sehr stark durch die Energiekrise; langfristig durch Klimapolitik abnehmend.
+  - currency: AUD
+    driver: energy:lng_asia
+    expected_sign: 1
+    mechanism: Australien ist einer der größten LNG-Exporteure der Welt.
+    causal_chain:
+      - Höhere asiatische Gaspreise erhöhen Australiens LNG-Erlöse.
+      - Verbesserte Terms of Trade stützen den AUD.
+    conditions: Viele Lieferungen laufen über Langfristverträge; Effekt kann verzögert sein.
+  - currency: AUD
+    driver: metals:copper
+    expected_sign: 1
+    mechanism: Kupfer gilt als Konjunkturbarometer der Weltwirtschaft.
+    causal_chain:
+      - Steigende Kupferpreise signalisieren weltweite Industrienachfrage.
+      - Australien profitiert als Rohstoffexporteur von globalem Wachstum.
+    conditions: Teilweise indirekter Effekt (Wachstumssignal), nicht nur Exporterlös.
+  - currency: AUD
+    driver: precious:gold
+    expected_sign: 1
+    mechanism: Australien ist einer der größten Goldproduzenten.
+    causal_chain:
+      - Höhere Goldpreise erhöhen Exporterlöse.
+      - Positiv für Terms of Trade und AUD.
+    conditions: Gold steigt oft in Krisen, in denen der AUD gleichzeitig fällt – Beziehung kann sich umkehren.
+  - currency: AUD
+    driver: industry:china_activity
+    expected_sign: 1
+    mechanism: China ist Australiens wichtigster Handelspartner.
+    causal_chain:
+      - Chinesische Industrie- und Baunachfrage steigt.
+      - Mehr Nachfrage nach Eisenerz, Kohle, LNG.
+      - Höhere Exporte stützen den AUD.
+  - currency: AUD
+    driver: risk:vix
+    expected_sign: -1
+    mechanism: AUD gilt als risikoabhängige Währung.
+    causal_chain:
+      - Steigende Unsicherheit führt zu Kapitalabflüssen aus Rohstoff- und Hochzinswährungen.
+      - Der AUD fällt.
+    conditions: Am stärksten in Krisen.
+
+  # ------------------------------------------------------------------ CAD
+  - currency: CAD
+    driver: energy:oil_wti
+    expected_sign: 1
+    mechanism: Rohöl ist Kanadas größtes Exportgut, überwiegend in die USA.
+    causal_chain:
+      - Höhere Ölpreise erhöhen Kanadas Exporterlöse und Investitionen im Energiesektor.
+      - Exporteure tauschen mehr USD in CAD.
+      - Wachstum und Inflation in Kanada steigen; Zinserwartungen der Bank of Canada steigen.
+    conditions: Seit etwa 2015 schwächer geworden; kanadisches Öl (WCS) wird mit Abschlag gehandelt; Zinsdifferenz zu den USA oft wichtiger.
+  - currency: CAD
+    driver: energy:natgas_us
+    expected_sign: 1
+    mechanism: Kanada exportiert Erdgas in die USA.
+    causal_chain:
+      - Höhere Gaspreise erhöhen Exporterlöse.
+      - Leicht positiv für den CAD.
+    conditions: Deutlich kleinerer Effekt als Öl.
+  - currency: CAD
+    driver: risk:vix
+    expected_sign: -1
+    mechanism: CAD reagiert auf globale Risikostimmung, aber schwächer als AUD/NZD.
+    causal_chain:
+      - In Krisen fallen Rohstoffpreise und Risikobereitschaft.
+      - Kapital fließt in den USD; der CAD schwächt sich ab.
+
+  # ------------------------------------------------------------------ EUR
+  - currency: EUR
+    driver: energy:natgas_eu
+    expected_sign: -1
+    mechanism: Die Eurozone importiert den Großteil ihres Erdgases.
+    causal_chain:
+      - Höhere Gaspreise erhöhen die Importrechnung.
+      - Handelsbilanz verschlechtert sich (2022 erstmals seit Jahren negativ).
+      - Industrie verliert Wettbewerbsfähigkeit; Wachstumserwartungen sinken.
+      - Der EUR schwächt sich ab.
+    conditions: Sehr stark 2021–2022 (Energiekrise); in Phasen niedriger Gaspreise kaum messbar.
+  - currency: EUR
+    driver: energy:oil_brent
+    expected_sign: -1
+    mechanism: Die Eurozone ist Netto-Ölimporteur.
+    causal_chain:
+      - Höhere Ölpreise erhöhen Importkosten und verschlechtern die Terms of Trade.
+      - Belastet Wachstum und EUR.
+    conditions: Kann durch Inflations- und Zinserwartungen (EZB strafft) überlagert werden.
+  - currency: EUR
+    driver: industry:china_activity
+    expected_sign: 1
+    mechanism: China ist ein wichtiger Abnehmer europäischer (v. a. deutscher) Industriegüter.
+    causal_chain:
+      - Stärkere chinesische Nachfrage nach Maschinen und Autos.
+      - Höhere Exporte der Eurozone stützen den EUR.
+
+  # ------------------------------------------------------------------ JPY
+  - currency: JPY
+    driver: energy:oil_brent
+    expected_sign: -1
+    mechanism: Japan importiert fast seine gesamte Energie.
+    causal_chain:
+      - Höhere Ölpreise erhöhen Japans Importrechnung.
+      - Handelsbilanz verschlechtert sich; Importeure verkaufen JPY, um USD zu kaufen.
+      - Der JPY schwächt sich ab.
+    conditions: Kann in Krisen überlagert werden, wenn der JPY als sicherer Hafen gesucht wird.
+  - currency: JPY
+    driver: energy:lng_asia
+    expected_sign: -1
+    mechanism: Japan ist einer der größten LNG-Importeure.
+    causal_chain:
+      - Höhere LNG-Preise erhöhen die Importkosten.
+      - Verschlechterte Handelsbilanz belastet den JPY.
+  - currency: JPY
+    driver: risk:vix
+    expected_sign: 1
+    mechanism: Der JPY gilt als sicherer Hafen.
+    causal_chain:
+      - Steigende Unsicherheit führt zur Auflösung von Carry-Trades, die in JPY finanziert sind.
+      - Japanische Investoren holen Kapital zurück.
+      - Der JPY wertet auf.
+    conditions: Bei hoher US-Zinsdifferenz und Zinsanstiegen kann diese Beziehung schwach sein oder brechen.
+
+  # ------------------------------------------------------------------ CHF
+  - currency: CHF
+    driver: risk:vix
+    expected_sign: 1
+    mechanism: Der CHF gilt als sicherer Hafen.
+    causal_chain:
+      - In Krisen suchen Anleger stabile Währungen mit Überschüssen und niedriger Verschuldung.
+      - Kapital fließt in den CHF; er wertet auf.
+    conditions: Durch SNB-Interventionen zeitweise gedämpft (Mindestkurs 2011–2015).
+  - currency: CHF
+    driver: precious:gold
+    expected_sign: 1
+    mechanism: Gold und CHF sind beide Krisenanlagen; die Schweiz ist Gold-Handelszentrum.
+    causal_chain:
+      - "Gemeinsamer Treiber: Unsicherheit erhöht die Nachfrage nach Gold und CHF."
+    conditions: Wahrscheinlich KEIN direkter Ursache-Wirkungs-Zusammenhang, sondern gemeinsamer Treiber.
+
+  # ------------------------------------------------------------------ GBP
+  - currency: GBP
+    driver: energy:natgas_eu
+    expected_sign: -1
+    mechanism: Großbritannien ist Netto-Energieimporteur; Gaspreise bestimmen die Strompreise.
+    causal_chain:
+      - Höhere Gaspreise erhöhen Importkosten und Inflation.
+      - Das Leistungsbilanzdefizit wächst; Wachstum leidet.
+      - Belastet den GBP.
+    conditions: 2022 stark; sonst schwach.
+  - currency: GBP
+    driver: risk:vix
+    expected_sign: -1
+    mechanism: GBP ist durch das Leistungsbilanzdefizit auf Kapitalzuflüsse angewiesen.
+    causal_chain:
+      - In Krisen fließt weniger Kapital nach Großbritannien.
+      - Der GBP schwächt sich ab.
+
+  # ------------------------------------------------------------------ USD
+  - currency: USD
+    driver: risk:vix
+    expected_sign: 1
+    mechanism: Der USD ist die Weltreserve- und Fluchtwährung ("Dollar-Smile").
+    causal_chain:
+      - In globalen Krisen steigt die Nachfrage nach Dollar-Liquidität.
+      - Kapital fließt in US-Staatsanleihen; der USD wertet auf.
+    conditions: Wenn die Krise von den USA ausgeht, kann der USD auch fallen.
+  - currency: USD
+    driver: energy:oil_wti
+    expected_sign: null
+    mechanism: Der Zusammenhang hat sich verändert, seit die USA Netto-Ölexporteur sind (ca. 2019).
+    causal_chain:
+      - "Früher: höhere Ölpreise = höhere US-Importrechnung = USD schwächer."
+      - "Heute: höhere Ölpreise = höhere US-Exporterlöse und Inflation = Zinsen steigen = USD eher stärker."
+    conditions: Lehrbeispiel für eine Beziehung, die ihr Vorzeichen gewechselt haben kann. Muss je Zeitraum getestet werden.
+  - currency: USD
+    driver: precious:gold
+    expected_sign: -1
+    mechanism: Gold wird in USD gehandelt; schwacher USD macht Gold für andere Käufer günstiger.
+    causal_chain:
+      - Wirkung läuft überwiegend vom USD zum Goldpreis, nicht umgekehrt.
+    conditions: Umgekehrte Kausalität – nur zur Erklärung, nicht zur Prognose des USD geeignet.

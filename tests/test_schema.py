@@ -28,9 +28,9 @@ def test_28_pairs_in_market_convention(conn):
         assert float(pip) == (0.01 if quote == "JPY" else 0.0001), symbol
 
 
-def test_three_horizons(conn):
+def test_horizons(conn):
     rows = dict(conn.execute("SELECT horizon_code, trading_days FROM ml.horizon").fetchall())
-    assert rows == {"1W": 5, "1M": 21, "3M": 63}
+    assert rows == {"1D": 1, "1W": 5, "1M": 20, "3M": 63}   # 3M ist angelegt, aber inaktiv
 
 
 # --- Point-in-Time ------------------------------------------------------------

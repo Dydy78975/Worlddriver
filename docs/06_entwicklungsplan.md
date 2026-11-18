@@ -12,27 +12,29 @@ Stand: 18.11.2026 · Status: **freigegeben** · Phase 0 und 1a abgeschlossen
 
 ## Wichtigster Planungsgrundsatz
 
-Eine echte Prognose-Bilanz entsteht nur mit **Zeit**: Eine 3-Monats-Prognose kann erst
-nach 3 Monaten bewertet werden. Deshalb startet das Prognose-Ledger **so früh wie möglich**
-(Phase 4) – zunächst mit einfachen Referenzmodellen. Die ML-Modelle kommen später dazu.
-So läuft die Uhr für die Erfolgsmessung bereits, während wir weiterentwickeln.
+Eine echte Prognose-Bilanz entsteht nur mit **Zeit**: Eine Monatsprognose kann erst nach
+20 Handelstagen bewertet werden. Deshalb startet das Prognose-Ledger **so früh wie möglich**
+(Phase 4) – zunächst mit einfachen Referenzmodellen für alle drei Horizonte. Die ML-Modelle kommen
+später dazu. So läuft die Uhr für die Erfolgsmessung bereits, während wir weiterentwickeln.
 
-## Phasen
+## Phasen (aktualisiert 18.11.2026: Quantitative Forecasting + Dependency Engine)
 
 | Phase | Inhalt | Ergebnis, das du prüfen kannst | Grobe Dauer* |
 |---|---|---|---|
-| **0 Fundament** | Projektstruktur, Docker, PostgreSQL, Schema einspielen, Tests einrichten | Datenbank mit 8 Währungen und 28 Paaren läuft | 1 Woche |
-| **1 Kursdaten** | Tageskurse aller 28 Paare (FRED + EZB, Kreuzkurse, Dukascopy für OHLC), Qualitätsprüfungen | Diagramm jedes Paares, Liste gefundener Datenfehler | 1–2 Wochen |
-| **2 Makrodaten point-in-time** | Leitzinsen (BIS), Renditen, Inflation (ALFRED/OECD), COT (CFTC), VIX, DXY-Berechnung, Zentralbank-Termine | Abfrage „Was wusste man am Tag X?“ funktioniert und ist getestet | 3–4 Wochen |
-| **3 Features & Validierungsrahmen** | Feature-Engine, Zielgrößen, Walk-Forward mit Purging/Embargo, Kennzahlen, Leakage-Tests | Bericht: Wie gut sind die Referenzprognosen historisch? | 2–3 Wochen |
-| **4 Prognose-Ledger live** | täglicher automatischer Lauf mit Referenzmodellen, Auswertung fälliger Prognosen, Server-Betrieb | Erste echte, unveränderliche Prognosen mit Zeitstempel | 1–2 Wochen |
-| **5 Machine Learning** | Logistische Regression, LightGBM, XGBoost, Kalibrierung, SHAP, Modell-Registry, Freigabeprozess | Vergleichstabelle aller Modelle je Währung/Horizont/Regime | 3–5 Wochen |
-| **6 Historische Analogien** | Regel-Abfragen und Ähnlichkeitssuche ohne Zukunftsdaten | Antwort auf Fragen wie „Was passierte mit EUR/USD, wenn …?“ | 2–3 Wochen |
-| **7 Makro-Beziehungen & Regime** | rollierende Korrelationen, Strukturbrüche, Regime-Kennzeichnung | Übersicht: welche Zusammenhänge sind gerade stabil oder brechen | 2–3 Wochen |
-| **8 Wochenbericht** | „What changed?“ automatisch aus der Datenbank | Erster vollständiger Wochenbericht | 1–2 Wochen |
-| **9 Dashboard** | Streamlit-Oberfläche: Prognosen, Szenarien, Unsicherheit, Bilanz | Alles im Browser ansehen | 2–3 Wochen |
-| **10 A+-Regel-Engine** | deine 6 Kriterien als getestete Regeln, eigene Ansicht | A+-Setups nur, wenn alle 6 erfüllt sind | 1–3 Wochen |
-| **11 Optimierung** | Prüfung kostenpflichtiger Daten (z. B. Konsens), neue Merkmale, Challenger-Zyklen | messbar bessere Modelle – oder der Nachweis, dass es keine gibt | laufend |
+| ✅ **0 Fundament** | Projektstruktur, PostgreSQL, Schema, Tests | Datenbank mit 8 Währungen und 28 Paaren | erledigt |
+| ✅ **1a Kursdaten FRED + EZB** | Tageskurse aller 28 Paare, Qualitätsprüfungen | Kursdiagramme, Befundliste | erledigt |
+| ✅ **Architektur-Erweiterung** | Horizonte Tag/Woche/Monat, quantitative Felder, Forecast-Tracker, Dependency Engine, Wissensbasis | Dokumente 08/09, Migration 0003, 28 Hypothesen | erledigt |
+| **1b Dukascopy** | Hoch/Tief/Schluss 17:00 New York für alle 28 Paare | **Pflicht für die Tagesprognose und die Handelsspanne** | 1–2 Wochen |
+| **2 Makro- und Rohstoffdaten point-in-time** | Leitzinsen, Renditen, Inflation, COT, VIX, DXY, Zentralbank-Termine; Rohstoffe von FRED; Quellen für Milch, Gold, China | „Was wusste man am Tag X?“ – getestet | 3–5 Wochen |
+| **3 Features & Validierungsrahmen** | Merkmale, Zielgrößen je Horizont, Walk-Forward mit Purging/Embargo, alle Kennzahlen | Bericht: Wie gut sind Referenzprognosen je Horizont? | 2–3 Wochen |
+| **4 Prognose-Ledger live** | täglicher Lauf: Referenzmodelle für 1D/1W/1M inkl. Volatilität und Spanne; Auswertung; Server | erste echte Prognosen, Forecast-Tracker füllt sich | 1–2 Wochen |
+| **5 Machine Learning** | je Horizont: Volatilität/Spanne (GARCH, HAR, LightGBM), Rendite (Ridge, LightGBM, XGBoost), Richtung (LogReg, LightGBM, XGBoost), Quantile + konforme Kalibrierung, SHAP, Konfidenz | Vergleichstabelle aller Modelle je Horizont/Währung/Regime | 4–6 Wochen |
+| **6 Dependency Engine – Tests** | Validierung der 28 Hypothesen, Überwachung, Entdeckung, „schon eingepreist?“, Ereignisstudien | Übersicht: welche Beziehungen belegt, schwach, gebrochen | 3–4 Wochen |
+| **7 Historische Analogien & Regime** | vergleichbare Situationen ohne Zukunftsdaten; Regime-Kennzeichnung | „Was passierte mit EUR/USD, wenn …?“ | 2–3 Wochen |
+| **8 Wochenbericht** | „What changed?“ inkl. Tracker („wird das System besser?“) und Wirkungsketten | erster vollständiger Wochenbericht | 1–2 Wochen |
+| **9 Website WorlᗡDriver** | FastAPI + Next.js, Weltkarte, AI Predictions, Tracker, Macro Center, Historical Intelligence | alles im iPhone-Browser | 4–6 Wochen |
+| **10 A+-Regel-Engine** | deine 6 Kriterien als getestete Regeln | A+-Setups nur, wenn alle 6 erfüllt sind | 1–3 Wochen |
+| **11 Optimierung** | kostenpflichtige Daten prüfen (Konsens, tägliche Rohstoff-Futures, Nachrichten), Challenger-Zyklen | messbar bessere Modelle – oder der Nachweis, dass es keine gibt | laufend |
 
 \* Grobe Kalenderdauer bei regelmäßiger gemeinsamer Arbeit. Abhängig davon, wie viel Zeit
 du für Prüfen und Entscheiden hast. Phase 2 ist erfahrungsgemäß der aufwendigste Teil,
@@ -74,11 +76,13 @@ weil jede Zentralbank und jedes Statistikamt Daten anders bereitstellt.
 * Kurse werden nie überschrieben; abweichende Neulieferungen werden als Befund gespeichert
 * Ergebnis: [reports/phase1/README.md](../reports/phase1/README.md), Auswertung: [07_phase1_ergebnisse.md](07_phase1_ergebnisse.md)
 
-## Nächster Schritt: Phase 1b – Dukascopy (Hoch/Tief/Schlusskurs 17:00 New York)
+## Nächster Schritt: Phase 1b – Dukascopy (Hoch/Tief/Schluss 17:00 New York)
 
-1. Stundenkerzen aller 28 Paare von Dukascopy laden (ca. 7.700 Monatsdateien, langsam wegen Abrufbegrenzung).
-2. Daraus Tageskerzen mit Schluss 17:00 New York bilden (Marktstandard).
-3. Vergleich mit FRED und EZB; Entscheidung, welche Quelle Hauptquelle für Modelle wird.
-4. Nutzungsbedingungen von Dukascopy prüfen (nur persönliche Nutzung erlaubt?).
+Durch die neue Tagesprognose ist Phase 1b jetzt Pflicht: Ohne tägliche Hoch-/Tiefkurse gibt es
+keine verlässliche Handelsspanne und keinen marktüblichen Schlusskurs.
 
-Danach Phase 2 – Makrodaten point-in-time.
+1. Nutzungsbedingungen von Dukascopy prüfen (persönliche Nutzung).
+2. Stundenkerzen aller 28 Paare laden (langsam, wegen Abrufbegrenzung), Schluss 17:00 New York bilden.
+3. Vergleich mit FRED und EZB; Hauptquelle für die Modelle festlegen.
+
+Danach Phase 2 – Makro- und Rohstoffdaten point-in-time.
