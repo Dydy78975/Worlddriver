@@ -1,6 +1,6 @@
 # Übergabe-Notiz – WorlᗡDriver / FOREX NEXUS AI
 
-Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `claude/forex-nexus-ai-platform-6ez50s`)
+Stand: 18.11.2026 · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj (privat, Version 8) · Branch `claude/charming-volta-yvgpff` (enthält alles aus `claude/forex-nexus-ai-platform-6ez50s`)
 · Arbeitsregeln: `CLAUDE.md`
 
 ## Ziel
@@ -27,21 +27,16 @@ Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `
 - 78 Tests grün. Migration 0009 legt VIX- und Rohstoffreihen an (früher durch die gelöschte Wissensbasis).
 
 ## Gerade in Arbeit / nächster Schritt
-- **BIS-Daten anbinden** (`stats.bis.org`, Host in Umgebung „worlddriver“ freigegeben): Verbraucherpreise und
-  offizielle Leitzinsen aller 8 Notenbanken. Erster Abruf wurde am 18.11.2026 von der automatischen
-  Freigabe-Prüfung abgelehnt → Nutzer muss es erlauben. Danach neue Quelle `BIS` (Migration 0010), CPI für
-  GB/JP/CH/CA/AU/NZ ersetzen, Signale neu prüfen.
-- Danach Kandidaten für mehr Signalkraft: 2-J.-Renditen, Konsens-Überraschungen, Dukascopy Hoch/Tief.
+- BIS angebunden (Migration 0010): Verbraucherpreise GB/JP/CH/CA/AU/NZ und offizielle Leitzinsen der 6 Notenbanken.
+  Alle Datenreihen aktuell; Prüfung weiterhin 0 von 344 (Tag/Woche).
+- Nächste Kandidaten für Signalkraft: 2-J.-Renditen, Konsens-Überraschungen (Ist vs. Erwartung), Dukascopy Hoch/Tief.
 
 ## Offen / bekannte Probleme
 - **Kein dauerhafter Betrieb:** Cloud-DB temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`; Neuaufbau:
   initdb + `migrate` + `ingest-fx` + `ingest-fred-series` + `ingest-cot` + `ingest-calendar` + `train` +
   `promote` + `forecast` + `build-site`).
 - Kurse = FRED-Mittagskurse (wöchentlich aktualisiert); Dukascopy nur vom eigenen Server.
-- Inflation für GBP, JPY, CHF, CAD, AUD, NZD veraltet → diese Inflationssignale stehen auf neutral. Geprüft 18.11.2026:
-  FRED hat keinen aktuellen Ersatz (auch die neuen OECD-Reihen `…CPALTT01IXNBM`, `…CPALTT01CTGYM` enden 2023–2025);
-  EZB führt diese Länder nicht. Es bleibt die BIS (oder nationale Statistikämter).
-- Modelle wurden von Claude zur Inbetriebnahme freigegeben → Bestätigung durch Nutzer ausstehend.
+- Spannen-Modelle vom Nutzer bestätigt (Freigaben 4–6, 18.11.2026).
 - A+-Regel-Engine: wartet auf die 6 Kriterien des Nutzers.
 - Die geplante tägliche Aufgabe (`trig_017cgKCoLFTF76c2subGa5aC`) ist an die alte Sitzung gebunden.
 

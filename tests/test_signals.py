@@ -101,3 +101,16 @@ def test_vote_labels_and_counts():
     cur = validate.current_vote(vote, sigs, days[-1])["pairs"]["EURUSD"]
     assert (cur["bull"], cur["bear"], cur["neutral"]) == (2, 1, 1)
     assert np.isclose(cur["share_bull"], 2 / 3) and cur["label"] == "eher long"
+
+
+def test_bis_csv_and_calendar_yoy():
+    from forex_nexus.ingestion.fred_series import parse_ecb_series
+    from forex_nexus.signals.data import _yoy
+    text = ("FREQ,REF_AREA,TITLE,TIME_PERIOD,OBS_VALUE\n"
+            'D,GB,"From 3 Aug 2006, official bank rate",2026-11-06,4\nD,GB,"x",2026-11-09,3.75\n')
+    s = parse_ecb_series(text)
+    assert list(s.values) == [4.0, 3.75] and str(s.index[0]) == "2026-11-06"
+    # Quartalspreise als Monatsreihe (Wert wiederholt): Vorjahresvergleich nach Kalender, nicht nach Zeilen
+    idx = pd.date_range("2024-01-01", "2025-12-01", freq="MS")
+    v = pd.Series([100.0] * 12 + [103.0] * 12, index=idx)
+    assert np.isclose(_yoy(v, "Q").iloc[-1], 3.0)

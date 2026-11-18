@@ -1,6 +1,6 @@
 # 12 – Signal-Abstimmung und Aufräumen
 
-Stand: 18.11.2026 · Code: `forex_nexus/signals/` · Bericht: [reports/signals/README.md](../reports/signals/README.md)
+Stand: 18.11.2026 (mit BIS-Daten) · Code: `forex_nexus/signals/` · Bericht: [reports/signals/README.md](../reports/signals/README.md)
 · Befehl: `python -m forex_nexus signals`
 
 ## Wunsch
@@ -36,8 +36,8 @@ nur geprüfte Signale mit echter positiver Rendite, und daraus ein Punkte-System
 |---|---|---|
 | geprüfte Kombinationen | 344 | 344 |
 | bestanden | **0** | **0** |
-| Fundamental-Mehrheit richtig seit 2020 | 50,8 % (95 %: 48–53 %) | 50,9 % (95 %: 46–56 %) |
-| Stufe „klar long“ richtig seit 2020 | 52,9 % (50–55 %) | 54,2 % (49–60 %) |
+| Fundamental-Mehrheit richtig seit 2020 | 50,9 % (95 %: 48–53 %) | 50,7 % (95 %: 46–56 %) |
+| Stufe „klar long“ richtig seit 2020 | 52,7 % (50–55 %) | 54,3 % (49–60 %) |
 
 * Kein Signal hält die Prüfung. Die stärkste Kombination (t = 2,3) liegt unter dem, was bei 344 Versuchen
   allein durch Zufall zu erwarten ist.
@@ -79,12 +79,10 @@ Alles ist in Git nachvollziehbar und kann zurückgeholt werden.
 
 ## Offene Punkte
 
-* **Inflation ist für GBP, JPY, CHF, CAD, AUD, NZD veraltet** (OECD-Reihen auf FRED eingestellt, Japan seit
-  2021). Diese Inflationssignale stehen deshalb auf neutral. Lösung: BIS-Statistik (`stats.bis.org`) mit
-  Verbraucherpreisen und offiziellen Leitzinsen aller 8 Notenbanken. Der Host ist in der Umgebung
-  „worlddriver“ freigegeben; der erste Abruf wurde in der Sitzung vom 18.11.2026 von der automatischen
-  Freigabe-Prüfung abgelehnt und muss vom Nutzer erlaubt werden. Über FRED und EZB gibt es keinen aktuellen
-  Ersatz (geprüft: auch die neueren OECD-Reihen auf FRED enden 2023–2025).
+* ~~Inflation für GBP, JPY, CHF, CAD, AUD, NZD veraltet~~ – **erledigt 18.11.2026**: Verbraucherpreise und
+  offizielle Leitzinsen (BoE, BoJ, SNB, BoC, RBA, RBNZ) kommen jetzt von der BIS (Migration 0010). Alle
+  Datenreihen sind aktuell. Neue Prüfung mit unveränderten Regeln: weiterhin 0 von 344 Kombinationen
+  (Tag und Woche); Fundamental-Mehrheit seit 2020: 50,9 % (Tag), 50,7 % (Woche).
 * Weitere Datenquellen, die Signale tragen könnten: 2-jährige Renditen aller Länder (bessere Zinserwartung),
   Konsens vs. Ist bei Wirtschaftsdaten (Überraschungen), Dukascopy Hoch/Tief (nur vom eigenen Server).
 * Neue Signale kommen automatisch in die geprüfte Abstimmung, sobald sie Entdeckung und Bestätigung bestehen.

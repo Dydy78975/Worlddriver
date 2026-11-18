@@ -7,7 +7,7 @@ Stand: 18.11.2026
 | Baustein | Stand |
 |---|---|
 | Kursdaten FRED + EZB, alle 28 Paare | läuft, mit Qualitätsprüfung |
-| Zinsen, Renditen, Inflation, **Arbeitslosenquoten** (alle 8 Währungsräume) | läuft; Inflation für 6 Länder veraltet (siehe unten) |
+| Zinsen (offizielle Leitzinsen via BIS), Renditen, Inflation (BIS), **Arbeitslosenquoten** (alle 8 Währungsräume) | läuft, alle Reihen aktuell |
 | COT (CFTC), VIX, Rohstoffe der Rohstoffwährungen | läuft |
 | Wirtschaftskalender (Forex Factory) | läuft, Woche |
 | **Signal-Prüfung** (43 Signale × 8 Währungen, Tag + Woche) | läuft, siehe [12_signal_abstimmung.md](12_signal_abstimmung.md) |

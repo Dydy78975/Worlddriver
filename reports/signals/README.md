@@ -11,27 +11,27 @@ Die 10 stärksten Kombinationen in der Entdeckung und was danach aus ihnen wurde
 | Signal | Währung | Entdeckung 1999–2012 | Bestätigung 2013–2019 | Schlusstest ab 2020 | gültig |
 |---|---|---|---|---|---|
 | Arbeitslosigkeit 6 Monate | EUR | +3,3 % (t 1,9) | +0,4 % (t 0,2) | +1,4 % (t 1,0) | nein |
-| Inflation (Notenbank-Sicht) | EUR | +2,4 % (t 1,9) | +1,2 % (t 0,7) | +1,3 % (t 0,8) | nein |
+| Inflation (Notenbank-Sicht) | EUR | +2,3 % (t 1,8) | +1,3 % (t 0,7) | +1,0 % (t 0,7) | nein |
 | Arbeitslosigkeit 6 Monate | CAD | +3,0 % (t 1,7) | +0,4 % (t 0,2) | +1,0 % (t 0,6) | nein |
-| Inflation (Notenbank-Sicht) | USD | +3,1 % (t 1,6) | +0,4 % (t 0,2) | +2,1 % (t 1,0) | nein |
-| Inflationsanstieg 3 Monate | CAD | +2,3 % (t 1,3) | -0,4 % (t -0,2) | +0,2 % (t 0,1) | nein |
+| Inflation (Notenbank-Sicht) | USD | +3,0 % (t 1,6) | +0,0 % (t 0,0) | +1,6 % (t 0,8) | nein |
+| Inflation (Notenbank-Sicht) | CAD | +1,9 % (t 1,3) | -0,4 % (t -0,2) | +0,5 % (t 0,4) | nein |
+| Zinsvorteil (Carry) | EUR | +2,5 % (t 1,3) | -0,7 % (t -0,3) | -0,4 % (t -0,3) | nein |
 | Arbeitslosigkeit 6 Monate | AUD | +2,4 % (t 1,2) | +1,9 % (t 0,8) | -0,9 % (t -0,5) | nein |
+| Inflationsanstieg 3 Monate | CAD | +2,1 % (t 1,2) | -0,1 % (t -0,1) | +0,1 % (t 0,1) | nein |
 | Arbeitslosenquote | NZD | +2,8 % (t 1,2) | +0,3 % (t 0,2) | -0,7 % (t -0,5) | nein |
 | Arbeitslosigkeit 12 Monate | CAD | +2,0 % (t 1,2) | -0,3 % (t -0,2) | +1,3 % (t 0,7) | nein |
-| Inflation (Notenbank-Sicht) | CAD | +1,7 % (t 1,2) | -0,1 % (t -0,0) | +0,7 % (t 0,4) | nein |
-| Rohstoffpreise 3 Monate | NZD | +2,9 % (t 1,1) | +0,9 % (t 0,3) | -1,4 % (t -0,6) | nein |
 
 **Fundamental-Abstimmung (25 Signale, ungeprüft) im Schlusstest ab 2020-01-02:**
 
 | Stufe | Fälle | Trefferquote | 95-%-Intervall |
 |---|---|---|---|
-| klar long | 5269 | 52,9 % | 50–55 % |
-| eher long | 13984 | 51,0 % | 49–53 % |
-| unentschieden | 12189 | 49,9 % | 47–52 % |
-| eher short | 12814 | 50,0 % | 48–52 % |
-| klar short | 3792 | 51,5 % | 49–54 % |
+| klar long | 5735 | 52,7 % | 50–55 % |
+| eher long | 14729 | 51,2 % | 49–54 % |
+| unentschieden | 12042 | 50,3 % | 48–53 % |
+| eher short | 11690 | 49,9 % | 48–52 % |
+| klar short | 3852 | 51,3 % | 49–54 % |
 
-Insgesamt: 50,8 % Treffer (Zufall = 50 %), Ergebnis vor Kosten.
+Insgesamt: 50,9 % Treffer (Zufall = 50 %), Ergebnis vor Kosten.
 
 ## Woche (1W)
 
@@ -43,8 +43,8 @@ Die 10 stärksten Kombinationen in der Entdeckung und was danach aus ihnen wurde
 |---|---|---|---|---|---|
 | Arbeitslosigkeit 6 Monate | EUR | +4,0 % (t 2,3) | +0,3 % (t 0,2) | +1,7 % (t 1,2) | nein |
 | Arbeitslosigkeit 6 Monate | CAD | +3,9 % (t 2,3) | +1,1 % (t 0,6) | +1,6 % (t 1,0) | nein |
-| Inflation (Notenbank-Sicht) | EUR | +2,5 % (t 1,9) | +1,5 % (t 0,8) | +0,9 % (t 0,6) | nein |
-| Inflation (Notenbank-Sicht) | USD | +3,1 % (t 1,7) | -0,0 % (t -0,0) | +2,0 % (t 0,9) | nein |
+| Inflation (Notenbank-Sicht) | EUR | +2,4 % (t 1,8) | +1,6 % (t 0,9) | +0,7 % (t 0,5) | nein |
+| Inflation (Notenbank-Sicht) | USD | +3,0 % (t 1,7) | -0,3 % (t -0,2) | +1,2 % (t 0,6) | nein |
 | Gegenbewegung 1 Tag | JPY | +4,0 % (t 1,4) | -1,5 % (t -0,6) | +1,3 % (t 0,5) | nein |
 | Gegenbewegung 6 Monate | GBP | +2,3 % (t 1,4) | -3,0 % (t -1,3) | +1,1 % (t 0,8) | nein |
 | Arbeitslosigkeit 3 Monate | CAD | +2,3 % (t 1,4) | -1,7 % (t -0,9) | +3,2 % (t 1,8) | nein |
@@ -56,13 +56,13 @@ Die 10 stärksten Kombinationen in der Entdeckung und was danach aus ihnen wurde
 
 | Stufe | Fälle | Trefferquote | 95-%-Intervall |
 |---|---|---|---|
-| klar long | 1119 | 54,2 % | 49–60 % |
-| eher long | 2939 | 52,4 % | 47–58 % |
-| unentschieden | 2531 | 49,3 % | 44–55 % |
-| eher short | 2638 | 49,0 % | 44–54 % |
-| klar short | 797 | 50,7 % | 45–57 % |
+| klar long | 1213 | 54,3 % | 49–60 % |
+| eher long | 3119 | 52,2 % | 47–57 % |
+| unentschieden | 2493 | 48,7 % | 43–54 % |
+| eher short | 2384 | 48,6 % | 43–54 % |
+| klar short | 815 | 50,3 % | 45–56 % |
 
-Insgesamt: 50,9 % Treffer (Zufall = 50 %), Ergebnis vor Kosten.
+Insgesamt: 50,7 % Treffer (Zufall = 50 %), Ergebnis vor Kosten.
 
 ## Datenstand und Nutzen
 
@@ -70,26 +70,26 @@ Insgesamt: 50,9 % Treffer (Zufall = 50 %), Ergebnis vor Kosten.
 |---|---|---|---|---|
 | Rindfleisch | – | 2026-09-01 | ja | commodity_1m, commodity_3m |
 | Rundholz (Weichholz) | – | 2026-09-01 | ja | commodity_1m, commodity_3m |
-| Verbraucherpreisindex Australien (OECD, Quartal) | AUD | 2025-01-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
-| Verbraucherpreisindex Kanada (OECD) | CAD | 2025-03-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
-| Verbraucherpreisindex Schweiz (OECD) | CHF | 2025-04-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Australien (BIS, Quartal) | AUD | 2026-06-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Kanada (BIS) | CAD | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Schweiz (BIS) | CHF | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
 | HICP Eurozone (Index) | EUR | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
-| Verbraucherpreisindex Großbritannien (OECD) | GBP | 2025-03-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
-| Verbraucherpreisindex Japan (OECD) | JPY | 2021-06-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
-| Verbraucherpreisindex Neuseeland (OECD, Quartal) | NZD | 2025-01-01 | **nein** | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Großbritannien (BIS) | GBP | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Japan (BIS) | JPY | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
+| Verbraucherpreise Neuseeland (BIS, Quartal) | NZD | 2026-09-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
 | Verbraucherpreisindex USA | USD | 2026-10-01 | ja | infl_hawk, infl_ppp, infl_chg_3m, real_rate |
 | Rohöl WTI (USA) | – | 2026-11-11 | ja | commodity_1m, commodity_3m |
 | Kraftwerkskohle Australien | – | 2026-09-01 | ja | commodity_1m, commodity_3m |
 | Kupfer | – | 2026-09-01 | ja | commodity_1m, commodity_3m |
 | Eisenerz | – | 2026-09-01 | ja | commodity_1m, commodity_3m |
 | Volatilitätsindex VIX (Risikostimmung) | – | 2026-11-16 | ja | risk_vix_chg, risk_vix_level |
-| Tagesgeldsatz Australien (OECD), nahe Leitzins | AUD | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
-| Tagesgeldsatz Kanada (OECD), nahe Leitzins | CAD | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
-| Tagesgeldsatz Schweiz (OECD), nahe Leitzins | CHF | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Reserve Bank of Australia (BIS) | AUD | 2026-11-05 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Bank of Canada (BIS) | CAD | 2026-11-09 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Schweizerische Nationalbank (BIS) | CHF | 2026-11-10 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
 | EZB-Einlagesatz | EUR | 2026-11-18 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
-| Tagesgeldsatz Großbritannien (OECD), nahe Leitzins | GBP | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
-| Tagesgeldsatz Japan (OECD), nahe Leitzins | JPY | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
-| 3-Monats-Interbankensatz Neuseeland (OECD) | NZD | 2026-10-01 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Bank of England (BIS) | GBP | 2026-11-09 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Bank of Japan (BIS) | JPY | 2026-11-10 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
+| Leitzins Reserve Bank of New Zealand (BIS) | NZD | 2026-11-06 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
 | Effektiver Leitzins USA (Fed Funds) | USD | 2026-11-16 | ja | carry, rate_chg_3m, rate_chg_6m, rate_chg_12m, curve, real_rate |
 | Arbeitslosenquote Australien (OECD) | AUD | 2026-09-01 | ja | unemp, unemp_chg_3m, unemp_chg_6m, unemp_chg_12m |
 | Arbeitslosenquote Kanada (OECD) | CAD | 2026-10-01 | ja | unemp, unemp_chg_3m, unemp_chg_6m, unemp_chg_12m |

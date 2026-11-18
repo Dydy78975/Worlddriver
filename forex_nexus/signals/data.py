@@ -22,7 +22,7 @@ PRICE_SOURCES = ["FRED_H10", "FRED_H10_CROSS"]
 START = "1999-01-04"
 # Veraltet, wenn seit der Veröffentlichung des letzten Werts mehr als Periodenlänge + 45 Tage vergangen sind
 # (dann ist der nächste Wert überfällig, z. B. weil die Quelle eingestellt wurde).
-MAX_DAYS_SINCE_RELEASE = {"D": 10, "W": 21, "M": 76, "Q": 137}
+MAX_DAYS_SINCE_RELEASE = {"D": 21, "W": 21, "M": 76, "Q": 137}   # D: BIS liefert Tageswerte wöchentlich
 COMMODITY_DRIVERS = {"CAD": ["DCOILWTICO"], "AUD": ["PIORECRUSDM", "PCOPPUSDM", "PCOALAUUSDM"],
                      "NZD": ["PBEEFUSDM", "PLOGSKUSDM"]}
 
@@ -92,7 +92,8 @@ def change(s: pd.Series, months: int) -> pd.Series:
 
 def _per_currency(conn, category: str) -> dict:
     out = {}
-    for ccy, code in conn.execute("SELECT currency, source_code FROM ref.series WHERE category = %s", (category,)).fetchall():
+    for ccy, code in conn.execute("SELECT currency, source_code FROM ref.series WHERE category = %s AND active",
+                                  (category,)).fetchall():
         df, freq = load_periods(conn, code)
         if not df.empty:
             out[ccy] = (df["value"].astype(float), df["avail"], freq)
@@ -108,7 +109,10 @@ def _factor(series: dict, when, transform) -> pd.DataFrame:
 
 
 def _yoy(v: pd.Series, freq: str) -> pd.Series:
-    return (v / v.shift(4 if freq == "Q" else 12) - 1) * 100
+    """Veränderung gegenüber dem Vorjahr in % (nach Kalender, gleich für Monats- und Quartalsreihen)."""
+    v = v.dropna().sort_index()
+    past = v.reindex(v.index - pd.DateOffset(years=1), method="ffill")
+    return pd.Series((v.values / past.values - 1) * 100, index=v.index)
 
 
 def load_inputs(conn) -> Inputs:

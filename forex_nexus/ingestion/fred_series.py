@@ -1,4 +1,5 @@
-"""Makro- und Rohstoffreihen laden: FRED (Rohstoffe, Zinsen, Arbeitsmarkt) und einzelne EZB-Reihen.
+"""Makro- und Rohstoffreihen laden: FRED (Rohstoffe, Zinsen, Arbeitsmarkt), einzelne EZB-Reihen und die BIS
+(Verbraucherpreise, offizielle Leitzinsen).
 
 Point-in-Time: FRED liefert für diese Reihen keine historischen Datenstände. Der Veröffentlichungs-
 zeitpunkt wird deshalb vorsichtig geschätzt:  available_at = Ende der Periode + publication_lag
@@ -18,12 +19,13 @@ from forex_nexus.db import connect
 from forex_nexus.ingestion.fx_daily import FRED_URL, parse_fred_csv
 from forex_nexus.ingestion.http import fetch_text
 
-SOURCES = ("FRED_COMMODITY", "FRED_RATES", "FRED_LABOUR", "ECB_SERIES")
+SOURCES = ("FRED_COMMODITY", "FRED_RATES", "FRED_LABOUR", "ECB_SERIES", "BIS")
 ECB_SERIES_URL = "https://data-api.ecb.europa.eu/service/data/{key}?format=csvdata"
+BIS_URL = "https://stats.bis.org/api/v2/data/dataflow/BIS/{key}?format=csv&startPeriod=1995-01-01"
 
 
 def parse_ecb_series(text: str) -> pd.Series:
-    """EZB-CSV einer einzelnen Reihe -> Series(Periodenbeginn -> Wert). '2026-09' -> 2026-09-01."""
+    """EZB- oder BIS-CSV einer einzelnen Reihe -> Series(Periodenbeginn -> Wert). '2026-09' -> 2026-09-01."""
     df = pd.read_csv(io.StringIO(text), usecols=["TIME_PERIOD", "OBS_VALUE"]).dropna()
     df["date"] = pd.to_datetime(df["TIME_PERIOD"]).dt.date
     return df.set_index("date")["OBS_VALUE"].astype(float).sort_index()
@@ -32,6 +34,13 @@ def parse_ecb_series(text: str) -> pd.Series:
 def fetch_values(source: str, code: str) -> pd.Series:
     if source == "ECB_SERIES":
         return parse_ecb_series(fetch_text(ECB_SERIES_URL.format(key=code)))
+    if source == "BIS":
+        for _ in range(3):                       # die BIS liefert gelegentlich eine leere Antwort
+            text = fetch_text(BIS_URL.format(key=code))
+            if text.strip():
+                return parse_ecb_series(text)
+            time.sleep(5)
+        raise RuntimeError(f"BIS lieferte keine Daten für {code}")
     return parse_fred_csv(fetch_text(FRED_URL.format(series=code)), require_positive=False)
 
 
