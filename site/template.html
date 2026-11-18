@@ -1,0 +1,652 @@
+<title>WorlᗡDriver</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="WorlᗡDriver – Prognosen und Wirtschaftsbeziehungen für die 8 Hauptwährungen und ihre 28 Paare">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopfzeile mit Logo + Status, darunter Reiter; Inhalt als ruhige Spalte (max. 1100px), Karten nur wo sie Objekte trennen */
+:root{
+  color-scheme:dark;
+  --bg:#0a101c; --surface:#101828; --surface-2:#162036; --line:#243150; --line-soft:#1b2640;
+  --fg:#e7ecf5; --fg-2:#a9b5cb; --fg-3:#7c89a3;
+  --accent:#4c93ec; --accent-ink:#0a101c;
+  --bull:#20a87c; --bear:#e0712f; --neutral:#7f8aa1;
+  --good:#2fae6b; --warn:#d9a12a; --bad:#e0563f;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-data:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  color-scheme:light;--bg:#f4f6fa;--surface:#ffffff;--surface-2:#eef2f8;--line:#d5dceb;--line-soft:#e4e9f2;
+  --fg:#111827;--fg-2:#45526b;--fg-3:#6a7690;--accent:#2a6fd0;--accent-ink:#ffffff;
+  --bull:#127f5d;--bear:#c25717;--neutral:#7a8499;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}}
+:root[data-theme="light"]{
+  color-scheme:light;--bg:#f4f6fa;--surface:#ffffff;--surface-2:#eef2f8;--line:#d5dceb;--line-soft:#e4e9f2;
+  --fg:#111827;--fg-2:#45526b;--fg-3:#6a7690;--accent:#2a6fd0;--accent-ink:#ffffff;
+  --bull:#127f5d;--bear:#c25717;--neutral:#7a8499;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h2{font-size:1.25rem}
+h3{font-size:1rem}
+p{margin:0}
+.num{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.muted{color:var(--fg-2)} .faint{color:var(--fg-3)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Kopf */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft)}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;padding-block:12px 8px;flex-wrap:wrap}
+@media (max-width:760px){.top-row .status{width:100%;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.status::-webkit-scrollbar{display:none}}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--fg)}
+.brand svg{height:26px;width:auto;display:block}
+.status{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.78rem;color:var(--fg-2);white-space:nowrap;background:var(--surface)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--fg-3);flex:none}
+.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:0 8px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--fg-2);font-weight:500;font-size:.92rem;padding:7px 12px;border-radius:8px}
+nav.tabs a[aria-current="page"]{background:var(--surface-2);color:var(--fg)}
+nav.tabs a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main{padding-block:20px 48px}
+section.view{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+section.view>*,.grid-2>*,.grid-3>*,.kpis>*{min-width:0}
+.lede{display:grid;gap:6px}
+.lede h1{font-size:clamp(1.5rem,4vw,2.1rem)}
+.lede p{max-width:68ch;color:var(--fg-2)}
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:16px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3);font-weight:600}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:760px){.grid-3,.grid-2{grid-template-columns:minmax(0,1fr)}}
+
+/* Horizont-Karten */
+.hz{display:grid;gap:10px;align-content:start;min-width:0}
+.hz .verdict{font-size:.92rem}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:6px 14px;font-size:.88rem}
+.hz .kv{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.kv dt{color:var(--fg-2)} .kv dd{margin:0;text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:.76rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.pill.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent);background:color-mix(in srgb,var(--good) 12%,transparent)}
+.pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.pill.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.pill.info{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.pill.plain{color:var(--fg-2);border-color:var(--line)}
+.pill.dashed{color:var(--fg-3);border:1px dashed var(--line)}
+
+/* Währungsstärke */
+.strength{display:grid;gap:2px}
+.srow{display:grid;grid-template-columns:44px minmax(0,1fr) 72px 96px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft)}
+.srow:last-child{border-bottom:0}
+.sbar{position:relative;height:10px}
+.sbar .axis{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.sbar .fill{position:absolute;top:0;height:10px;border-radius:3px}
+.ccy{font-family:var(--font-display);font-weight:600}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
+.seg button{all:unset;cursor:pointer;padding:5px 12px;border-radius:7px;font-size:.86rem;color:var(--fg-2);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgb(0 0 0 / .25)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{all:unset;cursor:pointer;font-size:.82rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--fg-2)}
+.chips button[aria-pressed="true"]{border-color:var(--accent);color:var(--fg);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+select{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:.86rem}
+
+/* Prognoseliste */
+.fc-list{display:grid;gap:8px}
+.fc{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden}
+.fc>button{all:unset;cursor:pointer;display:grid;grid-template-columns:96px minmax(0,1fr) 150px 90px;gap:14px;align-items:center;padding:12px 14px;width:100%;box-sizing:border-box}
+.fc>button:hover{background:var(--surface-2)}
+.fc .pair{font-family:var(--font-display);font-weight:600;font-size:1.02rem}
+.fc .price{font-size:.8rem;color:var(--fg-3)}
+.probbar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px;background:var(--bg)}
+.probbar span{display:flex;align-items:center;justify-content:center;font-size:.72rem;font-family:var(--font-data);color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+.probbar .b{background:var(--bear)} .probbar .n{background:var(--neutral)} .probbar .u{background:var(--bull)}
+.probmeta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg-3);margin-top:4px}
+.interval{font-size:.82rem;text-align:right}
+.interval small{display:block;color:var(--fg-3);font-size:.72rem}
+.fc .conf{justify-self:end}
+.fc-detail{border-top:1px solid var(--line-soft);padding:16px 14px;display:grid;gap:16px}
+@media (max-width:760px){
+  .fc>button{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"pair conf" "bar bar" "int int";row-gap:10px}
+  .fc>button .c-pair{grid-area:pair} .fc>button .c-bar{grid-area:bar} .fc>button .c-int{grid-area:int} .fc>button .conf{grid-area:conf}
+  .interval{text-align:left}
+}
+.drivers{display:grid;gap:8px}
+.drv{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:center;font-size:.88rem}
+.drv-bar{position:relative;height:8px;background:var(--surface-2);border-radius:4px}
+.drv-bar i{position:absolute;top:0;height:8px;border-radius:4px}
+.drv-bar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:4px;color:var(--fg-2);font-size:.9rem}
+.note{font-size:.84rem;color:var(--fg-2);border-left:2px solid var(--line);padding-left:10px}
+
+/* Diagramme */
+svg.chart{width:100%;height:auto;display:block;overflow:visible}
+svg.chart text{fill:var(--fg-3);font-family:var(--font-body);font-size:11px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+/* Tabellen */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--fg-3);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
+td.num,th.num{font-family:var(--font-data)}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{display:grid;gap:2px}
+.kpi b{font-family:var(--font-display);font-size:1.5rem;font-weight:600}
+
+/* Karte */
+.map-wrap{position:relative}
+svg.map{width:100%;height:auto;display:block}
+svg.map path.land{fill:var(--surface-2);stroke:var(--bg);stroke-width:.4}
+svg.map path.eco{fill:color-mix(in srgb,var(--accent) 30%,var(--surface-2))}
+svg.map path.eco.sel{fill:color-mix(in srgb,var(--accent) 55%,var(--surface-2))}
+svg.map .flow{fill:none;stroke-width:1.6;stroke-linecap:round}
+svg.map .marker{cursor:pointer}
+svg.map .marker circle{fill:var(--bg);stroke:var(--accent);stroke-width:1.6}
+svg.map .marker circle.hit{fill:transparent;stroke:none}
+svg.map .marker.sel circle{fill:var(--accent)}
+svg.map .marker text{font-family:var(--font-display);font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--bg)}
+svg.map .flowlabel{fill:var(--fg-2);paint-order:stroke;stroke:var(--bg)}
+
+/* Beziehungen */
+.deps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.deps{grid-template-columns:minmax(0,1fr)}}
+.dep{display:grid;gap:10px;align-content:start;min-width:0}
+.dep-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.dep-title{font-family:var(--font-display);font-weight:600}
+ol.chain{margin:0;padding-left:20px;display:grid;gap:3px;font-size:.88rem;color:var(--fg-2)}
+.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2)}
+.stats b{color:var(--fg);font-weight:500}
+.subs{display:inline-flex;gap:4px;vertical-align:middle}
+.subs i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
+details summary{cursor:pointer;color:var(--fg-2);font-size:.86rem}
+.empty{padding:22px;border:1px dashed var(--line);border-radius:var(--r);color:var(--fg-2);display:grid;gap:6px}
+footer{border-top:1px solid var(--line-soft);padding-block:20px 32px;color:var(--fg-3);font-size:.8rem;display:grid;gap:6px}
+@media (prefers-reduced-motion:no-preference){.fc-detail{animation:open .18s ease-out}@keyframes open{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <a class="brand" href="#uebersicht" aria-label="WorlᗡDriver Startseite">
+        <svg viewBox="0 0 470 84" role="img" aria-hidden="true">
+          <g font-family="Space Grotesk, Inter, Arial, sans-serif" font-size="64" font-weight="700" fill="currentColor">
+            <text x="0" y="62" textLength="146" lengthAdjust="spacingAndGlyphs">Worl</text>
+            <g transform="translate(198 0) scale(-1 1)"><text x="0" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text></g>
+            <text x="202" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text>
+            <text x="250" y="62" textLength="200" lengthAdjust="spacingAndGlyphs">river</text>
+          </g>
+        </svg>
+      </a>
+      <div class="status" id="status"></div>
+    </div>
+    <nav class="tabs" aria-label="Bereiche">
+      <a href="#uebersicht">Übersicht</a>
+      <a href="#prognosen">Prognosen</a>
+      <a href="#tracker">Forecast-Tracker</a>
+      <a href="#weltkarte">Weltkarte</a>
+      <a href="#beziehungen">Wirtschaftsbeziehungen</a>
+      <a href="#daten">Daten</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<footer class="wrap" id="foot"></footer>
+
+<script>
+const D = /*__WORLDDRIVER_DATA__*/null;
+const $ = (s, el = document) => el.querySelector(s);
+const nf = (d) => new Intl.NumberFormat("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+const fmt = (x, d = 2) => x == null || isNaN(x) ? "–" : nf(d).format(x);
+const pct = (x, d = 2, sign = true) => { if (x == null || isNaN(x)) return "–"; const v = Math.abs(x * 100) < 0.5 * 10 ** -d ? 0 : x * 100; return (sign && v > 0 ? "+" : "") + nf(d).format(v) + " %"; };
+const pp = (x, d = 0) => x == null ? "–" : nf(d).format(x * 100) + " %";
+const dateDe = (s) => s ? new Date(s + (s.length === 10 ? "T12:00:00" : "")).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "–";
+const pairName = (p) => p.slice(0, 3) + "/" + p.slice(3);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const HZ = {"1D": "Tag", "1W": "Woche", "1M": "Monat"};
+const HZ_LONG = {"1D": "1 Handelstag", "1W": "5 Handelstage", "1M": "20 Handelstage"};
+const state = {horizon: "1D", ccy: "ALLE", sort: "az", open: null, depCcy: "ALLE", mapSel: "AU"};
+try { const s = JSON.parse(localStorage.getItem("wd-state") || "{}"); Object.assign(state, {horizon: s.horizon || state.horizon, sort: s.sort || state.sort}); } catch (e) {}
+const save = () => { try { localStorage.setItem("wd-state", JSON.stringify({horizon: state.horizon, sort: state.sort})); } catch (e) {} };
+
+function regimeOf(v) { return v == null ? "unbekannt" : v < 15 ? "ruhig" : v <= 25 ? "normal" : "Stress"; }
+
+/* ---------- Bewertung der Modellgüte in Alltagssprache ---------- */
+function horizonVerdict(h) {
+  const b = D.backtest[h]; if (!b || !b.champion) return {cls: "plain", short: "Noch nicht trainiert", text: ""};
+  const m = b.models[b.champion] || {}; const v = m.validation || {}, o = m.holdout || {};
+  const best = Object.entries(b.models).filter(([k]) => k !== "climatology")
+    .map(([k, x]) => [k, (x.validation || {}).bss]).sort((a, c) => (c[1] ?? -9) - (a[1] ?? -9))[0];
+  const bestDir = Object.entries(b.models).filter(([k]) => k === "logreg" || k === "lgbm")
+    .sort((a, c) => ((c[1].validation || {}).bss_vs_volref ?? -9) - ((a[1].validation || {}).bss_vs_volref ?? -9))[0];
+  if (b.champion === "logreg" || b.champion === "lgbm") {
+    return {cls: "good", short: "Richtungsvorteil",
+      text: `${m.label} sagt besser voraus als beide Referenzen (gegenüber der Schwankungs-Referenz ${pct(v.bss_vs_volref, 2)}, Hold-out ab 2022 ${pct(o.bss_vs_volref, 2)}). Trefferquote Richtung ${pp(v.hit_rate, 1)}.`};
+  }
+  if (b.champion === "volref") {
+    return {cls: "info", short: "Vorteil nur bei der Schwankung",
+      text: `Die Schwankungs-Referenz ist besser als die reine Häufigkeit (${pct(v.bss, 2)}): Sie erkennt, ob ein ruhiger oder bewegter Markt zu erwarten ist. Bei der Richtung schlägt kein Modell diese Referenz belastbar (bestes: ${bestDir ? esc(bestDir[1].label) + " mit " + pct((bestDir[1].validation || {}).bss_vs_volref, 2) : "–"}).`};
+  }
+  return {cls: "warn", short: "Kein Modell besser als die Referenz",
+    text: `Kein Modell schlägt die Referenz belastbar (bestes: ${best ? (b.models[best[0]].label) + " mit " + pct(best[1], 2) : "–"}). Angezeigt werden deshalb die historischen Häufigkeiten und die Schwankungsbreite.`};
+}
+
+/* ---------- Kopf und Fuß ---------- */
+function renderChrome() {
+  const vix = D.meta.vix, reg = regimeOf(vix);
+  const pending = D.promotions.filter((p) => p.needs_confirmation).length;
+  $("#status").innerHTML = `
+    <span class="chip"><span class="dot good"></span>Kurse bis ${dateDe(D.meta.as_of)}</span>
+    <span class="chip"><span class="dot ${reg === "Stress" ? "bad" : reg === "normal" ? "warn" : "good"}"></span>VIX ${fmt(vix, 1)} · ${reg}</span>
+    ${pending ? `<a class="chip" href="#uebersicht" style="text-decoration:none"><span class="dot warn"></span>${pending} Freigaben offen</a>` : ""}`;
+  $("#foot").innerHTML = `
+    <div>WorlᗡDriver · Prognose-Engine FOREX NEXUS AI · Version ${esc(D.meta.code_commit)} · erzeugt ${new Date(D.meta.generated_at).toLocaleString("de-DE")}</div>
+    <div>Kursbasis: ${esc(D.meta.price_basis)}. ${esc(D.map.attribution)}.</div>
+    <div>Persönliches Analysewerkzeug. Statistische Prognosen sind keine Anlageberatung und keine Handelssignale.</div>`;
+}
+
+/* ---------- Übersicht ---------- */
+function viewOverview() {
+  const hz = ["1D", "1W", "1M"].map((h) => {
+    const b = D.backtest[h], v = horizonVerdict(h), m = (b.models[b.champion] || {});
+    const val = m.validation || {}, hold = m.holdout || {};
+    return `<article class="panel hz">
+      <div class="panel-head"><h3>${HZ[h]} <span class="faint">· ${HZ_LONG[h]}</span></h3><span class="pill ${v.cls}">${v.short}</span></div>
+      <p class="verdict muted">${v.text}</p>
+      <dl class="kv">
+        <dt>Angezeigtes Modell</dt><dd>${esc(m.label || "–")}</dd>
+        <dt>Trefferquote Richtung</dt><dd class="num">${pp(val.hit_rate, 1)}</dd>
+        <dt>80-%-Intervall traf</dt><dd class="num">${pp(val.coverage_80, 1)}</dd>
+        <dt>Hold-out ab 2022 (BSS)</dt><dd class="num">${pct(hold.bss, 2)}</dd>
+      </dl>
+    </article>`;}).join("");
+  const pend = D.promotions.filter((p) => p.needs_confirmation);
+  const explain = D.dependencies.filter((d) => ["erklärend", "vorauslaufend"].includes(d.verdict));
+  return `<section class="view">
+    <div class="lede"><h1>Prognosen für 8 Währungen, ehrlich gemessen</h1>
+      <p>USD, EUR, JPY, GBP, CHF, CAD, AUD und NZD mit ihren 28 Paaren – für den nächsten Tag, die nächste Woche und den nächsten Monat. Jede Prognose wird unveränderlich gespeichert und später gegen die tatsächliche Entwicklung geprüft.</p></div>
+    <div class="grid-3">${hz}</div>
+    <div class="grid-2">
+      <article class="panel">
+        <div class="panel-head"><h2>Währungsstärke</h2>
+          <div class="seg" role="group" aria-label="Zeitraum">
+            ${[["chg_5d", "5 T"], ["chg_20d", "20 T"], ["chg_60d", "60 T"]].map(([k, l]) => `<button type="button" data-sk="${k}" aria-pressed="${(state.sk || "chg_20d") === k}">${l}</button>`).join("")}
+          </div></div>
+        <p class="faint" style="font-size:.8rem;margin-bottom:8px">Veränderung jeder Währung gegen den Korb der anderen sieben, in Prozent.</p>
+        <div class="strength" id="strength"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><h2>Deine Entscheidungen</h2><span class="pill ${pend.length ? "warn" : "good"}">${pend.length ? pend.length + " offen" : "nichts offen"}</span></div>
+        <div style="display:grid;gap:12px">
+          ${pend.length ? `<div class="note"><b>Modelle bestätigen:</b> Zur Inbetriebnahme wurden die Testsieger eingesetzt – ${pend.map((p) => `${HZ[p.horizon]}: ${esc(p.model)}`).join(", ")}. Sie laufen, bis du sie bestätigst oder änderst. <a href="#tracker">Ergebnisse ansehen</a></div>` : ""}
+          <div class="note"><b>${explain.length} Wirtschaftsbeziehungen</b> sind statistisch als gleichzeitiger Zusammenhang belegt und warten auf deine Prüfung. Keine davon hat bisher einen nachweisbaren Vorlauf. <a href="#beziehungen">Ansehen</a></div>
+          <div class="note"><b>Deine 6 A+-Kriterien</b> fehlen noch. Die Regel-Engine ist vorbereitet und bleibt streng getrennt von den Prognosen.</div>
+        </div>
+      </article>
+    </div>
+  </section>`;
+}
+function renderStrength() {
+  const k = state.sk || "chg_20d";
+  const rows = Object.entries(D.strength).map(([c, s]) => [c, s[k], s.series]).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(...rows.map((r) => Math.abs(r[1] || 0)), 0.5);
+  $("#strength").innerHTML = rows.map(([c, v, series]) => {
+    const w = Math.abs(v) / max * 50, left = v >= 0 ? 50 : 50 - w;
+    return `<div class="srow"><span class="ccy">${c}</span>
+      <div class="sbar" role="img" aria-label="${c} ${pct(v / 100, 2)}"><span class="axis"></span><span class="fill" style="left:${left}%;width:${w}%;background:${v >= 0 ? "var(--bull)" : "var(--bear)"}"></span></div>
+      <span class="num" style="text-align:right">${v > 0 ? "+" : ""}${fmt(v, 2)} %</span>${spark(series, 96, 26)}</div>`;}).join("");
+  document.querySelectorAll("[data-sk]").forEach((b) => b.onclick = () => { state.sk = b.dataset.sk; document.querySelectorAll("[data-sk]").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderStrength(); });
+}
+function spark(vals, w, h) {
+  const v = vals.filter((x) => x != null); if (v.length < 2) return "";
+  const mn = Math.min(...v), mx = Math.max(...v), sy = (x) => h - 3 - (x - mn) / ((mx - mn) || 1) * (h - 6);
+  const d = v.map((x, i) => (i ? "L" : "M") + (i / (v.length - 1) * (w - 4) + 2).toFixed(1) + "," + sy(x).toFixed(1)).join("");
+  const end = v[v.length - 1] >= v[0];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${end ? "var(--bull)" : "var(--bear)"}" stroke-width="1.6"/><circle cx="${w - 2}" cy="${sy(v[v.length - 1])}" r="2.4" fill="${end ? "var(--bull)" : "var(--bear)"}"/></svg>`;
+}
+
+/* ---------- Prognosen ---------- */
+function viewForecasts() {
+  const ccys = ["ALLE", ...D.majors];
+  return `<section class="view">
+    <div class="lede"><h1>Prognosen</h1>
+      <p>Wahrscheinlichkeit für fallend, seitwärts und steigend, das 80-%-Prognoseintervall und die Konfidenz – je Horizont aus einem eigenen Modell. Tippe ein Paar an für Einflussfaktoren, Ungültigkeitsbedingungen und Modellgüte.</p></div>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Horizont">${Object.keys(HZ).map((h) => `<button type="button" data-hz="${h}" aria-pressed="${state.horizon === h}">${HZ[h]}</button>`).join("")}</div>
+      <label class="faint" style="font-size:.84rem">Sortieren <select id="sort">
+        <option value="az">Paar A–Z</option><option value="bull">Wahrscheinlichkeit steigend</option>
+        <option value="bear">Wahrscheinlichkeit fallend</option><option value="vol">Größte Schwankungsbreite</option></select></label>
+    </div>
+    <div class="chips" role="group" aria-label="Währung">${ccys.map((c) => `<button type="button" data-ccy="${c}" aria-pressed="${state.ccy === c}">${c === "ALLE" ? "Alle 28" : c}</button>`).join("")}</div>
+    <div class="note" id="hz-note"></div>
+    <div class="fc-list" id="fc-list"></div>
+  </section>`;
+}
+function bindForecasts() {
+  document.querySelectorAll("[data-hz]").forEach((b) => b.onclick = () => { state.horizon = b.dataset.hz; state.open = null; save(); route(); });
+  document.querySelectorAll("[data-ccy]").forEach((b) => b.onclick = () => { state.ccy = b.dataset.ccy; route(); });
+  const s = $("#sort"); s.value = state.sort; s.onchange = () => { state.sort = s.value; save(); renderList(); };
+  const v = horizonVerdict(state.horizon);
+  $("#hz-note").innerHTML = `<b>${HZ[state.horizon]}:</b> ${v.text}`;
+  renderList();
+}
+function renderList() {
+  let rows = D.forecasts.filter((f) => f.horizon === state.horizon && (state.ccy === "ALLE" || f.pair.includes(state.ccy)));
+  const key = {az: (f) => f.pair, bull: (f) => -f.p_bull, bear: (f) => -f.p_bear, vol: (f) => -(f.quantiles.q90 - f.quantiles.q10)}[state.sort];
+  rows.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
+  if (!rows.length) { $("#fc-list").innerHTML = `<div class="empty"><b>Keine Prognosen für diese Auswahl.</b><span>Prognosen entstehen täglich nach Kursschluss.</span></div>`; return; }
+  $("#fc-list").innerHTML = rows.map((f) => {
+    const q = f.quantiles, open = state.open === f.pair;
+    const cls = f.confidence_label === "hoch" ? "good" : f.confidence_label === "mittel" ? "info" : "plain";
+    return `<article class="fc"><button type="button" data-open="${f.pair}" aria-expanded="${open}">
+      <div class="c-pair"><div class="pair">${pairName(f.pair)}</div><div class="price num">${fmt(f.price, f.pair.endsWith("JPY") ? 3 : 5)}</div></div>
+      <div class="c-bar">${probBar(f)}</div>
+      <div class="c-int interval num">${pct(q.q10)} … ${pct(q.q90)}<small>80-%-Intervall bis ${dateDe(f.target_date)}</small></div>
+      <span class="conf pill ${cls}">Konfidenz ${f.confidence_label}</span>
+    </button>${open ? detail(f) : ""}</article>`;}).join("");
+  document.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => { state.open = state.open === b.dataset.open ? null : b.dataset.open; renderList(); });
+}
+function probBar(f) {
+  const s = (p, c, t) => `<span class="${c}" style="width:${(p * 100).toFixed(1)}%" title="${t} ${pp(p, 0)}">${p >= 0.16 ? pp(p, 0) : ""}</span>`;
+  return `<div class="probbar" role="img" aria-label="fallend ${pp(f.p_bear)}, seitwärts ${pp(f.p_neutral)}, steigend ${pp(f.p_bull)}">${s(f.p_bear, "b", "fallend")}${s(f.p_neutral, "n", "seitwärts")}${s(f.p_bull, "u", "steigend")}</div>
+    <div class="probmeta"><span>fallend</span><span>seitwärts</span><span>steigend</span></div>`;
+}
+function detail(f) {
+  const b = D.backtest[f.horizon], m = (b.models[f.model] || {}), v = m.validation || {};
+  const cur = (m.currency || {});
+  const maxc = Math.max(...f.drivers.map((d) => Math.abs(d.contribution)), 0.01);
+  const dirTxt = f.direction > 0 ? "leicht steigend" : f.direction < 0 ? "leicht fallend" : "keine klare Richtung";
+  const er = f.expected_return === 0 ? `<b>0,00 %</b> <span class="faint">– keine verlässliche Renditeprognose (Out-of-Sample nicht besser als 0)</span>` : `<b>${pct(f.expected_return)}</b>`;
+  const range = f.range_high == null ? `<span class="faint">Für den Tageshorizont folgt die Handelsspanne mit den Hoch-/Tiefkursen (Dukascopy).</span>`
+    : `<b class="num">${pct(f.range_low)} … ${pct(f.range_high)}</b> <span class="faint">(typische Spanne der Schlusskurse bis zum Zieldatum)</span>`;
+  return `<div class="fc-detail">
+    <div class="grid-2">
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="label">Kurs der letzten 12 Monate und Prognosefächer</div>
+        ${fanChart(f)}
+        <div class="legend"><span><i style="background:var(--accent)"></i>Kurs</span><span><i style="background:color-mix(in srgb,var(--accent) 45%,transparent);height:8px"></i>80-%-Intervall</span><span><i style="background:color-mix(in srgb,var(--accent) 20%,transparent);height:8px"></i>90-%-Intervall</span></div>
+      </div>
+      <dl class="kv" style="align-content:start">
+        <dt>Erwartete Richtung</dt><dd>${dirTxt}</dd>
+        <dt>Erwartete Veränderung</dt><dd>${er}</dd>
+        <dt>90-%-Intervall</dt><dd class="num">${pct(f.quantiles.q05)} … ${pct(f.quantiles.q95)}</dd>
+        <dt>Handelsspanne</dt><dd>${range}</dd>
+        <dt>Erwartete Schwankung (1σ)</dt><dd class="num">${pct(f.expected_vol, 2, false)}</dd>
+        <dt>Seitwärts bedeutet</dt><dd class="num">± ${pct(f.expected_vol * 0.5, 2, false)}</dd>
+        <dt>Vergleich zur Vorprognose</dt><dd>${f.change_p_bull == null ? '<span class="faint">erste Prognose</span>' : `steigend ${pct(f.change_p_bull, 1)}, fallend ${pct(f.change_p_bear, 1)}`}</dd>
+        <dt>Marktregime</dt><dd>${esc(f.regime || "–")}</dd>
+      </dl>
+    </div>
+    <div class="grid-2">
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="label">Wichtigste Einflussfaktoren</div>
+        <div class="drivers">${f.drivers.map((d) => { const w = Math.abs(d.contribution) / maxc * 50; return `<div class="drv"><span>${esc(d.label)}<br><span class="faint" style="font-size:.78rem">${d.contribution > 0 ? "spricht für steigend" : "spricht für fallend"}</span></span>
+          <div class="drv-bar" role="img" aria-label="${esc(d.label)}"><span class="mid"></span><i style="left:${d.contribution >= 0 ? 50 : 50 - w}%;width:${w}%;background:${d.contribution >= 0 ? "var(--bull)" : "var(--bear)"}"></i></div></div>`; }).join("") || '<span class="faint">Das Referenzmodell nutzt keine Einflussfaktoren.</span>'}</div>
+        <p class="faint" style="font-size:.8rem">Beiträge aus dem logistischen Modell. Bei der Referenz zeigen sie, wohin die Faktoren zeigen würden – ohne dass das Modell sie nutzt.</p>
+      </div>
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="label">Die Prognose wird ungültig, wenn</div>
+        <ul class="plain">${(f.invalidation || []).map((r) => `<li>${r.rule === "kursbewegung" && r.threshold_log != null ? `Kurs bewegt sich mehr als ${pct(r.threshold_log, 2, false)} gegen die erwartete Richtung` : esc(r.text_de)}</li>`).join("")}</ul>
+        <div class="label" style="margin-top:6px">Modell und Güte (${HZ[f.horizon]})</div>
+        <dl class="kv">
+          <dt>Modell</dt><dd>${esc(f.model_label)} <span class="faint">${esc(f.version)}</span></dd>
+          <dt>Brier Skill Score 2006–2021</dt><dd class="num">${pct(v.bss, 2)}</dd>
+          <dt>Trefferquote Richtung</dt><dd class="num">${pp(v.hit_rate, 1)}</dd>
+          <dt>80-%-Intervall traf</dt><dd class="num">${pp(v.coverage_80, 1)}</dd>
+          <dt>Wahrscheinlichkeiten</dt><dd>${f.calibrated ? '<span class="pill good">validiert</span>' : '<span class="pill plain">Referenzwerte</span>'}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>`;
+}
+function fanChart(f) {
+  const series = (D.prices[f.pair] || []).map((r) => r[1]);
+  const W = Math.max(320, Math.min(560, innerWidth - 64)), H = 190, padL = 46, padR = 54, padT = 10, padB = 22, n = series.length;
+  const q = f.quantiles, p0 = f.price;
+  const lv = (x) => p0 * Math.exp(x);
+  const ext = [q.q05, q.q95].map(lv);
+  const all = series.concat(ext);
+  const mn = Math.min(...all), mx = Math.max(...all), pad = (mx - mn) * 0.06;
+  const y = (v) => padT + (1 - (v - mn + pad) / (mx - mn + 2 * pad)) * (H - padT - padB);
+  const plotW = W - padL - padR, xEnd = padL + plotW * 0.86, x = (i) => padL + i / (n - 1) * (xEnd - padL);
+  const d = series.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1)).join("");
+  const xF = W - padR, yp = y(p0);
+  const fan = (a, b) => `M${xEnd},${yp}L${xF},${y(lv(q[b])).toFixed(1)}L${xF},${y(lv(q[a])).toFixed(1)}Z`;
+  const dec = f.pair.endsWith("JPY") ? 2 : 4;
+  const ticks = [mn, (mn + mx) / 2, mx];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Kursverlauf ${pairName(f.pair)} mit Prognosefächer">
+    ${ticks.map((t) => `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line-soft)"/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t, dec)}</text>`).join("")}
+    <path d="${fan("q05", "q95")}" fill="color-mix(in srgb,var(--accent) 20%,transparent)"/>
+    <path d="${fan("q10", "q90")}" fill="color-mix(in srgb,var(--accent) 45%,transparent)"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+    <circle cx="${xEnd}" cy="${yp}" r="3.2" fill="var(--accent)"/>
+    <text x="${xF + 4}" y="${y(lv(q.q90)) + 4}">${fmt(lv(q.q90), dec)}</text>
+    <text x="${xF + 4}" y="${y(lv(q.q10)) + 4}">${fmt(lv(q.q10), dec)}</text>
+    <text x="${padL}" y="${H - 4}">${dateDe((D.prices[f.pair][0] || [])[0])}</text>
+    ${xF - xEnd > 80 ? `<text x="${xEnd}" y="${H - 4}" text-anchor="middle">${dateDe(f.as_of)}</text>` : ""}
+    <text x="${xF}" y="${H - 4}" text-anchor="end">${dateDe(f.target_date)}</text>
+  </svg>`;
+}
+
+/* ---------- Tracker ---------- */
+function viewTracker() {
+  const L = D.ledger;
+  const due = Object.entries(L.next_due || {}).sort();
+  const live = L.monthly || [];
+  return `<section class="view">
+    <div class="lede"><h1>Forecast-Tracker</h1>
+      <p>Jede Prognose wird mit Zeitstempel und den damals verfügbaren Daten unveränderlich gespeichert. Nach Ablauf des Horizonts vergleicht das System Prognose und tatsächliche Entwicklung. So siehst du, ob das System wirklich besser wird.</p></div>
+    <div class="panel kpis">
+      <div class="kpi"><span class="label">Prognosen im Ledger</span><b class="num">${nf(0).format(L.forecasts)}</b><span class="faint" style="font-size:.8rem">davon ${nf(0).format(L.shadow)} im Schattenbetrieb</span></div>
+      <div class="kpi"><span class="label">Ausgewertet</span><b class="num">${nf(0).format(L.evaluated)}</b><span class="faint" style="font-size:.8rem">Live-Bilanz seit ${dateDe((L.first_run || "").slice(0, 10))}</span></div>
+      <div class="kpi"><span class="label">Prognoseläufe</span><b class="num">${L.runs}</b><span class="faint" style="font-size:.8rem">ein Lauf pro Handelstag</span></div>
+      <div class="kpi"><span class="label">Nächste Auswertung</span><b class="num" style="font-size:1.1rem">${due.length ? dateDe(due.map((x) => x[1]).sort()[0]) : "–"}</b><span class="faint" style="font-size:.8rem">${due.sort((a, b) => a[1] < b[1] ? -1 : 1).map(([h, d]) => HZ[h] + " " + dateDe(d)).join(" · ")}${due.some(([, d]) => d <= D.meta.generated_at.slice(0, 10)) ? " · fällig, wartet auf neue Kurse" : ""}</span></div>
+    </div>
+    <article class="panel">
+      <div class="panel-head"><h2>Live-Bilanz</h2><span class="pill ${live.length ? "info" : "plain"}">${live.length ? "läuft" : "beginnt"}</span></div>
+      ${live.length ? liveTable(live) : `<div class="empty"><b>Noch keine Prognose ist fällig.</b><span>Die erste Tagesprognose ist für den ${dateDe((L.next_due || {})["1D"])} fällig und wird ausgewertet, sobald der Kurs dieses Tages vorliegt (FRED liefert wöchentlich), die erste Monatsprognose am ${dateDe((L.next_due || {})["1M"])}. Bis dahin zeigt der Backtest unten, wie die Modelle in der Vergangenheit abgeschnitten hätten.</span></div>`}
+    </article>
+    <article class="panel">
+      <div class="panel-head"><h2>Wird das System besser? Backtest 2006 bis heute</h2>
+        <div class="seg" role="group" aria-label="Horizont">${Object.keys(HZ).map((h) => `<button type="button" data-thz="${h}" aria-pressed="${state.horizon === h}">${HZ[h]}</button>`).join("")}</div></div>
+      <p class="muted" style="font-size:.88rem;margin-bottom:10px">Brier Skill Score je Jahr: über 0 % ist das Modell besser als die Referenz (historische Häufigkeit), darunter schlechter. Die Schwankungs-Referenz kennt nur die Marktschwankung; ein echter Richtungsvorteil zeigt sich erst, wenn ein Modell auch über ihr liegt. Jedes Jahr wurde mit Modellen vorhergesagt, die dieses Jahr nie gesehen haben (Walk-Forward). Ab 2022 schattiert: Hold-out-Zeitraum, der bei der Modellauswahl verschlossen blieb.</p>
+      <div id="yearly"></div>
+    </article>
+    <article class="panel"><div class="panel-head"><h2>Modelle im Vergleich</h2></div><div class="tbl-wrap" id="cmp"></div></article>
+    <div class="grid-2">
+      <article class="panel"><div class="panel-head"><h2>Je Währung</h2><span class="faint" style="font-size:.8rem">angezeigtes Modell, Backtest</span></div><div class="tbl-wrap" id="byccy"></div></article>
+      <article class="panel"><div class="panel-head"><h2>Je Marktregime</h2><span class="faint" style="font-size:.8rem">nach VIX des Vortags</span></div><div class="tbl-wrap" id="byreg"></div></article>
+    </div>
+  </section>`;
+}
+function liveTable(rows) {
+  return `<div class="tbl-wrap"><table><thead><tr><th>Monat</th><th>Horizont</th><th>Modell</th><th class="num">n</th><th class="num">Brier</th><th class="num">Treffer</th><th class="num">80-%-Int.</th></tr></thead><tbody>
+    ${rows.map((r) => `<tr><td>${esc(r.month.slice(0, 7))}</td><td>${HZ[r.horizon]}</td><td>${esc(r.model)}</td><td class="num">${r.n}</td><td class="num">${fmt(r.brier, 3)}</td><td class="num">${pp(r.hit_rate, 1)}</td><td class="num">${pp(r.coverage_80, 1)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+const MODEL_COLORS = {logreg: "var(--accent)", lgbm: "#c76bd6", volref: "#4fc1c9", climatology: "var(--fg-3)"};
+const SHORT = {logreg: "Log. Regr.", lgbm: "LightGBM", volref: "Schwankung"};
+function bindTracker() {
+  document.querySelectorAll("[data-thz]").forEach((b) => b.onclick = () => { state.horizon = b.dataset.thz; save(); document.querySelectorAll("[data-thz]").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderTracker(); });
+  renderTracker();
+}
+function renderTracker() {
+  const b = D.backtest[state.horizon];
+  const ser = Object.entries(b.yearly).filter(([m]) => m !== "climatology");
+  const years = [...new Set(ser.flatMap(([, v]) => v.map((r) => r[0])))].sort();
+  const vals = ser.flatMap(([, v]) => v.map((r) => r[1]));
+  const W = Math.max(340, Math.min(720, ($("#yearly").clientWidth || 640))), H = W < 500 ? 240 : 220, pl = 46, pr = 70, pt = 12, pb = 24;
+  const lim = Math.max(0.01, ...vals.map(Math.abs)) * 1.15;
+  const x = (yr) => pl + (yr - years[0]) / Math.max(1, years[years.length - 1] - years[0]) * (W - pl - pr);
+  const y = (v) => pt + (1 - (v + lim) / (2 * lim)) * (H - pt - pb);
+  const ticks = [-lim * 0.8, -lim * 0.4, 0, lim * 0.4, lim * 0.8];
+  const holdX = x(2021.5);
+  const lines = ser.map(([m, v]) => {
+    const d = v.map((r, i) => (i ? "L" : "M") + x(r[0]).toFixed(1) + "," + y(r[1]).toFixed(1)).join("");
+    const last = v[v.length - 1];
+    return {m, v, last, svg: `<path d="${d}" fill="none" stroke="${MODEL_COLORS[m]}" stroke-width="2"/>${v.map((r) => `<circle cx="${x(r[0])}" cy="${y(r[1])}" r="3" fill="${MODEL_COLORS[m]}" stroke="var(--surface)" stroke-width="1.5"><title>${b.models[m].label} ${r[0]}: ${pct(r[1], 2)}</title></circle>`).join("")}
+`};
+  });
+  // Endbeschriftungen ohne Überlappung (mindestens 13 Einheiten Abstand)
+  const ends = lines.map((l) => ({...l, ly: y(l.last[1]) + 4})).sort((a, b) => a.ly - b.ly);
+  for (let i = 1; i < ends.length; i++) if (ends[i].ly - ends[i - 1].ly < 13) ends[i].ly = ends[i - 1].ly + 13;
+  const linesSvg = ends.map((l) => l.svg + `<text x="${x(l.last[0]) + 8}" y="${l.ly}" style="fill:var(--fg-2)">${SHORT[l.m] || l.m}</text>`).join("");
+  $("#yearly").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Brier Skill Score je Jahr">
+    <rect x="${holdX}" y="${pt}" width="${W - pr - holdX}" height="${H - pt - pb}" fill="color-mix(in srgb,var(--accent) 7%,transparent)"/>
+    <text x="${holdX + 4}" y="${pt + 12}">Hold-out</text>
+    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line-soft)"/><text x="${pl - 6}" y="${y(t) + 4}" text-anchor="end">${pct(t, 1)}</text>`).join("")}
+    <line x1="${pl}" x2="${W - pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--fg-3)" stroke-dasharray="4 3"/>
+    <text x="${W - pr + 8}" y="${y(0) + 4}">Referenz</text>
+    ${years.filter((yr, i) => i % (W < 500 ? 5 : 3) === 0 || yr === years[years.length - 1]).map((yr) => `<text x="${x(yr)}" y="${H - 6}" text-anchor="middle">${yr}</text>`).join("")}
+    ${linesSvg}</svg>
+    <div class="legend">${ser.map(([m]) => `<span><i style="background:${MODEL_COLORS[m]}"></i>${b.models[m].label}</span>`).join("")}<span><i style="background:var(--fg-3)"></i>Referenz = 0 %</span></div>`;
+  const keys = [["bss", "BSS", 2, "pct"], ["bss_vs_volref", "ggü. Schwankungs-Ref.", 2, "pct"], ["bss_ci_low", "BSS untere 95-%-Grenze", 2, "pct"], ["hit_rate", "Trefferquote", 1, "pp"], ["coverage_80", "80-%-Intervall", 1, "pp"], ["ece", "Kalibrierungsfehler", 3, "n"]];
+  const cell = (val, k) => k[3] === "pct" ? pct(val, k[2]) : k[3] === "pp" ? pp(val, k[2]) : fmt(val, k[2]);
+  $("#cmp").innerHTML = `<table><thead><tr><th>Modell (${HZ[state.horizon]})</th><th>Zeitraum</th>${keys.map((k) => `<th class="num">${k[1]}</th>`).join("")}</tr></thead><tbody>
+    ${Object.entries(b.models).flatMap(([m, x]) => [["2006–2021", x.validation], ["Hold-out ab 2022", x.holdout]].map(([lab, s], i) => `<tr><td>${i ? "" : esc(x.label) + (b.champion === m ? ' <span class="pill info">angezeigt</span>' : "")}</td><td class="faint">${lab}</td>${keys.map((k) => `<td class="num">${cell((s || {})[k[0]], k)}</td>`).join("")}</tr>`)).join("")}</tbody></table>`;
+  const seg = (obj) => `<table><thead><tr><th></th><th class="num">BSS</th><th class="num">Treffer</th><th class="num">80-%-Int.</th><th class="num">n</th></tr></thead><tbody>
+    ${Object.entries(obj || {}).map(([k, s]) => `<tr><td>${esc(k)}</td><td class="num">${pct(s.bss, 2)}</td><td class="num">${pp(s.hit_rate, 1)}</td><td class="num">${pp(s.coverage_80, 1)}</td><td class="num">${nf(0).format(s.n || 0)}</td></tr>`).join("")}</tbody></table>`;
+  const model = (b.champion === "climatology" || b.champion === "volref") ? "logreg" : b.champion;
+  $("#byccy").innerHTML = seg(b.currency[model]) + `<p class="faint" style="font-size:.78rem;margin-top:6px">${esc(b.models[model].label)}; Paare, die die Währung enthalten.</p>`;
+  $("#byreg").innerHTML = seg(b.regime[model]);
+}
+
+/* ---------- Weltkarte ---------- */
+const FLOWS = [
+  {from: "AU", to: "CN", label: "Eisenerz, Kohle", dep: ["AUD", "metals:iron_ore"], t: 0.62},
+  {from: "NZ", to: "CN", label: "Milch, Holz", dep: ["NZD", "agriculture:logs"]},
+  {from: "CA", to: "US", label: "Öl", dep: ["CAD", "energy:oil_wti"]},
+  {from: "AU", to: "JP", label: "LNG", dep: ["AUD", "energy:lng_asia"], t: 0.3},
+  {from: "US", to: "EA", label: "LNG", dep: ["EUR", "energy:natgas_eu"]},
+  {from: "EA", to: "CN", label: "Maschinen, Autos", dep: ["EUR", "industry:china_activity"]},
+];
+const MAP_VIEWS = {welt: {label: "Welt", box: [0, 15, 1000, 430]}, europa: {label: "Europa", box: [450, 28, 140, 92]},
+  asien: {label: "Asien-Pazifik", box: [700, 60, 290, 360]}, amerika: {label: "Amerika", box: [110, 15, 300, 170]}};
+const LABEL_POS = {GB: [-1, -0.6], CH: [0.6, 1.6], EA: [1, -0.4], CN: [-1, -0.8], JP: [1, 0.2]};
+if (!state.mapView) state.mapView = innerWidth < 700 ? "asien" : "welt";
+const VERDICT_STYLE = {"vorauslaufend": ["good", "var(--good)"], "erklärend": ["info", "var(--accent)"], "schwächer werdend": ["warn", "var(--warn)"],
+  "instabil": ["warn", "var(--warn)"], "gegenteilig": ["bad", "var(--bad)"], "nicht belegt": ["plain", "var(--fg-3)"], "keine Daten": ["dashed", "var(--fg-3)"], "nicht geprüft": ["plain", "var(--fg-3)"]};
+const depOf = (ccy, key) => D.dependencies.find((d) => d.currency === ccy && d.driver_key === key);
+function viewMap() {
+  return `<section class="view">
+    <div class="lede"><h1>Weltkarte der Abhängigkeiten</h1>
+      <p>Wichtige Handelsströme der acht Währungsräume. Die Farbe einer Linie zeigt, ob der zugehörige Zusammenhang in den Daten belegt ist. Tippe auf eine Währung.</p></div>
+    <div class="seg" role="group" aria-label="Ausschnitt">${Object.entries(MAP_VIEWS).map(([k, v]) => `<button type="button" data-mv="${k}" aria-pressed="${state.mapView === k}">${v.label}</button>`).join("")}</div>
+    <article class="panel map-wrap" id="map"></article>
+    <div class="legend">${Object.entries(VERDICT_STYLE).filter(([k]) => k !== "nicht geprüft").map(([k, [, c]]) => `<span><i style="background:${c}"></i>${k}</span>`).join("")}</div>
+    <article class="panel" id="map-detail"></article>
+  </section>`;
+}
+const bez = (p0, p1, p2, t) => (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
+function bindMap() {
+  const M = D.map, eco = M.economies;
+  const iso = new Set(Object.values(eco).flatMap((e) => e.iso));
+  const selIso = new Set((eco[state.mapSel] || {}).iso || []);
+  const box = MAP_VIEWS[state.mapView].box;
+  const k = box[2] / Math.max(320, ($("#map").clientWidth || 360) - 32);   // Bildschirmpixel -> Kartenkoordinaten
+  const paths = Object.entries(M.countries).map(([id, d]) => `<path class="land${iso.has(id) ? " eco" : ""}${selIso.has(id) ? " sel" : ""}" d="${d}" style="stroke-width:${0.6 * k}"/>`).join("");
+  const flows = FLOWS.map((f) => {
+    const a = eco[f.from].xy, b = eco[f.to].xy, dep = depOf(...f.dep), col = (VERDICT_STYLE[dep ? dep.verdict : "nicht geprüft"] || VERDICT_STYLE["nicht geprüft"])[1];
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.22;
+    return `<path class="flow" d="M${a[0]},${a[1]}Q${mx},${my} ${b[0]},${b[1]}" stroke="${col}" style="stroke-width:${2 * k}" ${dep && dep.verdict === "keine Daten" ? `stroke-dasharray="${5 * k} ${4 * k}"` : ""}/>
+      <text class="flowlabel" x="${bez(a[0], mx, b[0], f.t ?? 0.5)}" y="${bez(a[1], my, b[1], f.t ?? 0.5) - 5 * k}" text-anchor="middle" style="font-size:${11 * k}px;stroke-width:${3 * k}px">${esc(f.label)}</text>`;
+  }).join("");
+  const markers = Object.entries(eco).map(([c, e]) => { const [dx, dy] = LABEL_POS[c] || [1, 0.3];
+    return `<g class="marker${state.mapSel === c ? " sel" : ""}" data-eco="${c}" tabindex="0" role="button" aria-label="${esc(e.label)}">
+      <circle class="hit" cx="${e.xy[0]}" cy="${e.xy[1]}" r="${12 * k}"/>
+      <circle cx="${e.xy[0]}" cy="${e.xy[1]}" r="${5.5 * k}" style="stroke-width:${1.8 * k}"/>
+      <text x="${e.xy[0] + dx * 9 * k}" y="${e.xy[1] + dy * 10 * k + 4 * k}" text-anchor="${dx < 0 ? "end" : dx === 0.6 ? "middle" : "start"}" style="font-size:${13 * k}px;stroke-width:${3.5 * k}px">${esc(e.label)}</text></g>`; }).join("");
+  $("#map").innerHTML = `<svg class="map" viewBox="${box.join(" ")}" role="img" aria-label="Weltkarte, Ausschnitt ${MAP_VIEWS[state.mapView].label}">${paths}${flows}${markers}</svg>`;
+  document.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => { state.mapView = b.dataset.mv; document.querySelectorAll("[data-mv]").forEach((x) => x.setAttribute("aria-pressed", x === b)); bindMap(); });
+  document.querySelectorAll("[data-eco]").forEach((g) => { const go = () => { state.mapSel = g.dataset.eco; bindMap(); }; g.onclick = go; g.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") go(); }; });
+  const e = D.economies.find((x) => x.code === state.mapSel) || {};
+  const deps = D.dependencies.filter((d) => d.currency === e.currency);
+  $("#map-detail").innerHTML = `<div class="panel-head"><h2>${esc(e.name || "")} ${e.currency ? `<span class="faint">· ${e.currency}</span>` : ""}</h2></div>
+    <p class="muted" style="margin-bottom:12px">${esc(e.notes || "")}</p>
+    ${deps.length ? `<div style="display:grid;gap:8px">${deps.map((d) => `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line-soft);padding-bottom:8px"><span>${esc(d.driver)} <span class="faint">→ ${d.currency} ${d.expected_sign > 0 ? "▲" : d.expected_sign < 0 ? "▼" : "?"}</span></span><span class="pill ${(VERDICT_STYLE[d.verdict] || ["plain"])[0]}">${esc(d.verdict)}</span></div>`).join("")}</div>` : `<p class="faint">China ist hier als Handelspartner erfasst und keine der acht Währungen.</p>`}
+    ${e.currency ? `<p style="margin-top:12px"><a href="#beziehungen" data-goto="${e.currency}">Alle Details zu ${e.currency}</a></p>` : ""}`;
+  const g = $("[data-goto]"); if (g) g.onclick = () => { state.depCcy = g.dataset.goto; };
+}
+
+/* ---------- Wirtschaftsbeziehungen ---------- */
+function viewDeps() {
+  const counts = {}; D.dependencies.forEach((d) => counts[d.verdict] = (counts[d.verdict] || 0) + 1);
+  return `<section class="view">
+    <div class="lede"><h1>Wirtschaftsbeziehungen</h1>
+      <p>Welche Rohstoffe und Faktoren beeinflussen welche Währung? Jede Beziehung startet als Hypothese und wird mit Daten seit 1999 geprüft: gleichzeitig (erklärt Bewegungen) und mit Vorlauf (sagt Bewegungen voraus). Als validiert gilt eine Beziehung erst, wenn du sie freigibst.</p></div>
+    <div class="chips">${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="pill ${(VERDICT_STYLE[k] || ["plain"])[0]}">${n} ${esc(k)}</span>`).join("")}</div>
+    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-dccy="${c}" aria-pressed="${state.depCcy === c}">${c === "ALLE" ? "Alle" : c}</button>`).join("")}</div>
+    <div class="deps" id="deps"></div>
+  </section>`;
+}
+function bindDeps() {
+  document.querySelectorAll("[data-dccy]").forEach((b) => b.onclick = () => { state.depCcy = b.dataset.dccy; route(); });
+  const rows = D.dependencies.filter((d) => state.depCcy === "ALLE" || d.currency === state.depCcy);
+  $("#deps").innerHTML = rows.map((d) => {
+    const st = VERDICT_STYLE[d.verdict] || ["plain"];
+    const c = d.contemporaneous, p = d.predictive;
+    const subs = (d.subperiods || []).map((s) => s ? `<i title="${s.from}–${s.to}: β ${fmt(s.beta, 2)}, p ${fmt(s.p, 3)}" style="background:${s.p < 0.1 ? (Math.sign(s.beta) === Math.sign(c ? c.beta : 0) ? "var(--accent)" : "var(--bear)") : "transparent"}"></i>` : "<i></i>").join("");
+    return `<article class="panel dep">
+      <div class="dep-head"><div><div class="dep-title">${esc(d.driver)} → ${d.currency}</div>
+        <div class="faint" style="font-size:.8rem">erwartet: ${d.expected_sign > 0 ? "steigt der Treiber, wird " + d.currency + " stärker" : d.expected_sign < 0 ? "steigt der Treiber, wird " + d.currency + " schwächer" : "Richtung unklar oder wechselnd"}</div></div>
+        <span class="pill ${st[0]}">${esc(d.verdict)}</span></div>
+      <p style="font-size:.92rem">${esc(d.mechanism)}</p>
+      <p class="note">${esc(d.verdict_text)}</p>
+      ${c ? `<div class="stats"><span>Beta <b class="num">${fmt(c.beta, 3)}</b></span><span>p <b class="num">${fmt(c.p, 3)}</b></span><span>erklärt <b class="num">${pp(c.r2, 1)}</b> der Monatsbewegung</span>
+        <span>Teilperioden <span class="subs" aria-label="2000–08, 2009–15, ab 2016">${subs}</span></span>
+        ${p ? `<span>Vorlauf ${p.lead_months} M: OOS-R² <b class="num">${pct((p.oos || {}).r2, 1)}</b></span>` : ""}</div>` : ""}
+      <details><summary>Wirkungskette und Bedingungen</summary>
+        <ol class="chain" style="margin-top:8px">${(d.chain || []).map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+        ${d.conditions ? `<p class="faint" style="font-size:.84rem;margin-top:8px">${esc(d.conditions)}</p>` : ""}
+      </details>
+      <div class="faint" style="font-size:.78rem">Status: ${d.status === "hypothesis" ? "Hypothese – Freigabe durch dich" : esc(d.status)}</div>
+    </article>`;}).join("");
+}
+
+/* ---------- Daten ---------- */
+function viewData() {
+  const q = D.quality;
+  const label = {gap: "Lücken", spike: "Verdacht auf Datenfehler", extreme_move: "Extreme Marktbewegungen (echt)", source_mismatch: "Abweichung FRED/EZB", stale: "Veraltete Daten", source_revision: "Nachträglich geänderte Werte"};
+  return `<section class="view">
+    <div class="lede"><h1>Daten und Grenzen</h1><p>Woher die Zahlen kommen, wie aktuell sie sind und was noch fehlt.</p></div>
+    <div class="grid-2">
+      <article class="panel"><div class="panel-head"><h2>Quellen</h2></div><div class="tbl-wrap"><table><thead><tr><th>Quelle</th><th>Letzter Abruf</th><th>Status</th></tr></thead><tbody>
+        ${D.sources.map((s) => `<tr><td>${esc(s.source)}</td><td class="num">${s.last_run ? new Date(s.last_run).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"}) : "–"}</td><td><span class="pill ${s.status === "ok" ? "good" : "bad"}">${esc(s.status)}</span></td></tr>`).join("")}</tbody></table></div></article>
+      <article class="panel"><div class="panel-head"><h2>Datenqualität seit 1999</h2></div><div class="tbl-wrap"><table><thead><tr><th>Prüfung</th><th>Einstufung</th><th class="num">Anzahl</th></tr></thead><tbody>
+        ${q.length ? q.map((r) => `<tr><td>${esc(label[r.check] || r.check)}</td><td><span class="pill ${r.severity === "info" ? "info" : r.severity === "warning" ? "warn" : "bad"}">${esc(r.severity)}</span></td><td class="num">${r.count}</td></tr>`).join("") : `<tr><td colspan="3" class="faint">Noch keine Prüfung gelaufen.</td></tr>`}</tbody></table></div></article>
+    </div>
+    <article class="panel"><div class="panel-head"><h2>Bekannte Grenzen</h2></div><ul class="plain">
+      <li>Kurse sind vorläufig FRED-Mittagskurse (12:00 New York) und erscheinen nur wöchentlich. Marktübliche Schlusskurse um 17:00 New York mit Hoch/Tief (Dukascopy) folgen auf einem eigenen Server.</li>
+      <li>Die Tagesprognose hat deshalb noch keine Handelsspanne.</li>
+      <li>Zinsdifferenzen, Inflation und COT-Positionierung sind noch nicht angebunden (nächste Phase). Bisher nutzen die Modelle Kursdynamik, Schwankung und Risikostimmung.</li>
+      <li>Milchpreise, Gold und die Industrieaktivität Chinas fehlen noch als Datenquellen.</li>
+      <li>Rohstoffpreise von FRED sind meist Monatsdurchschnitte und erscheinen mit etwa 45 Tagen Verzögerung. Das System rechnet damit und nutzt keine Werte, die damals noch unbekannt waren.</li>
+    </ul></article>
+    <article class="panel"><div class="panel-head"><h2>Letzte Werte der Treiber</h2></div><div class="chips">${Object.entries(D.series_last).sort().map(([k, v]) => `<span class="chip">${esc(k)} <span class="num">${dateDe(v)}</span></span>`).join("")}</div></article>
+  </section>`;
+}
+
+/* ---------- Routing ---------- */
+const VIEWS = {uebersicht: [viewOverview, renderStrength], prognosen: [viewForecasts, bindForecasts], tracker: [viewTracker, bindTracker],
+  weltkarte: [viewMap, bindMap], beziehungen: [viewDeps, bindDeps], daten: [viewData, () => {}]};
+function route() {
+  const name = (location.hash || "#uebersicht").slice(1);
+  const [view, bind] = VIEWS[name] || VIEWS.uebersicht;
+  $("#app").innerHTML = view(); bind();
+  document.querySelectorAll("nav.tabs a").forEach((a) => { if (a.getAttribute("href") === "#" + (VIEWS[name] ? name : "uebersicht")) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+}
+if (!D) { document.getElementById("app").innerHTML = '<div class="empty"><b>Keine Daten eingebettet.</b><span>Die Seite wird mit „python -m forex_nexus build-site“ erzeugt.</span></div>'; }
+else { renderChrome(); route(); window.addEventListener("hashchange", () => { state.open = null; route(); window.scrollTo(0, 0); }); }
+</script>

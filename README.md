@@ -13,7 +13,8 @@ gegen die tatsächliche Entwicklung gemessen.
 
 ## Status
 
-**Phase 1a (Kursdaten FRED + EZB) abgeschlossen.** Planung freigegeben am 18.11.2026.
+**Erste lauffähige Version (18.11.2026):** Prognose-Engine für Tag/Woche/Monat, unveränderliches Ledger,
+Forecast-Tracker, Dependency Engine und Website. Details: [Stand und Bedienung](docs/10_stand_und_bedienung.md).
 
 → [Ergebnis Phase 1: Kursdiagramme und Datenqualität](reports/phase1/README.md)
 
@@ -29,7 +30,12 @@ Planungsdokumente:
 6. [Entwicklungsplan](docs/06_entwicklungsplan.md)
 7. [Ergebnisse Phase 1a](docs/07_phase1_ergebnisse.md)
 8. [Quantitative Forecasting Engine](docs/08_quantitative_forecasting.md)
-9. [Global Economic Dependency Engine](docs/09_dependency_engine.md) – Wissensbasis: [`knowledge/relationships.yaml`](knowledge/relationships.yaml)
+9. [Global Economic Dependency Engine](docs/09_dependency_engine.md)
+10. [Stand der Software und Bedienung](docs/10_stand_und_bedienung.md)
+
+Die Website selbst: `site/index.html` (wird mit `python -m forex_nexus daily` erzeugt).
+
+Weitere Dokumente: – Wissensbasis: [`knowledge/relationships.yaml`](knowledge/relationships.yaml)
 
 ## Grundsätze
 

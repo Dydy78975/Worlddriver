@@ -43,13 +43,14 @@ ECB_URL = ("https://data-api.ecb.europa.eu/service/data/EXR/D.{ccys}.EUR.SP00.A"
 
 # --------------------------------------------------------------------------- Parser
 
-def parse_fred_csv(text: str) -> pd.Series:
-    """FRED-CSV -> Series(Datum -> Kurs). Leere Werte bzw. '.' = kein Handelstag."""
+def parse_fred_csv(text: str, require_positive: bool = True) -> pd.Series:
+    """FRED-CSV -> Series(Datum -> Wert). Leere Werte bzw. '.' = kein Handelstag.
+    require_positive: für Wechselkurse Pflicht; Rohstoffe können negativ sein (WTI am 20.04.2020)."""
     df = pd.read_csv(io.StringIO(text), na_values=[".", ""])
     df.columns = ["date", "value"]
     df["date"] = pd.to_datetime(df["date"]).dt.date
     s = df.dropna().set_index("date")["value"].astype(float)
-    if (s <= 0).any():
+    if require_positive and (s <= 0).any():
         raise ValueError("FRED lieferte nicht-positive Kurse")
     return s
 
