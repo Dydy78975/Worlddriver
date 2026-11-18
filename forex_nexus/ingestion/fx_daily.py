@@ -83,14 +83,23 @@ def _long(frame: pd.DataFrame, tz: ZoneInfo, local_time: time) -> pd.DataFrame:
     df = frame.stack(future_stack=True).dropna().rename("close").reset_index()
     df.columns = ["trade_date", "symbol", "close"]
     df["available_at"] = [datetime.combine(d, local_time, tz) for d in df["trade_date"]]
-    df["close"] = df["close"].round(8)
     return df
 
 
 def store(conninfo: str, source_name: str, frame: pd.DataFrame, tz: ZoneInfo, local_time: time) -> dict:
+    """Schlusskurse (breites Format: Datum x Paar) speichern."""
+    return store_rows(conninfo, source_name, _long(frame, tz, local_time))
+
+
+def store_rows(conninfo: str, source_name: str, rows: pd.DataFrame) -> dict:
     """Schreibt Kurse unveränderlich: Vorhandene Werte werden nie überschrieben.
-    Weicht ein neu gelieferter Wert ab, wird das als Qualitätsproblem 'source_revision' gemeldet."""
-    rows = _long(frame, tz, local_time)
+    Weicht ein neu gelieferter Schlusskurs ab, wird das als Qualitätsproblem 'source_revision' gemeldet.
+
+    rows: Spalten symbol, trade_date, close, available_at und optional open, high, low."""
+    rows = rows.copy()
+    for col in ("open", "high", "low"):
+        if col not in rows:
+            rows[col] = None
     with connect(conninfo) as conn:
         source_id = conn.execute("SELECT source_id FROM ref.data_source WHERE name = %s", (source_name,)).fetchone()[0]
         run_id = conn.execute(
@@ -98,10 +107,12 @@ def store(conninfo: str, source_name: str, frame: pd.DataFrame, tz: ZoneInfo, lo
         ).fetchone()[0]
         conn.commit()
         try:
-            conn.execute("CREATE TEMP TABLE stage (symbol TEXT, trade_date DATE, close NUMERIC, available_at TIMESTAMPTZ) ON COMMIT DROP")
+            conn.execute("""CREATE TEMP TABLE stage (symbol TEXT, trade_date DATE, open NUMERIC, high NUMERIC,
+                            low NUMERIC, close NUMERIC, available_at TIMESTAMPTZ) ON COMMIT DROP""")
             with conn.cursor().copy("COPY stage FROM STDIN") as cp:
                 for r in rows.itertuples(index=False):
-                    cp.write_row((r.symbol, r.trade_date, r.close, r.available_at))
+                    cp.write_row((r.symbol, r.trade_date, _num(r.open), _num(r.high), _num(r.low),
+                                  _num(r.close), r.available_at))
             revisions = conn.execute(
                 """INSERT INTO raw.data_quality_issue (check_name, instrument_id, affected_date, severity, details)
                    SELECT 'source_revision', i.instrument_id, s.trade_date, 'warning',
@@ -113,8 +124,8 @@ def store(conninfo: str, source_name: str, frame: pd.DataFrame, tz: ZoneInfo, lo
                    WHERE f.close <> s.close
                    ON CONFLICT DO NOTHING""", (source_name, source_id)).rowcount
             inserted = conn.execute(
-                """INSERT INTO raw.fx_daily (instrument_id, trade_date, source_id, close, available_at, run_id)
-                   SELECT i.instrument_id, s.trade_date, %s, s.close, s.available_at, %s
+                """INSERT INTO raw.fx_daily (instrument_id, trade_date, source_id, open, high, low, close, available_at, run_id)
+                   SELECT i.instrument_id, s.trade_date, %s, s.open, s.high, s.low, s.close, s.available_at, %s
                    FROM stage s JOIN ref.instrument i ON i.symbol = s.symbol
                    ON CONFLICT DO NOTHING""", (source_id, run_id)).rowcount
             conn.execute(
@@ -128,6 +139,10 @@ def store(conninfo: str, source_name: str, frame: pd.DataFrame, tz: ZoneInfo, lo
             conn.commit()
             raise
     return {"source": source_name, "rows": len(rows), "inserted": inserted, "revisions": revisions}
+
+
+def _num(x):
+    return None if x is None or (isinstance(x, float) and x != x) else round(float(x), 8)
 
 
 def ingest_all(conninfo: str) -> list[dict]:

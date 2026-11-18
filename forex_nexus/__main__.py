@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy"""
 
 import sys
 
@@ -9,7 +9,7 @@ from forex_nexus.db.migrate import migrate
 
 def main(argv: list[str]) -> int:
     cmd = argv[1] if len(argv) > 1 else "status"
-    url = database_url()
+    url = database_url() if cmd != "download-dukascopy" else None
     if cmd == "migrate":
         applied = migrate(url)
         print("Eingespielt:", ", ".join(applied) if applied else "nichts – Datenbank ist aktuell")
@@ -32,6 +32,17 @@ def main(argv: list[str]) -> int:
         from forex_nexus.ingestion.fx_daily import ingest_all
         for r in ingest_all(url):
             print(f"{r['source']}: {r['rows']} Werte geliefert, {r['inserted']} neu, {r['revisions']} abweichend")
+        return 0
+    if cmd == "download-dukascopy":
+        from datetime import date
+
+        from forex_nexus.ingestion import dukascopy
+        start = date(int(argv[2]), 1, 1) if len(argv) > 2 else dukascopy.FIRST_MONTH
+        print(dukascopy.download(start=max(start, dukascopy.FIRST_MONTH), log=lambda m: print(m, flush=True)))
+        return 0
+    if cmd == "ingest-dukascopy":
+        from forex_nexus.ingestion import dukascopy
+        print(dukascopy.ingest(url))
         return 0
     if cmd == "load-knowledge":
         from forex_nexus.dependencies.knowledge import load
