@@ -42,3 +42,16 @@ Die Website zeigt diese Ergebnisse neben den Signalen. Die fundamentale Wochenan
 * Kalender: Forex Factory Wochen-Feed. **Nur zur persönlichen Nutzung** – deshalb wird die fertige
   Website (`site/index.html`) nicht im öffentlichen Repository gespeichert, sondern als private Seite
   bereitgestellt. Das Programm meldet sich beim Abruf ehrlich als „WorlDDriver“.
+
+## Version 2 (18.11.2026)
+
+| Neu | Beschreibung |
+|---|---|
+| Seitenleiste | auf iPad und Desktop fest sichtbar; Umschalter Woche (Swing) / Heute (Intraday) |
+| Paar-Matrix | Bias-Abstand jeder Währung gegen jede andere; Antippen öffnet die Konfluenz-Checkliste mit Bias-Abstand, Faktoren, Event-Lage und Gegenargumenten |
+| Währungsstärke | Rangliste für 1 Tag, 1 Woche, 1 Monat (gegen den Korb) und Bias-Rangliste |
+| COT | Pegel je Währung (Commercials-Index, Kleinanleger-Strich, Extremlinien) und Verlauf der Netto-Positionen von Commercials, Spekulanten und Kleinanlegern über 1–3 Jahre mit markierten Extremphasen |
+| Saisonalität | Jahresverlauf (Basis 100) für 5/10/15/20 Jahre oder alle Jahre; **Saison-Screener** mit exaktem Binomialtest und Bonferroni-Korrektur über alle durchsuchten Fenster (aktuell besteht kein Paar die Korrektur) |
+| Makro | Marktstimmung Risk-on/Risk-off (VIX gegen Jahresmittel, AUD/JPY-Trend, US-Dollar), Quadrant Trend × Positionierung, Stärke-Heatmap |
+| Rechner | Positionsgröße aus Risiko, Pip-Wert in Kontowährung, Chance-Risiko-Verhältnis, Warnung bei zu engem Stop im Verhältnis zur typischen Tagesbewegung |
+| Kalender | Countdown zum nächsten roten Ordner |
