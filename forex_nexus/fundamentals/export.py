@@ -30,10 +30,10 @@ def _r(x, n=4):
 
 def load_cot(conn) -> pd.DataFrame:
     rows = conn.execute(
-        """SELECT currency, report_date, available_at, open_interest, comm_long, comm_short, noncomm_long, noncomm_short
-           FROM raw.cot_position""").fetchall()
+        """SELECT currency, report_date, available_at, open_interest, comm_long, comm_short, noncomm_long, noncomm_short,
+                  nonrept_long, nonrept_short FROM raw.cot_position""").fetchall()
     return pd.DataFrame(rows, columns=["currency", "report_date", "available_at", "open_interest", "comm_long",
-                                       "comm_short", "noncomm_long", "noncomm_short"])
+                                       "comm_short", "noncomm_long", "noncomm_short", "nonrept_long", "nonrept_short"])
 
 
 def load_events(conn, start: datetime, end: datetime) -> list[dict]:
@@ -118,6 +118,9 @@ def build(conn, closes: pd.DataFrame, strength: pd.DataFrame, forecasts: list[di
                 "open_interest": None if pd.isna(last["open_interest"]) else int(last["open_interest"]),
                 "label": A.cot_label(last["comm_idx"]),
                 "history": [[str(d), _r(a, 0), _r(b, 0)] for d, a, b in zip(tail["report_date"], tail["comm_idx"], tail["spec_idx"])],
+                "weekly": [[str(d), int(cn), int(sn), None if pd.isna(sm) else int(sm)] for d, cn, sn, sm in
+                           zip(tail["report_date"], tail["comm_net"], tail["spec_net"], tail["small_net"])],
+                "small_idx": _r(last.get("small_idx"), 0),
                 "contract": "US-Dollar-Index (ICE)" if c == "USD" else f"{A.CCY_NAME[c]}-Future (CME)",
             }
 
@@ -132,7 +135,21 @@ def build(conn, closes: pd.DataFrame, strength: pd.DataFrame, forecasts: list[di
     top_event = next((e for e in upcoming if e["impact"] == "High" and e["currency"] in (strong, weak)), None) or \
         next((e for e in upcoming if e["impact"] == "High"), None)
     best = sorted([x for x in pairs if x["direction"]], key=lambda x: (-x["confluence"], -abs(x["cot_diff"] or 0)))
+    from forex_nexus.fundamentals import extras
+    vix_s = None
+    try:
+        from forex_nexus.ingestion.fred_series import load_series
+        vix_s = load_series(conn, "VIXCLS")
+    except Exception:
+        vix_s = None
+    extra = {
+        "season_paths": extras.seasonal_paths(closes, now.year),
+        "screener": extras.season_screener(closes, now.date()),
+        "strength_windows": extras.strength_windows(strength),
+        "mood": extras.market_mood(vix_s, closes, strength) if vix_s is not None and len(vix_s) > 260 and "AUDJPY" in closes else None,
+    }
     return {
+        "extra": extra,
         "week": {"start": monday.date().isoformat(), "end": (monday + timedelta(days=4)).date().isoformat(),
                  "kw": int(monday.isocalendar()[1]), "days": [d.isoformat() for d in days]},
         "headline": {"strong": strong, "weak": weak, "strong_name": A.CCY_NAME[strong], "weak_name": A.CCY_NAME[weak],

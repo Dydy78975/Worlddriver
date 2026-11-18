@@ -43,7 +43,11 @@ def cot_indices(cot: pd.DataFrame, window: int = COT_WINDOW) -> pd.DataFrame:
         g = g.copy()
         g["comm_net"] = g["comm_long"] - g["comm_short"]
         g["spec_net"] = g["noncomm_long"] - g["noncomm_short"]
-        for col, name in (("comm_net", "comm_idx"), ("spec_net", "spec_idx")):
+        g["small_net"] = (g["nonrept_long"] - g["nonrept_short"]) if "nonrept_long" in g else np.nan
+        for col, name in (("comm_net", "comm_idx"), ("spec_net", "spec_idx"), ("small_net", "small_idx")):
+            if g[col].isna().all():
+                g[name] = np.nan
+                continue
             lo = g[col].rolling(window, min_periods=52).min()
             hi = g[col].rolling(window, min_periods=52).max()
             g[name] = ((g[col] - lo) / (hi - lo).replace(0, np.nan) * 100).clip(0, 100)
