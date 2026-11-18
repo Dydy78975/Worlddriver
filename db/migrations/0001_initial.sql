@@ -1,6 +1,8 @@
 -- FOREX NEXUS AI – Datenbankschema (Entwurf v0.1)
 -- PostgreSQL 16
 -- Erklärung der Tabellen: docs/04_datenbank.md
+-- Migration 0001. Einmal eingespielte Migrationen werden nie mehr geändert;
+-- Änderungen kommen als neue Datei (0002_..., 0003_...).
 --
 -- Grundregeln:
 --   * Rohdaten sind bitemporal: period_date (worauf bezieht sich der Wert)

@@ -1,6 +1,6 @@
 # 06 – Entwicklungsplan
 
-Stand: 18.11.2026 · Status: Entwurf zur Freigabe
+Stand: 18.11.2026 · Status: **freigegeben** · Phase 0 abgeschlossen
 
 ## Arbeitsweise
 
@@ -50,16 +50,25 @@ weil jede Zentralbank und jedes Statistikamt Daten anders bereitstellt.
 
 | Wann | Entscheidung |
 |---|---|
-| vor Phase 0 | Freigabe dieser Planung (oder Änderungswünsche) |
-| vor Phase 0 | Wo läuft das System? Eigener PC (Windows/Mac?) für die Entwicklung, später kleiner Server? |
+| ~~vor Phase 0~~ | ~~Freigabe dieser Planung~~ – erledigt 18.11.2026 |
+| ~~vor Phase 0~~ | ~~Wo läuft das System?~~ – Entwicklung in der Cloud, Bedienung per iPhone; ab Phase 4 kleiner Server (ca. 5–15 €/Monat) |
+| vor Phase 4 | Server-Anbieter auswählen und Konto anlegen (Claude unterstützt Schritt für Schritt) |
 | Phase 3 | Definition „neutral“ (Startwert k = 0,5) bestätigen |
 | Phase 5 | Schwellen für „kalibriert“ bestätigen |
 | vor Phase 10 | Deine sechs A+-Kriterien möglichst genau beschreiben |
 | laufend | Freigabe neuer Modellversionen |
 
-## Nächster konkreter Schritt (Phase 0)
+## Phase 0 – erledigt
 
-1. Python-Projektgerüst mit Ordnerstruktur aus `03_architektur.md`.
-2. `docker-compose.yml` mit PostgreSQL 16, Schema automatisch eingespielt.
-3. Erster automatischer Test: Datenbank startet, 28 Paare vorhanden, Ledger ist unveränderlich.
-4. Kurze Anleitung für dich: „Wie starte ich das System auf meinem Rechner?“
+* Python-Projekt mit Ordnerstruktur aus `03_architektur.md`
+* Migrations-Mechanismus (`db/migrations/`, Prüfsummen-Schutz)
+* 16 automatische Tests, laufen bei jedem Upload auf GitHub (Reiter „Actions“)
+* `docker-compose.yml` für den späteren Server (noch nicht auf einem Server erprobt)
+* [Anleitung für iPhone-Nutzung](ANLEITUNG.md)
+
+## Nächster Schritt: Phase 1 – Kursdaten
+
+1. Tageskurse der 7 USD-Paare von FRED laden, Kreuzkurse für die übrigen 21 Paare berechnen.
+2. EZB-Referenzkurse als zweite Quelle zur Kontrolle.
+3. Qualitätsprüfungen (Lücken, Ausreißer, Abweichung zwischen Quellen).
+4. Ergebnis für dich: Kursdiagramme aller 28 Paare und eine Liste gefundener Datenprobleme.

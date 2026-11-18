@@ -161,7 +161,7 @@ Stand: 18.11.2026 · Status: Entwurf zur Freigabe
 |---|---|---|
 | Sprache | Python 3.12 | Standard für Datenanalyse und ML |
 | Datenbank | PostgreSQL 16 | zuverlässig, kostenlos, Trigger für Unveränderlichkeit, JSON-Felder |
-| Datenbank-Migrationen | Alembic | Änderungen an der Struktur nachvollziehbar |
+| Datenbank-Migrationen | eigene nummerierte SQL-Dateien mit Prüfsumme (`db/migrations/`) | einfacher und transparenter als Alembic; Änderungen nachvollziehbar |
 | Datenverarbeitung | pandas, numpy | Standard |
 | Statistik | statsmodels, scipy | Regressionen, Strukturbruch-Tests |
 | ML | scikit-learn, LightGBM, XGBoost | wie gewünscht |
@@ -189,7 +189,7 @@ forex_nexus/
   reports/         # Wochenbericht
   setups/          # A+-Regel-Engine (getrennt)
   dashboard/       # Streamlit-App
-db/                # Datenbankschema und Migrationen
+db/migrations/     # nummerierte Datenbank-Migrationen
 tests/
 docs/
 ```

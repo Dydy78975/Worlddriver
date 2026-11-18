@@ -9,12 +9,16 @@ gegen die tatsächliche Entwicklung gemessen.
 
 ## Status
 
-**Planungsphase.** Bevor Code geschrieben wird, sind folgende Dokumente zur Freigabe vorgesehen:
+**Phase 0 (Fundament) abgeschlossen.** Planung freigegeben am 18.11.2026.
+
+→ [Anleitung für dich (iPhone)](docs/ANLEITUNG.md)
+
+Planungsdokumente:
 
 1. [Technische Machbarkeit](docs/01_machbarkeit.md)
 2. [Datenquellen und Kosten](docs/02_datenquellen_und_kosten.md)
 3. [Technische Architektur](docs/03_architektur.md)
-4. [Datenbankstruktur](docs/04_datenbank.md) – Schema: [`db/schema.sql`](db/schema.sql)
+4. [Datenbankstruktur](docs/04_datenbank.md) – Schema: [`db/migrations/0001_initial.sql`](db/migrations/0001_initial.sql)
 5. [Prognose- und Validierungsmethodik](docs/05_ml_methodik.md)
 6. [Entwicklungsplan](docs/06_entwicklungsplan.md)
 

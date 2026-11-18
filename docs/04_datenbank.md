@@ -1,6 +1,6 @@
 # 04 – Datenbankstruktur
 
-Stand: 18.11.2026 · Das vollständige, lauffähige Schema steht in [`db/schema.sql`](../db/schema.sql)
+Stand: 18.11.2026 · Das vollständige, lauffähige Schema steht in [`db/migrations/0001_initial.sql`](../db/migrations/0001_initial.sql)
 (getestet mit PostgreSQL 16: legt alle Tabellen und die 28 Paare an; Änderungs- und
 Löschversuche am Prognose-Ledger werden von der Datenbank abgewiesen).
 
@@ -94,5 +94,5 @@ in der jeweiligen Regelprüfung festgehalten.
 
 * Speicherung von Intraday-Kursen (falls deine A+-Kriterien sie brauchen).
 * Genaue Struktur der 6 A+-Regeln – folgt, sobald du sie beschreibst.
-* Die Struktur wird später über Migrationen (Alembic) weiterentwickelt, nicht durch
-  manuelles Ändern dieser Datei.
+* Die Struktur wird über neue Migrationsdateien (`0002_…sql`) weiterentwickelt.
+  `0001_initial.sql` wird nie mehr verändert – das prüft ein automatischer Test.
