@@ -24,6 +24,7 @@ später dazu. So läuft die Uhr für die Erfolgsmessung bereits, während wir we
 | ✅ **0 Fundament** | Projektstruktur, PostgreSQL, Schema, Tests | Datenbank mit 8 Währungen und 28 Paaren | erledigt |
 | ✅ **1a Kursdaten FRED + EZB** | Tageskurse aller 28 Paare, Qualitätsprüfungen | Kursdiagramme, Befundliste | erledigt |
 | ✅ **Architektur-Erweiterung** | Horizonte Tag/Woche/Monat, quantitative Felder, Forecast-Tracker, Dependency Engine, Wissensbasis | Dokumente 08/09, Migration 0003, 28 Hypothesen | erledigt |
+| ✅ **Erste lauffähige Version** | Engine Tag/Woche/Monat (4 Modelle), Ledger, Tracker, Dependency-Tests, Website, täglicher Check | siehe `10_stand_und_bedienung.md` | erledigt 18.11.2026 |
 | **1b Dukascopy** | Hoch/Tief/Schluss 17:00 New York für alle 28 Paare | **Pflicht für die Tagesprognose und die Handelsspanne** | 1–2 Wochen |
 | **2 Makro- und Rohstoffdaten point-in-time** | Leitzinsen, Renditen, Inflation, COT, VIX, DXY, Zentralbank-Termine; Rohstoffe von FRED; Quellen für Milch, Gold, China | „Was wusste man am Tag X?“ – getestet | 3–5 Wochen |
 | **3 Features & Validierungsrahmen** | Merkmale, Zielgrößen je Horizont, Walk-Forward mit Purging/Embargo, alle Kennzahlen | Bericht: Wie gut sind Referenzprognosen je Horizont? | 2–3 Wochen |

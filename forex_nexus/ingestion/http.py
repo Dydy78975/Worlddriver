@@ -32,12 +32,14 @@ def fetch_bytes(url: str, retries: int = 8, timeout: int = 90, base_wait: float 
     raise RuntimeError(f"Abruf fehlgeschlagen nach {retries} Versuchen: {url}") from last
 
 
-def fetch_text(url: str, retries: int = 4, timeout: int = 90) -> str:
+def fetch_text(url: str, retries: int = 4, timeout: int = 90, user_agent: str | None = None) -> str:
     last: Exception | None = None
     for attempt in range(retries):
         try:
-            # Bewusst die Standard-Kennung von Python: FRED blockiert unbekannte User-Agents.
-            with urllib.request.urlopen(url, timeout=timeout) as resp:
+            # Standard: Kennung von Python (FRED blockiert unbekannte Kennungen). Wo eine Quelle das ablehnt,
+            # gibt sich das Programm ehrlich mit eigenem Namen zu erkennen – nie als Browser.
+            req = urllib.request.Request(url, headers={"User-Agent": user_agent}) if user_agent else url
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
             if exc.code < 500 and exc.code != 429:

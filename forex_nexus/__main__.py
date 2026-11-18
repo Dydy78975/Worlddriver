@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily | ingest-cot | ingest-calendar"""
 
 import sys
 
@@ -39,6 +39,77 @@ def main(argv: list[str]) -> int:
         from forex_nexus.ingestion import dukascopy
         start = date(int(argv[2]), 1, 1) if len(argv) > 2 else dukascopy.FIRST_MONTH
         print(dukascopy.download(start=max(start, dukascopy.FIRST_MONTH), log=lambda m: print(m, flush=True)))
+        return 0
+    if cmd == "train":
+        from pathlib import Path
+
+        from forex_nexus.ledger.pipeline import train
+        s = train(url, Path(argv[2] if len(argv) > 2 else "data/train"))
+        print(f"Version {s['version']}: " + ", ".join(
+            f"{h}: Empfehlung {v['champion_recommendation']}" for h, v in s["horizons"].items()))
+        return 0
+    if cmd == "promote":
+        from forex_nexus.ledger.pipeline import promote
+        pid = promote(url, argv[2], argv[3], argv[4], argv[5], " ".join(argv[6:]))
+        print(f"Freigabe {pid} gespeichert: {argv[4]} {argv[3]} ({argv[2]}) durch {argv[5]}")
+        return 0
+    if cmd == "forecast":
+        from forex_nexus.ledger.pipeline import forecast
+        forecast(url)
+        return 0
+    if cmd == "evaluate":
+        from forex_nexus.ledger.pipeline import evaluate_due
+        evaluate_due(url)
+        return 0
+    if cmd == "ingest-cot":
+        from forex_nexus.ingestion.cot import ingest
+        print(ingest(url))
+        return 0
+    if cmd == "ingest-calendar":
+        from forex_nexus.ingestion.calendar import ingest
+        print(ingest(url))
+        return 0
+    if cmd == "daily":
+        # Kompletter Tagesablauf: Daten laden, prüfen, prognostizieren, auswerten, Website bauen
+        from datetime import date
+        from pathlib import Path
+
+        from forex_nexus.ingestion.fred_series import ingest as ingest_series
+        from forex_nexus.ingestion.fx_daily import ingest_all
+        from forex_nexus.ledger.pipeline import evaluate_due, forecast
+        from forex_nexus.quality.fx_checks import run_checks
+        from forex_nexus.reports.fx_overview import plot_pairs, write_markdown
+        from forex_nexus.reports.site_export import build
+        for r in ingest_all(url):
+            print(f"{r['source']}: {r['inserted']} neue Kurse")
+        print(f"Makro/Rohstoffe: {len(ingest_series(url))} Reihen aktualisiert")
+        from forex_nexus.ingestion import calendar as cal, cot
+        print(f"COT: {cot.ingest(url)}")
+        print(f"Kalender: {cal.ingest(url)}")
+        result = run_checks(url, date.today())
+        print(f"Qualitätsprüfung: {result['new_in_db']} neue Befunde")
+        out = Path("reports/phase1")
+        out.mkdir(parents=True, exist_ok=True)
+        plot_pairs(result["fred"], out / "kurse_28_paare.png")
+        write_markdown(result, out / "README.md", "kurse_28_paare.png", date.today())
+        forecast(url)
+        evaluate_due(url)
+        print(f"Website: {build(url)}")
+        return 0
+    if cmd == "build-site":
+        from forex_nexus.reports.site_export import build
+        print(f"Website geschrieben: {build(url)}")
+        return 0
+    if cmd == "validate-dependencies":
+        from forex_nexus.dependencies.validation import run
+        from forex_nexus.ledger.pipeline import code_commit
+        for r in run(url, code_commit()):
+            print(f"{r['currency']} ← {r['driver_name']}: {r['verdict']}")
+        return 0
+    if cmd == "ingest-fred-series":
+        from forex_nexus.ingestion.fred_series import ingest
+        for r in ingest(url):
+            print(f"{r['series']}: {r['values']} Werte, letzter {r['last']}")
         return 0
     if cmd == "ingest-dukascopy":
         from forex_nexus.ingestion import dukascopy
