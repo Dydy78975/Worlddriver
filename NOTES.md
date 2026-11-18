@@ -38,7 +38,9 @@ Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `
   initdb + `migrate` + `ingest-fx` + `ingest-fred-series` + `ingest-cot` + `ingest-calendar` + `train` +
   `promote` + `forecast` + `build-site`).
 - Kurse = FRED-Mittagskurse (wöchentlich aktualisiert); Dukascopy nur vom eigenen Server.
-- Inflation für GBP, JPY, CHF, CAD, AUD, NZD veraltet → diese Inflationssignale stehen auf neutral.
+- Inflation für GBP, JPY, CHF, CAD, AUD, NZD veraltet → diese Inflationssignale stehen auf neutral. Geprüft 18.11.2026:
+  FRED hat keinen aktuellen Ersatz (auch die neuen OECD-Reihen `…CPALTT01IXNBM`, `…CPALTT01CTGYM` enden 2023–2025);
+  EZB führt diese Länder nicht. Es bleibt die BIS (oder nationale Statistikämter).
 - Modelle wurden von Claude zur Inbetriebnahme freigegeben → Bestätigung durch Nutzer ausstehend.
 - A+-Regel-Engine: wartet auf die 6 Kriterien des Nutzers.
 - Die geplante tägliche Aufgabe (`trig_017cgKCoLFTF76c2subGa5aC`) ist an die alte Sitzung gebunden.

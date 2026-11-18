@@ -83,7 +83,8 @@ Alles ist in Git nachvollziehbar und kann zurückgeholt werden.
   2021). Diese Inflationssignale stehen deshalb auf neutral. Lösung: BIS-Statistik (`stats.bis.org`) mit
   Verbraucherpreisen und offiziellen Leitzinsen aller 8 Notenbanken. Der Host ist in der Umgebung
   „worlddriver“ freigegeben; der erste Abruf wurde in der Sitzung vom 18.11.2026 von der automatischen
-  Freigabe-Prüfung abgelehnt und muss vom Nutzer erlaubt werden.
+  Freigabe-Prüfung abgelehnt und muss vom Nutzer erlaubt werden. Über FRED und EZB gibt es keinen aktuellen
+  Ersatz (geprüft: auch die neueren OECD-Reihen auf FRED enden 2023–2025).
 * Weitere Datenquellen, die Signale tragen könnten: 2-jährige Renditen aller Länder (bessere Zinserwartung),
   Konsens vs. Ist bei Wirtschaftsdaten (Überraschungen), Dukascopy Hoch/Tief (nur vom eigenen Server).
 * Neue Signale kommen automatisch in die geprüfte Abstimmung, sobald sie Entdeckung und Bestätigung bestehen.
