@@ -1,0 +1,21 @@
+# Für den späteren Server-Betrieb (Phase 4).
+# Start:  cp .env.example .env  (Passwort ändern!)  &&  docker compose up -d
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fnx
+      POSTGRES_PASSWORD: ${FNX_DB_PASSWORD:?FNX_DB_PASSWORD in .env setzen}
+      POSTGRES_DB: fnx
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"   # nur lokal erreichbar, nie offen ins Internet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fnx"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
