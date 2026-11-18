@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily | ingest-cot | ingest-calendar"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | ingest-cot | ingest-calendar | signals | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | build-site | daily"""
 
 import sys
 
@@ -82,7 +82,7 @@ def main(argv: list[str]) -> int:
         from forex_nexus.reports.site_export import build
         for r in ingest_all(url):
             print(f"{r['source']}: {r['inserted']} neue Kurse")
-        print(f"Makro/Rohstoffe: {len(ingest_series(url))} Reihen aktualisiert")
+        print(f"Makro/Rohstoffe/Arbeitsmarkt: {len(ingest_series(url))} Reihen aktualisiert")
         from forex_nexus.ingestion import calendar as cal, cot
         print(f"COT: {cot.ingest(url)}")
         print(f"Kalender: {cal.ingest(url)}")
@@ -94,17 +94,19 @@ def main(argv: list[str]) -> int:
         write_markdown(result, out / "README.md", "kurse_28_paare.png", date.today())
         forecast(url)
         evaluate_due(url)
-        print(f"Website: {build(url)}")
+        print(f"Website (inkl. Signal-Prüfung): {build(url)}")
+        return 0
+    if cmd == "signals":
+        from pathlib import Path
+
+        from forex_nexus.signals.report import run_and_write
+        p = run_and_write(url, Path("reports/signals"))
+        print("Gültige Signale: " + ", ".join(f"{h}: {len(v['valid'])}" for h, v in p["horizons"].items())
+              + " – Bericht: reports/signals/README.md")
         return 0
     if cmd == "build-site":
         from forex_nexus.reports.site_export import build
         print(f"Website geschrieben: {build(url)}")
-        return 0
-    if cmd == "validate-dependencies":
-        from forex_nexus.dependencies.validation import run
-        from forex_nexus.ledger.pipeline import code_commit
-        for r in run(url, code_commit()):
-            print(f"{r['currency']} ← {r['driver_name']}: {r['verdict']}")
         return 0
     if cmd == "ingest-fred-series":
         from forex_nexus.ingestion.fred_series import ingest
@@ -114,16 +116,6 @@ def main(argv: list[str]) -> int:
     if cmd == "ingest-dukascopy":
         from forex_nexus.ingestion import dukascopy
         print(dukascopy.ingest(url))
-        return 0
-    if cmd == "load-knowledge":
-        from forex_nexus.dependencies.knowledge import load
-        r = load(url)
-        print(f"Wissensbasis {r.version}: {r.drivers} Treiber, {r.new_relationships} neue und "
-              f"{r.updated_relationships} aktualisierte Beziehungen")
-        for x in r.reset_to_testing:
-            print(f"  zurück auf 'testing' (Vorzeichen geändert): {x}")
-        for x in r.missing_in_file:
-            print(f"  Hinweis: {x} steht nicht mehr in der Datei (wird nicht gelöscht)")
         return 0
     if cmd in ("check-fx", "report-fx"):
         from datetime import date

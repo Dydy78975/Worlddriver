@@ -2,9 +2,12 @@
 
 Stand: 18.11.2026 · Status: freigegeben, erweitert um Quantitative Forecasting Engine und Dependency Engine
 
+> **Aktualisierung 18.11.2026:** Dependency Engine, Richtungsmodelle und mehrere Website-Bereiche wurden
+> entfernt; neu ist die Signal-Prüfung (`forex_nexus/signals/`). Siehe [12_signal_abstimmung.md](12_signal_abstimmung.md).
+
 > **Erweiterung 18.11.2026:** Details zu den neuen Kernmodulen stehen in
 > [08 – Quantitative Forecasting Engine](08_quantitative_forecasting.md) und
-> [09 – Global Economic Dependency Engine](09_dependency_engine.md).
+> 09 – Global Economic Dependency Engine (entfernt am 18.11.2026).
 > Horizonte jetzt: **täglich (1 Tag), wöchentlich (5 Tage), monatlich (20 Tage)** – je ein eigenes Modell.
 > Umfang: ausschließlich USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
 

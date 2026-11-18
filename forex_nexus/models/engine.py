@@ -1,16 +1,16 @@
-"""Prognose-Engine: drei unabhängige Horizonte, je drei Modelle, Walk-Forward-Validierung.
+"""Prognose-Engine: drei unabhängige Horizonte (Tag, Woche, Monat), Walk-Forward-Validierung.
 
 Modelle je Horizont (jedes Modell wird NUR auf Daten seines Horizonts trainiert):
   * climatology – historische Klassenhäufigkeit je Paar (Referenz)
   * volref      – Schwankungs-Referenz: logistische Regression NUR auf Schwankungsmerkmalen. Sie fängt den
                   Effekt ein, dass „seitwärts“ über eine geschätzte (ungenaue) Volatilität definiert ist.
-                  Ein Modell beansprucht erst dann einen RICHTUNGSvorteil, wenn es auch diese Referenz schlägt.
-  * logreg      – multinomiale logistische Regression (statistischer Benchmark)
-  * lgbm        – LightGBM (nichtlinear)
 Zusätzlich je Horizont:
-  * Rendite: Ridge-Regression auf die standardisierte Rendite; wird nur genutzt, wenn Out-of-Sample-R² > 0
   * Intervall: empirische Quantile der standardisierten Rendite (Skalierung mit aktueller Volatilität)
   * Spanne: empirische Quantile der standardisierten Kursspanne (Schlusskurse)
+
+Entfernt am 18.11.2026 (Beleg: Walk-Forward 2006–2021 und Hold-out ab 2022, docs/12_signal_abstimmung.md):
+logistische Regression und LightGBM schlugen die Schwankungs-Referenz in keinem Horizont, das Ridge-
+Renditemodell hatte überall ein negatives Out-of-Sample-R². Richtungssignale prüft jetzt forex_nexus.signals.
 
 Walk-Forward: Für jedes Testjahr wird nur mit Beobachtungen trainiert, deren Zielzeitraum mindestens
 einen Horizont (Embargo) vor Beginn des Testjahres endet.
@@ -23,16 +23,13 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
-from lightgbm import LGBMClassifier
-from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from forex_nexus.models.features import FEATURES, HORIZONS, vix_regime
 
-MODELS = ("climatology", "volref", "logreg", "lgbm")
-VOL_FEATURES = ["vol_ratio", "vix_level", "vix_chg_5d"]
-DIRECTIONAL = ("logreg", "lgbm")
+MODELS = ("climatology", "volref")
 QUANTILES = (0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95)
 VALIDATION_END_YEAR = 2021          # 2006–2021: Modellauswahl; ab 2022: Hold-out (nur Bericht)
 FIRST_TEST_YEAR = 2006
@@ -54,32 +51,14 @@ def _fit_predict_proba(model: str, train: pd.DataFrame, test: pd.DataFrame, hori
         known = test["pair"].isin(freq.index).values
         out[known] = freq.loc[test.loc[known, "pair"]].values
         return out
-    X, Xt = train[FEATURES].values, test[FEATURES].values
-    if model == "volref":
-        X, Xt = train[VOL_FEATURES].values, test[VOL_FEATURES].values
-        clf = make_pipeline(StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
-    elif model == "logreg":
-        clf = make_pipeline(StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
-    elif model == "lgbm":
-        clf = LGBMClassifier(n_estimators=150, learning_rate=0.03, num_leaves=15, min_child_samples=800,
-                             subsample=0.8, subsample_freq=1, colsample_bytree=0.8, reg_lambda=5.0,
-                             verbose=-1, n_jobs=4, random_state=42)
-    else:
+    if model != "volref":
         raise ValueError(model)
+    clf = make_pipeline(StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        clf.fit(X, y)
-        proba = clf.predict_proba(Xt)
-    classes = clf.classes_ if model == "lgbm" else clf[-1].classes_   # noqa: E501
-    return pd.DataFrame(proba, columns=classes).reindex(columns=CLASSES, fill_value=0).values
-
-
-def _fit_return(train: pd.DataFrame, test: pd.DataFrame, horizon: str) -> np.ndarray:
-    h = HORIZONS[horizon]
-    z = (train[f"y_{horizon}"] / (train["sigma"] * np.sqrt(h))).clip(-6, 6)
-    reg = make_pipeline(StandardScaler(), Ridge(alpha=1000.0))
-    reg.fit(train[FEATURES].values, z.values)
-    return reg.predict(test[FEATURES].values) * test["sigma"].values * np.sqrt(h)
+        clf.fit(train[FEATURES].values, y)
+        proba = clf.predict_proba(test[FEATURES].values)
+    return pd.DataFrame(proba, columns=clf[-1].classes_).reindex(columns=CLASSES, fill_value=0).values
 
 
 def _dist_params(train: pd.DataFrame, horizon: str) -> dict:
@@ -118,7 +97,6 @@ def walk_forward(panel: pd.DataFrame, horizon: str, models=MODELS, log=print) ->
         for m in models:
             p = _fit_predict_proba(m, train, test, horizon)
             res[f"{m}_p_bear"], res[f"{m}_p_neutral"], res[f"{m}_p_bull"] = p[:, 0], p[:, 1], p[:, 2]
-        res["ret_pred"] = _fit_return(train, test, horizon)
         params = _dist_params(train, horizon)
         scale = res["sigma"] * np.sqrt(h)
         for q, zq in params["z_q"].items():
@@ -189,26 +167,17 @@ def metrics(df: pd.DataFrame, model: str, horizon: str) -> dict:
     hits = (np.sign(score[decided]) == np.sign(df["y"][decided]))
     daily = pd.DataFrame({"date": df["date"], "d": b0 - b}).groupby("date")["d"].mean()
     lo, hi = block_bootstrap_ci(daily, block=max(20, 4 * h))
-    dir_lo = dir_bss = None
-    if "volref_p_bull" in df and model not in ("climatology", "volref"):
-        bv = brier(df, "volref")
-        dd = pd.DataFrame({"date": df["date"], "d": bv - b}).groupby("date")["d"].mean()
-        lo2, _ = block_bootstrap_ci(dd, block=max(20, 4 * h))
-        dir_bss = float(1 - b.mean() / bv.mean())
-        dir_lo = float(lo2 / bv.mean()) if lo2 == lo2 else None
     bss = 1 - b.mean() / b0.mean()
     denom = b0.mean()
     n_dates = df["date"].nunique()
-    y, yhat = df["y"], df["ret_pred"]
+    y = df["y"]
     return {
         "n": int(len(df)), "n_dates": int(n_dates),
         "effective_n": int(n_dates / h * 7),     # 7 unabhängige Währungsbewegungen, nicht überlappend
         "brier": float(b.mean()), "brier_climatology": float(denom), "bss": float(bss),
         "bss_ci_low": float(lo / denom) if lo == lo else None, "bss_ci_high": float(hi / denom) if hi == hi else None,
-        "bss_vs_volref": dir_bss, "bss_vs_volref_ci_low": dir_lo,
         "log_loss": float(ll.mean()), "hit_rate": float(hits.mean()) if len(hits) else None,
         "hit_n": int(len(hits)), "ece": ece(df, model),
-        "oos_r2_return": float(1 - ((y - yhat) ** 2).sum() / (y ** 2).sum()),
         "coverage_80": float(((y >= df["q10"]) & (y <= df["q90"])).mean()),
         "coverage_90": float(((y >= df["q05"]) & (y <= df["q95"])).mean()),
     }
@@ -226,7 +195,6 @@ class HorizonReport:
     holdout: dict = field(default_factory=dict)        # Modell -> Kennzahlen ab 2022
     by_segment: list = field(default_factory=list)     # Zeilen für ml.evaluation
     champion: str = "climatology"
-    use_return_model: bool = False
     display_calibrated: bool = False
     yearly: list = field(default_factory=list)         # Verlauf: Jahr, Modell, BSS
 
@@ -239,16 +207,9 @@ def evaluate(oos: pd.DataFrame, horizon: str, models=MODELS) -> HorizonReport:
         rep.validation[m] = metrics(val, m, horizon)
         if not hold.empty:
             rep.holdout[m] = metrics(hold, m, horizon)
-    # Champion: bestes Modell auf dem Validierungszeitraum, nur wenn es die Referenz belastbar schlägt
-    # 1) Richtungsmodelle müssen die Schwankungs-Referenz belastbar schlagen
-    directional = [m for m in DIRECTIONAL if m in models and (rep.validation[m].get("bss_vs_volref_ci_low") or -1) > 0
-                   and (rep.validation[m]["bss_ci_low"] or -1) > 0]
-    if directional:
-        rep.champion = min(directional, key=lambda m: rep.validation[m]["brier"])
-    # 2) sonst die Schwankungs-Referenz, wenn sie die reine Häufigkeit belastbar schlägt
-    elif "volref" in models and (rep.validation["volref"]["bss_ci_low"] or -1) > 0:
+    # Champion: die Schwankungs-Referenz, wenn sie die reine Häufigkeit belastbar schlägt
+    if "volref" in models and (rep.validation["volref"]["bss_ci_low"] or -1) > 0:
         rep.champion = "volref"
-    rep.use_return_model = rep.validation[rep.champion]["oos_r2_return"] > 0
     rep.display_calibrated = rep.champion != "climatology" and display_allowed(rep.validation[rep.champion])
     for m in models:
         for seg_type, col in (("pair", "pair"), ("regime", "regime")):
@@ -270,8 +231,7 @@ def evaluate(oos: pd.DataFrame, horizon: str, models=MODELS) -> HorizonReport:
 
 # --------------------------------------------------------------------------- Live-Prognose
 
-def live_forecast(panel: pd.DataFrame, horizon: str, champion: str, use_return_model: bool,
-                  models=MODELS) -> pd.DataFrame:
+def live_forecast(panel: pd.DataFrame, horizon: str, champion: str, models=MODELS) -> pd.DataFrame:
     """Trainiert auf allen Daten, deren Ergebnis bereits bekannt ist, und prognostiziert ab dem letzten Tag."""
     h = HORIZONS[horizon]
     last_date = panel["date"].max()
@@ -281,8 +241,6 @@ def live_forecast(panel: pd.DataFrame, horizon: str, champion: str, use_return_m
     for m in models:
         p = _fit_predict_proba(m, train, today, horizon)
         today[f"{m}_p_bear"], today[f"{m}_p_neutral"], today[f"{m}_p_bull"] = p[:, 0], p[:, 1], p[:, 2]
-    today["ret_pred_raw"] = _fit_return(train, today, horizon)
-    today["ret_pred"] = today["ret_pred_raw"] if use_return_model else 0.0
     params = _dist_params(train, horizon)
     scale = today["sigma"] * np.sqrt(h)
     for q, zq in params["z_q"].items():
@@ -290,22 +248,5 @@ def live_forecast(panel: pd.DataFrame, horizon: str, champion: str, use_return_m
     today["hi_pred"], today["lo_pred"] = params["hi_med"] * scale, params["lo_med"] * scale
     today["horizon"] = horizon
     today["champion"] = champion
-    today["contrib"] = list(_contributions(train, today, horizon))
     return today
 
-
-def _contributions(train: pd.DataFrame, today: pd.DataFrame, horizon: str):
-    """Einflussfaktoren: Beitrag jedes Merkmals zur Differenz P(bullisch) − P(bärisch) im
-    logistischen Modell (Koeffizient × standardisierter Wert). Gut erklärbar und stabil."""
-    clf = make_pipeline(StandardScaler(), LogisticRegression(C=0.05, max_iter=1000))
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        clf.fit(train[FEATURES].values, train[f"cls_{horizon}"].astype(int).values)
-    scaler, lr = clf[0], clf[-1]
-    classes = list(lr.classes_)
-    w = lr.coef_[classes.index(1)] - lr.coef_[classes.index(-1)]
-    xs = scaler.transform(today[FEATURES].values)
-    for row in xs:
-        c = row * w
-        order = np.argsort(-np.abs(c))[:4]
-        yield [(FEATURES[i], float(c[i])) for i in order]

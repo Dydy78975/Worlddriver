@@ -16,7 +16,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -26,15 +26,13 @@ import pandas as pd
 from forex_nexus.db import connect
 from forex_nexus.ingestion.fred_series import load_series
 from forex_nexus.models import engine
-from forex_nexus.models.features import (EWMA_LAMBDA, FEATURE_LABELS_DE, FEATURES, HORIZONS, NEUTRAL_K,
-                                         build_panel, vix_regime)
+from forex_nexus.models.features import EWMA_LAMBDA, FEATURES, HORIZONS, NEUTRAL_K, build_panel, vix_regime
 from forex_nexus.quality.fx_checks import ANALYSIS_START, load_closes
 
 NEW_YORK = ZoneInfo("America/New_York")
 PRICE_SOURCES = ["FRED_H10", "FRED_H10_CROSS"]
-FEATURE_SET_VERSION = "fs-2026.11-a"
+FEATURE_SET_VERSION = "fs-2026.11-b"        # b: nur noch Schwankungsmerkmale
 LABEL_VERSION = "ld-2026.11-a"
-VIX_RELATED = {"vix_level", "vix_chg_5d", "vix_x_risk"}
 
 
 def code_commit() -> str:
@@ -97,10 +95,10 @@ def train(conninfo: str, out_dir: Path, log=print) -> dict:
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'candidate', %s)
                        ON CONFLICT (name, version, horizon_code) DO UPDATE SET status = ml.model_version.status
                        RETURNING model_version_id""",
-                    (m, version, "baseline" if m in ("climatology", "volref") else "ml", horizon, fid, lid,
+                    (m, version, "baseline", horizon, fid, lid,
                      json.dumps({"model": m}), ANALYSIS_START, train_end, commit,
                      m == rep.champion and rep.display_calibrated,
-                     json.dumps({"direction": m, "return": "ridge" if rep.use_return_model else "zero (OOS-R² <= 0)",
+                     json.dumps({"direction": m, "return": "zero",
                                  "interval": "empirische Quantile × EWMA-Volatilität",
                                  "range": "empirische Spanne der Schlusskurse × EWMA-Volatilität"}))).fetchone()[0]
                 # erneuter Lauf derselben Version: alte Kennzahlen dieser Version ersetzen (keine Dubletten)
@@ -133,7 +131,7 @@ def train(conninfo: str, out_dir: Path, log=print) -> dict:
                                                                  if k not in ("model", "segment_type", "segment_value")})))
             conn.commit()
         summary["horizons"][horizon] = {
-            "champion_recommendation": rep.champion, "use_return_model": rep.use_return_model,
+            "champion_recommendation": rep.champion,
             "display_calibrated": rep.display_calibrated, "validation": rep.validation, "holdout": rep.holdout,
             "yearly": rep.yearly, "by_segment": rep.by_segment, "model_version_ids": ids, "train_end": str(train_end)}
         log(f"  {horizon}: empfohlener Champion {rep.champion}, Anzeige kalibriert: {rep.display_calibrated}")
@@ -192,14 +190,12 @@ def forecast(conninfo: str, log=print) -> dict:
         versions = conn.execute(
             """SELECT mv.model_version_id, mv.name, mv.version, mv.horizon_code, mv.status, mv.train_end,
                       mv.is_calibrated, mv.components
-               FROM ml.model_version mv WHERE mv.status IN ('champion', 'shadow') ORDER BY mv.horizon_code, mv.status""").fetchall()
+               FROM ml.model_version mv WHERE mv.status IN ('champion', 'shadow') AND mv.name = ANY(%s)
+               ORDER BY mv.horizon_code, mv.status""", (list(engine.MODELS),)).fetchall()
         if not versions:
             raise RuntimeError("Kein freigegebenes Modell vorhanden – zuerst 'train' und 'promote' ausführen")
         panel = load_panel(conn)
         ids = dict(conn.execute("SELECT symbol, instrument_id FROM ref.instrument").fetchall())
-        rel = {}
-        for rid, ccy in conn.execute("SELECT relationship_id, currency FROM dep.relationship WHERE driver_key = 'risk:vix'").fetchall():
-            rel[ccy] = rid
         open_issues = conn.execute(
             """SELECT count(*) FROM raw.data_quality_issue WHERE severity IN ('warning','blocking')
                AND check_name IN ('spike','stale') AND resolved_at IS NULL""").fetchone()[0]
@@ -245,8 +241,7 @@ def forecast(conninfo: str, log=print) -> dict:
             mask_unknown = frozen[f"target_date_{horizon}"] > train_end
             frozen.loc[mask_unknown, [f"y_{horizon}", f"cls_{horizon}"]] = np.nan
             champ = next((v for v in hv if v[4] == "champion"), hv[0])
-            use_ret = "ridge" in json.dumps(champ[7])
-            preds = engine.live_forecast(frozen, horizon, champ[1], use_ret, models=tuple(v[1] for v in hv))
+            preds = engine.live_forecast(frozen, horizon, champ[1], models=tuple(v[1] for v in hv))
             target = (last_date + pd.offsets.BDay(h)).date()
             for mid, name, ver, _, status, _, calibrated, _ in hv:
                 for _, r in preds.iterrows():
@@ -257,34 +252,23 @@ def forecast(conninfo: str, log=print) -> dict:
                     band = NEUTRAL_K * r["sigma"] * np.sqrt(h)
                     quant = {f"q{int(q * 100):02d}": round(float(r[f"q{int(q * 100):02d}"]), 6) for q in engine.QUANTILES}
                     regime = vix_regime(pd.Series([r["vix_level"]])).iloc[0]
-                    fid_row = conn.execute(
+                    conn.execute(
                         """INSERT INTO ml.forecast (run_id, model_version_id, instrument_id, horizon_code, snapshot_id,
                                reference_price, target_date, p_bull, p_neutral, p_bear, expected_direction, expected_vol,
                                quantiles, uncertainty, is_display_calibrated, neutral_band, top_drivers, invalidation_rules,
                                is_shadow, expected_return, expected_range_high, expected_range_low, confidence,
                                confidence_label, perf_snapshot)
-                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                           RETURNING forecast_id""",
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                         (run_id, mid, ids[r["pair"]], horizon, snapshots[r["pair"]], float(r["price"]), target,
                          float(probs[2]), float(probs[1]), float(probs[0]), direction, float(r["sigma"] * np.sqrt(h)),
                          json.dumps(quant), float(-(probs * np.log(np.clip(probs, 1e-9, 1))).sum() / np.log(3)),
                          bool(calibrated), json.dumps({"lower": -float(band), "upper": float(band), "k": NEUTRAL_K}),
-                         json.dumps([{"feature": f, "label": FEATURE_LABELS_DE[f], "contribution": round(c, 4)}
-                                     for f, c in r["contrib"]]),
+                         json.dumps([]),
                          json.dumps(_invalidation(r, h)),
-                         status != "champion", float(r["ret_pred"]),
+                         status != "champion", 0.0,
                          None if h == 1 else float(r["hi_pred"]), None if h == 1 else float(r["lo_pred"]),
                          conf, label, json.dumps({"validation": perf.get(mid), "regime": regime,
-                                                  "model": name, "version": ver}))).fetchone()[0]
-                    if status == "champion":
-                        for rank, (f, c) in enumerate(r["contrib"], start=1):
-                            ccy_rel = None
-                            if f in VIX_RELATED:
-                                ccy_rel = rel.get(r["pair"][:3]) or rel.get(r["pair"][3:])
-                            conn.execute(
-                                """INSERT INTO ml.forecast_driver (forecast_id, rank, feature_key, relationship_id,
-                                       contribution, explanation_de) VALUES (%s, %s, %s, %s, %s, %s)""",
-                                (fid_row, rank, f, ccy_rel, round(c, 5), _explain(f, c, r)))
+                                                  "model": name, "version": ver})))
                     result["written"] += 1
         conn.commit()
     log(f"{result['written']} Prognosen für {result['as_of']} gespeichert.")
@@ -299,14 +283,6 @@ def _invalidation(r, h) -> list[dict]:
         {"rule": "risikostimmung", "text_de": "VIX steigt über 30 (Wechsel in ein Stress-Regime)", "vix_above": 30},
         {"rule": "zentralbank", "text_de": "Außerplanmäßige Zinsentscheidung einer der beiden Zentralbanken"},
     ]
-
-
-def _explain(feature: str, contribution: float, r) -> str:
-    direction = "stützt" if contribution > 0 else "belastet"
-    label = FEATURE_LABELS_DE[feature]
-    pair = f"{r['pair'][:3]}/{r['pair'][3:]}"
-    value = r[feature]
-    return f"{label} (Wert {value:+.2f}) {direction} {pair} in diesem Modell."
 
 
 # --------------------------------------------------------------------------- evaluate

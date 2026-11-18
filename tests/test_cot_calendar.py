@@ -1,14 +1,13 @@
-"""Fundamentale Wochenanalyse: COT, Saisonalität, Konfluenz, Kalender (ohne Internet)."""
+"""COT-Positionierung und Wirtschaftskalender: Abruf, Veröffentlichungszeitpunkt, Index (ohne Internet)."""
 
-from datetime import date, datetime, time
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-import numpy as np
 import pandas as pd
 import pytest
 
-from forex_nexus.fundamentals import analysis as A
 from forex_nexus.ingestion import calendar, cot
+from forex_nexus.signals.data import as_of, cot_indices, decision_times
 
 NY = ZoneInfo("America/New_York")
 
@@ -37,56 +36,22 @@ def _cot_frame(net_values, ccy="EUR"):
 
 def test_cot_index_scale_and_window():
     nets = list(range(0, 100)) + [50]
-    idx = A.cot_indices(_cot_frame(nets))
+    idx = cot_indices(_cot_frame(nets))
     assert idx["comm_idx"].iloc[99] == pytest.approx(100)          # Höchststand im Fenster
     assert idx["comm_idx"].iloc[100] == pytest.approx(50 / 99 * 100, rel=1e-6)
     assert idx["spec_idx"].iloc[99] == pytest.approx(0)            # Spekulanten spiegelbildlich
     assert idx["comm_idx"].iloc[:51].isna().all()                   # erst ab 52 Wochen
 
 
-def test_cot_as_of_respects_publication():
-    idx = A.cot_indices(_cot_frame(list(range(60))))
-    last_tuesday = idx["report_date"].iloc[-1]
-    before = datetime.combine(last_tuesday, time(12), NY)            # Dienstag: Bericht noch nicht veröffentlicht
-    assert A.cot_as_of(idx, before).loc["EUR", "report_date"] < last_tuesday
-    after = datetime.combine(last_tuesday, time(12), NY) + pd.Timedelta(days=4)
-    assert A.cot_as_of(idx, after).loc["EUR", "report_date"] == last_tuesday
-
-
-def test_season_signal_rules():
-    assert A.season_signal({"hit": 0.7, "n": 20, "mean": 0.01}) == 1
-    assert A.season_signal({"hit": 0.3, "n": 20, "mean": -0.01}) == -1
-    assert A.season_signal({"hit": 0.55, "n": 20, "mean": 0.01}) == 0
-    assert A.season_signal({"hit": 0.9, "n": 3, "mean": 0.01}) == 0            # zu wenige Jahre
-
-
-def test_season_stats_only_uses_prior_years():
-    idx = pd.date_range("2000-01-31", "2010-12-31", freq="ME")
-    m = pd.DataFrame({"EURUSD": np.where(idx.year < 2010, 0.01, -0.05)}, index=idx)
-    st = A.season_stats(m, before_year=2010)
-    assert st["EURUSD"][3]["mean"] == pytest.approx(0.01)
-    assert st["EURUSD"][3]["n"] == 10
-
-
-def test_pair_view_confluence_and_against():
-    cot_now = pd.DataFrame({"comm_idx": {"EUR": 90.0, "USD": 20.0}})
-    trend = pd.Series({"EUR": 1.0, "USD": -0.2})
-    season = {"EURUSD": {11: {"mean": -0.01, "hit": 0.2, "n": 20, "t": -2.0}}}
-    v = A.pair_view("EURUSD", cot_now, trend, season, 11)
-    assert v.direction == 1 and v.confluence == 2 and v.against == ["season"]
-    v0 = A.pair_view("EURUSD", pd.DataFrame(), pd.Series(dtype=float), {}, 11)
-    assert v0.direction == 0 and v0.confluence == 0
-
-
-def test_wilson_interval():
-    lo, hi = A._wilson(60, 100)
-    assert 0.5 < lo < 0.6 < hi < 0.7
-    assert A._wilson(0, 0) is None
-
-
-def test_pips():
-    assert A.pips("EURUSD", 1.1, np.log(1.001)) == pytest.approx(11.0)
-    assert A.pips("USDJPY", 150.0, np.log(1.001)) == pytest.approx(15.0)
+def test_cot_counts_only_after_publication():
+    idx = cot_indices(_cot_frame(list(range(60))))
+    tuesday = idx["report_date"].iloc[-1]
+    g = idx.set_index(pd.to_datetime(idx["report_date"]))
+    when = decision_times(pd.bdate_range(tuesday, periods=6))     # Di, Mi, Do, Fr, Mo, Di
+    s = as_of(g["comm_idx"], g["available_at"], when, "W")
+    prev = idx["comm_idx"].iloc[-2]
+    assert list(s.iloc[:4]) == [prev] * 4                          # Fr 12:00 New York: Bericht kommt erst 15:30
+    assert s.iloc[4] == idx["comm_idx"].iloc[-1]                   # ab Montag bekannt
 
 
 def test_calendar_parse_filters_and_keys():

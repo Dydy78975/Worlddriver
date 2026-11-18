@@ -16,21 +16,8 @@ import pandas as pd
 HORIZONS = {"1D": 1, "1W": 5, "1M": 20}
 EWMA_LAMBDA = 0.94
 NEUTRAL_K = 0.5
-MOMENTUM_WINDOWS = (5, 20, 60, 250)
-
-# Risikoneigung der Währungen (Expertenannahme, versioniert): positiv = profitiert von Risikofreude
-RISK_SCORE = {"AUD": 1.0, "NZD": 1.0, "CAD": 0.5, "GBP": 0.3, "EUR": 0.0, "USD": -0.5, "CHF": -1.0, "JPY": -1.0}
-
-FEATURES = [f"mom_{n}" for n in MOMENTUM_WINDOWS] + [
-    "vol_ratio", "vix_level", "vix_chg_5d", "risk_score", "vix_x_risk", "dow_0", "dow_4", "month_end"]
-
-FEATURE_LABELS_DE = {
-    "mom_5": "Kursdynamik 1 Woche", "mom_20": "Kursdynamik 1 Monat", "mom_60": "Kursdynamik 3 Monate",
-    "mom_250": "Kursdynamik 1 Jahr", "vol_ratio": "Aktuelle vs. langfristige Schwankung",
-    "vix_level": "Risikostimmung (VIX-Niveau)", "vix_chg_5d": "Veränderung der Risikostimmung (VIX, 5 Tage)",
-    "risk_score": "Risikoprofil des Paares", "vix_x_risk": "Risikostimmung × Risikoprofil des Paares",
-    "dow_0": "Wochentag Montag", "dow_4": "Wochentag Freitag", "month_end": "Monatsende",
-}
+# Nur Schwankungsmerkmale: sie bestimmen Intervall, Spanne und die Schwankungs-Referenz.
+FEATURES = ["vol_ratio", "vix_level", "vix_chg_5d"]
 
 
 def ewma_vol(returns: pd.Series, lam: float = EWMA_LAMBDA) -> pd.Series:
@@ -64,8 +51,6 @@ def build_panel(closes: pd.DataFrame, vix: pd.Series | None = None) -> pd.DataFr
         df["pair"] = pair
         df["price"] = p
         df["sigma"] = sigma
-        for n in MOMENTUM_WINDOWS:
-            df[f"mom_{n}"] = (logp - logp.shift(n)) / (sigma * np.sqrt(n))
         df["vol_ratio"] = r.rolling(20).std() / r.rolling(250).std()
         if vix_prev is not None:
             vp = vix_prev.reindex(p.index)
@@ -74,14 +59,6 @@ def build_panel(closes: pd.DataFrame, vix: pd.Series | None = None) -> pd.DataFr
         else:
             df["vix_level"] = np.nan
             df["vix_chg_5d"] = np.nan
-        rs = RISK_SCORE[pair[:3]] - RISK_SCORE[pair[3:]]
-        df["risk_score"] = rs
-        df["vix_x_risk"] = df["vix_chg_5d"] * rs
-        dow = p.index.day_of_week
-        df["dow_0"] = (dow == 0).astype(float)
-        df["dow_4"] = (dow == 4).astype(float)
-        nxt = p.index[1:].append(pd.DatetimeIndex([p.index[-1] + pd.Timedelta(days=3)]))
-        df["month_end"] = (nxt.month != p.index.month).astype(float)
 
         for code, h in HORIZONS.items():
             fut = logp.shift(-h)

@@ -30,7 +30,7 @@ später dazu. So läuft die Uhr für die Erfolgsmessung bereits, während wir we
 | **3 Features & Validierungsrahmen** | Merkmale, Zielgrößen je Horizont, Walk-Forward mit Purging/Embargo, alle Kennzahlen | Bericht: Wie gut sind Referenzprognosen je Horizont? | 2–3 Wochen |
 | **4 Prognose-Ledger live** | täglicher Lauf: Referenzmodelle für 1D/1W/1M inkl. Volatilität und Spanne; Auswertung; Server | erste echte Prognosen, Forecast-Tracker füllt sich | 1–2 Wochen |
 | **5 Machine Learning** | je Horizont: Volatilität/Spanne (GARCH, HAR, LightGBM), Rendite (Ridge, LightGBM, XGBoost), Richtung (LogReg, LightGBM, XGBoost), Quantile + konforme Kalibrierung, SHAP, Konfidenz | Vergleichstabelle aller Modelle je Horizont/Währung/Regime | 4–6 Wochen |
-| **6 Dependency Engine – Tests** | Validierung der 28 Hypothesen, Überwachung, Entdeckung, „schon eingepreist?“, Ereignisstudien | Übersicht: welche Beziehungen belegt, schwach, gebrochen | 3–4 Wochen |
+| ✅ **Signal-Prüfung und Abstimmung** | 43 Signale × 8 Währungen, Entdeckung/Bestätigung/Schlusstest, Abstimmung je Paar; Dependency Engine entfernt (kein Vorlauf) | [12_signal_abstimmung.md](12_signal_abstimmung.md) | erledigt 18.11.2026 |
 | **7 Historische Analogien & Regime** | vergleichbare Situationen ohne Zukunftsdaten; Regime-Kennzeichnung | „Was passierte mit EUR/USD, wenn …?“ | 2–3 Wochen |
 | **8 Wochenbericht** | „What changed?“ inkl. Tracker („wird das System besser?“) und Wirkungsketten | erster vollständiger Wochenbericht | 1–2 Wochen |
 | **9 Website WorlᗡDriver** | FastAPI + Next.js, Weltkarte, AI Predictions, Tracker, Macro Center, Historical Intelligence | alles im iPhone-Browser | 4–6 Wochen |

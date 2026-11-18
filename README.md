@@ -7,14 +7,17 @@
 Predictive Forex Intelligence Plattform ausschließlich für die 8 Hauptwährungen
 (USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD) und ihre 28 Paare.
 
-Prognosehorizonte: **täglich · wöchentlich · monatlich** – je ein eigenes, validiertes Modell.
-Jede Prognose wird unveränderlich gespeichert und nach Ablauf des Horizonts
-gegen die tatsächliche Entwicklung gemessen.
+Kern: **Signal-Abstimmung je Paar** für Tag und Woche – 43 Signale aus Zinsen, Zinserwartung, Inflation,
+Arbeitsmarkt, Positionierung (COT), Saison, Risikostimmung und Rohstoffen, jedes über 27 Jahre streng geprüft.
+Dazu die erwartete Spanne (80 %) für Tag/Woche/Monat, unveränderlich gespeichert und laufend gegen die
+Realität gemessen.
 
 ## Status
 
-**Erste lauffähige Version (18.11.2026):** Prognose-Engine für Tag/Woche/Monat, unveränderliches Ledger,
-Forecast-Tracker, Dependency Engine und Website. Details: [Stand und Bedienung](docs/10_stand_und_bedienung.md).
+**18.11.2026:** Signal-Prüfung und Abstimmung je Paar, Arbeitslosenquoten aller 8 Währungsräume, schlanke
+Website. Ehrliches Ergebnis: noch kein Signal besteht die Prüfung – siehe
+[Signal-Abstimmung](docs/12_signal_abstimmung.md) und [aktueller Prüfbericht](reports/signals/README.md).
+Details: [Stand und Bedienung](docs/10_stand_und_bedienung.md).
 
 → [Ergebnis Phase 1: Kursdiagramme und Datenqualität](reports/phase1/README.md)
 
@@ -30,19 +33,18 @@ Planungsdokumente:
 6. [Entwicklungsplan](docs/06_entwicklungsplan.md)
 7. [Ergebnisse Phase 1a](docs/07_phase1_ergebnisse.md)
 8. [Quantitative Forecasting Engine](docs/08_quantitative_forecasting.md)
-9. [Global Economic Dependency Engine](docs/09_dependency_engine.md)
 10. [Stand der Software und Bedienung](docs/10_stand_und_bedienung.md)
-11. [Fundamentale Wochenansicht: Cockpit, Paare, Kalender, COT, Saisonalität](docs/11_fundamentale_wochenansicht.md)
+12. [Signal-Abstimmung und Aufräumen](docs/12_signal_abstimmung.md)
+
+(09 Dependency Engine und 11 Fundamentale Wochenansicht wurden am 18.11.2026 entfernt, Begründung in 12.)
 
 Die Website wird mit `python -m forex_nexus daily` erzeugt (`site/index.html`, nicht im Repository, da sie Kalenderdaten zur persönlichen Nutzung enthält).
-
-Weitere Dokumente: – Wissensbasis: [`knowledge/relationships.yaml`](knowledge/relationships.yaml)
 
 ## Grundsätze
 
 * Keine Zukunftsdaten: Jeder Datenpunkt trägt den Zeitpunkt seiner Veröffentlichung.
 * Prognosen sind unveränderlich (von der Datenbank erzwungen).
-* Jedes Modell muss einfache Referenzprognosen schlagen.
+* Jedes Modell und jedes Signal muss einfache Referenzen schlagen – sonst fliegt es raus.
 * Wahrscheinlichkeiten werden nur angezeigt, wenn sie nachweislich kalibriert sind.
 * Neue Modelle nur nach Out-of-Sample-Test, Schattenbetrieb und manueller Freigabe.
 * Statistische Prognose und A+-Trading-Setup sind strikt getrennt.

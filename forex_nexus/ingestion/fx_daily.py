@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import io
 import time as time_mod
-from datetime import date, datetime, time
+from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
 import pandas as pd

@@ -1,10 +1,9 @@
-"""Prognose-Engine: Point-in-Time-Merkmale, Leakage-Schutz im Walk-Forward, Kennzahlen, Dependency-Tests."""
+"""Prognose-Engine: Point-in-Time-Merkmale, Leakage-Schutz im Walk-Forward, Kennzahlen."""
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from forex_nexus.dependencies import validation
 from forex_nexus.fx.crosses import all_pairs_from_usd
 from forex_nexus.models import engine
 from forex_nexus.models.features import FEATURES, build_panel
@@ -85,7 +84,7 @@ def test_walk_forward_never_trains_on_overlapping_targets(panel, horizon, monkey
         return real(model, train, test, h)
 
     monkeypatch.setattr(engine, "_fit_predict_proba", spy)
-    engine.walk_forward(panel, horizon, models=("climatology", "logreg"), log=lambda m: None)
+    engine.walk_forward(panel, horizon, models=("climatology", "volref"), log=lambda m: None)
     assert seen
     for last_target, test_start in seen:
         assert last_target < test_start, "Trainingsziel reicht in den Testzeitraum (Leakage)"
@@ -94,20 +93,17 @@ def test_walk_forward_never_trains_on_overlapping_targets(panel, horizon, monkey
 def test_random_walk_produces_no_false_champion(panel):
     oos = engine.walk_forward(panel, "1W", log=lambda m: None)
     rep = engine.evaluate(oos, "1W")
-    assert 0.45 < rep.validation["logreg"]["hit_rate"] < 0.55
-    # Bei reinem Zufall darf kein Richtungsmodell gewinnen. Die Schwankungs-Referenz darf die reine
-    # Häufigkeit schlagen (sie korrigiert nur die ungenaue Volatilitätsschätzung).
+    assert 0.45 < rep.validation["volref"]["hit_rate"] < 0.55
+    # Die Schwankungs-Referenz darf die reine Häufigkeit schlagen (sie korrigiert nur die ungenaue
+    # Volatilitätsschätzung); eine Richtung kann sie bei Zufall nicht vorhersagen.
     assert rep.champion in ("climatology", "volref")
-    for m in engine.DIRECTIONAL:
-        assert (rep.validation[m]["bss_vs_volref_ci_low"] or -1) <= 0 or rep.validation[m]["bss_ci_low"] <= 0
-    assert not rep.use_return_model
     cov = rep.validation["climatology"]["coverage_80"]
     assert 0.7 < cov < 0.9                       # Intervalle sind auch bei Zufall ehrlich
 
 
 def test_metrics_basics():
     df = pd.DataFrame({"date": pd.bdate_range("2020-01-01", periods=4), "cls": [1, 0, -1, 1],
-                       "y": [0.01, 0.0, -0.01, 0.02], "ret_pred": 0.0, "q05": -1, "q10": -1, "q90": 1, "q95": 1})
+                       "y": [0.01, 0.0, -0.01, 0.02], "q05": -1, "q10": -1, "q90": 1, "q95": 1})
     for m in ("climatology", "perfect"):
         df[f"{m}_p_bear"] = [0, 0, 1, 0] if m == "perfect" else 1 / 3
         df[f"{m}_p_neutral"] = [0, 1, 0, 0] if m == "perfect" else 1 / 3
@@ -125,46 +121,3 @@ def test_display_rules():
     assert not engine.display_allowed({**ok, "ece": 0.08})
     assert not engine.display_allowed({**ok, "effective_n": 100})
 
-
-# --- Dependency Engine: statistische Prüfung -------------------------------------------------------
-
-def _strength_and_driver(kind, seed=11):
-    rng = np.random.default_rng(seed)
-    idx = pd.bdate_range("2000-01-03", "2024-12-31")
-    months = pd.period_range("2000-01", "2024-12", freq="M")
-    shocks = pd.Series(rng.normal(0, 0.05, len(months)), index=months)
-    driver_m = np.exp(np.cumsum(shocks))
-    noise = pd.Series(rng.normal(0, 0.01, len(idx)), index=idx).cumsum()
-    per = idx.to_period("M")
-    if kind == "contemporaneous":
-        level = 0.4 * np.log(driver_m.reindex(per).values)
-    elif kind == "leading":
-        level = 0.4 * np.log(driver_m.shift(3).reindex(per).fillna(1.0).values)
-    else:
-        level = np.zeros(len(idx))
-    strength = pd.DataFrame({"AUD": level + noise.values * 0.2}, index=idx)
-    driver = pd.Series(driver_m.values, index=months.to_timestamp())
-    return strength, driver
-
-
-@pytest.mark.parametrize("kind, verdicts", [
-    ("contemporaneous", {"erklärend", "schwächer werdend"}),
-    ("leading", {"vorauslaufend"}),
-    ("none", {"nicht belegt", "instabil"}),
-])
-def test_dependency_verdicts(kind, verdicts):
-    strength, driver = _strength_and_driver(kind)
-    r = validation.analyse(strength, driver, "AUD", "M", 45, 1)
-    assert r["verdict"] in verdicts, r["verdict"]
-
-
-def test_dependency_wrong_sign_is_flagged():
-    strength, driver = _strength_and_driver("contemporaneous")
-    r = validation.analyse(strength, driver, "AUD", "M", 45, -1)
-    assert r["verdict"] == "gegenteilig"
-
-
-def test_target_lead_respects_publication_lag():
-    assert validation._target_lead("M", 45) == 3      # Monat m bekannt Mitte m+2 -> Ziel m+3
-    assert validation._target_lead("D", 7) == 2
-    assert validation._target_lead("D", 0) == 1

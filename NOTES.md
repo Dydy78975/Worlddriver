@@ -1,59 +1,57 @@
 # Übergabe-Notiz – WorlᗡDriver / FOREX NEXUS AI
 
-Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `claude/forex-nexus-ai-platform-6ez50s`) · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj (privat)
+Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `claude/forex-nexus-ai-platform-6ez50s`)
+· Arbeitsregeln: `CLAUDE.md`
 
 ## Ziel
-- Fundamentales Trading-Tool + Prognose-Plattform **nur** für USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
-- Prognosen Tag (1) / Woche (5) / Monat (20 Handelstage), je **eigenes** Modell, unveränderlich gespeichert, später gegen die Realität gemessen.
-- Fundamentale Wochen- und Tagesansicht: COT, Saisonalität, Kalender (rote Ordner), Zinsen, Währungsstärke, Konfluenz je Paar.
-- Nutzer: Deutsch, keine Programmierkenntnisse, nutzt iPhone/iPad. Design-Vorbild: lenvra.de/Primeedge (nur Anregung, nicht kopieren).
+- Fundamentales Trading-Tool nur für USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
+- Nutzer-Wunsch 18.11.2026: je Paar viele **geprüfte** Signale (Arbeitslosenquote, Zinserwartung,
+  Spekulation …) → Punkte-System „x von y Signalen long = z %“, Tag- und Wochenansicht. Alles Unnötige weg.
+  Nutzen vor Design; leicht verständlich.
+- Nutzer: Deutsch, keine Programmierkenntnisse, iPhone/iPad.
 
 ## Fertig
-- PostgreSQL-Schema (Migrationen 0001–0006): bitemporale Rohdaten (`available_at`), unveränderliches Ledger (Trigger), Modell-Registry, Dependency-Engine, COT, Kalender, Zinsen.
-- Daten: FRED H.10 + Kreuzkurse (28 Paare ab 1999), EZB-Kurse, 14 Rohstoff-/Risikoreihen, VIX, CFTC-COT ab 2005, Forex-Factory-Wochenkalender, Zinsen/Renditen/CPI (FRED).
-- Engine: Referenz, Schwankungs-Referenz, LogReg, LightGBM; Walk-Forward 2006–heute mit Purging/Embargo, Hold-out ab 2022; Quantile/Intervalle; Ledger, Auswertung.
-- Dependency-Engine: 28 Hypothesen (`knowledge/relationships.yaml`), HAC-Tests, Teilperioden, OOS, Benjamini-Hochberg.
-- Fundamentals: COT-Index (Commercials/Spekulanten/Kleinanleger), Saisonalität + Jahresverlauf + Screener (Binomialtest, Bonferroni), Konfluenz je Paar, Wochenaussage, Marktstimmung, Zinsen & Carry; alle Signale historisch geprüft.
-- Website (eine HTML-Datei): Cockpit, Heute, Währungen, Paare (Matrix + Checkliste), Paar-Seite (Woche/Tage), Kalender (Countdown), COT, Saisonalität, Prognosen, Tracker, Zinsen, Makro, Rechner, Weltkarte, Daten. iPad: feste Seitenleiste.
-- 96 Tests grün (lokal + GitHub Actions). Täglicher Check: geplante Aufgabe `trig_017cgKCoLFTF76c2subGa5aC`, 5:36 Europe/Berlin, läuft in dieser Sitzung.
+- Signal-Modul `forex_nexus/signals/`: 43 Signale (`library.py`), Daten point-in-time (`data.py`),
+  Prüfung Entdeckung 1999–2012 (BH 10 %) → Bestätigung 2013–2019 (t > 1) → Schlusstest ab 2020 je
+  Signal × Währung, Tag + Woche, 0,03 % Kosten (`validate.py`), Bericht + Datenstand (`report.py`).
+  Befehl `python -m forex_nexus signals`, Bericht `reports/signals/README.md`.
+- **Ergebnis: 0 von 344 Kombinationen bestehen (Tag und Woche).** Fundamental-Abstimmung (25 Signale,
+  ungeprüft) traf seit 2020 in 50,8 % (Tag) / 50,9 % (Woche). Wird offen so angezeigt. Details:
+  `docs/12_signal_abstimmung.md` (inkl. offengelegter Design-Iterationen).
+- Neu: Arbeitslosenquoten aller 8 Währungsräume (Migration 0007; Eurozone von der EZB, Quelle `ECB_SERIES`).
+- Entfernt (mit Beleg in docs/12): logreg, LightGBM, Ridge-Rendite, Einflussfaktoren, Konfluenz, Saison-Screener,
+  Dependency-Engine + Wissensbasis, 11 Website-Ansichten, 7 ungenutzte Datenreihen (Migration 0008: `ref.series.active`).
+- Engine: nur noch `climatology` + `volref` + Spannen (80-%-Intervall trifft 80 %). 168 Prognosen je Lauf.
+- Website (`site/template.html`, eine Datei): Übersicht (Abstimmung je Paar), Paar-Seite (Signale einzeln mit
+  Schlusstest-Ergebnis, Spanne, Termine, Kurs), Signal-Prüfung, Kalender, Rechner, Datenstand. Mobil geprüft.
+- 78 Tests grün. Migration 0009 legt VIX- und Rohstoffreihen an (früher durch die gelöschte Wissensbasis).
 
-## Gerade in Arbeit
-- Warten auf Design-Feedback des Nutzers zu Version 7 der Website (Ziel: „so sauber wie die Fotos“).
-
-## Erledigt in dieser Sitzung
-- `site/template.html` aufgeräumt: `viewOverview`, `renderStrength`, `spark`, `cotLine` und zugehöriges CSS entfernt; ungenutzter Export `strength` aus `site_export.py` gestrichen. 96 Tests grün.
+## Gerade in Arbeit / nächster Schritt
+- **BIS-Daten anbinden** (`stats.bis.org`, Host in Umgebung „worlddriver“ freigegeben): Verbraucherpreise und
+  offizielle Leitzinsen aller 8 Notenbanken. Erster Abruf wurde am 18.11.2026 von der automatischen
+  Freigabe-Prüfung abgelehnt → Nutzer muss es erlauben. Danach neue Quelle `BIS` (Migration 0010), CPI für
+  GB/JP/CH/CA/AU/NZ ersetzen, Signale neu prüfen.
+- Danach Kandidaten für mehr Signalkraft: 2-J.-Renditen, Konsens-Überraschungen, Dukascopy Hoch/Tief.
 
 ## Offen / bekannte Probleme
-- **Kein dauerhafter Betrieb:** Cloud-DB ist temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`) → echte Live-Bilanz braucht Server oder verwaltete DB.
-- Kurse = FRED-Mittagskurse, nur wöchentlich aktualisiert; Dukascopy (Hoch/Tief, 17:00 NY) blockiert die Cloud-IP → auf eigenem Server laden (`download-dukascopy`).
-- Inflation nur für USA/Eurozone aktuell; GB/JP/CH/CA/AU/NZ veraltet (OECD auf FRED endet) → nationale Statistikämter anbinden.
-- Modelle wurden von Claude zur Inbetriebnahme eingesetzt → Bestätigung durch Nutzer ausstehend.
-- Fehlende Treiberdaten: Milchpreise (GDT), Gold, China-Aktivität.
+- **Kein dauerhafter Betrieb:** Cloud-DB temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`; Neuaufbau:
+  initdb + `migrate` + `ingest-fx` + `ingest-fred-series` + `ingest-cot` + `ingest-calendar` + `train` +
+  `promote` + `forecast` + `build-site`).
+- Kurse = FRED-Mittagskurse (wöchentlich aktualisiert); Dukascopy nur vom eigenen Server.
+- Inflation für GBP, JPY, CHF, CAD, AUD, NZD veraltet → diese Inflationssignale stehen auf neutral.
+- Modelle wurden von Claude zur Inbetriebnahme freigegeben → Bestätigung durch Nutzer ausstehend.
 - A+-Regel-Engine: wartet auf die 6 Kriterien des Nutzers.
-- Richtungsmodelle schlagen die Referenzen nicht; COT/Saison/Konfluenz historisch ≈ Zufall (wird offen angezeigt).
-- Geplante Aufgabe hat keine Connectors; sie ist an die **alte** Sitzung gebunden, nicht an diese.
+- Die geplante tägliche Aufgabe (`trig_017cgKCoLFTF76c2subGa5aC`) ist an die alte Sitzung gebunden.
 
 ## Wichtige Dateien
-- `db/migrations/000X_*.sql` – Schema; nie ändern, nur neue Datei anlegen (Prüfsummenschutz).
-- `forex_nexus/__main__.py` – CLI: `migrate`, `ingest-fx`, `ingest-fred-series`, `ingest-cot`, `ingest-calendar`, `load-knowledge`, `train`, `promote`, `forecast`, `evaluate`, `validate-dependencies`, `build-site`, `daily`.
-- `forex_nexus/ingestion/` – Abrufe (FRED, EZB, Dukascopy, CFTC, Kalender, HTTP mit Retry).
-- `forex_nexus/models/` – Merkmale (point-in-time) und Engine (Walk-Forward, Kennzahlen).
-- `forex_nexus/ledger/pipeline.py` – train/promote/forecast/evaluate.
-- `forex_nexus/fundamentals/` – COT, Saison, Konfluenz (`analysis.py`), Screener/Stimmung (`extras.py`), Zinsen (`rates.py`), Export (`export.py`).
-- `forex_nexus/dependencies/` – Wissensbasis laden, statistische Prüfung.
-- `forex_nexus/reports/site_export.py` – sammelt Daten → `site/index.html` aus `site/template.html`.
-- `knowledge/relationships.yaml` – Wirtschaftsbeziehungen (für Nutzer lesbar).
-- `docs/01–11*.md`, `docs/ANLEITUNG.md` – Planung, Methodik, Ergebnisse, iPhone-Anleitung.
-- `tests/` – pytest; `conftest.py` startet temporäres PostgreSQL 16 (als root via `runuser postgres`).
+- `db/migrations/000X_*.sql` – Schema; nie ändern, nur neue Datei anlegen.
+- `forex_nexus/__main__.py` – CLI (`daily` = alles).
+- `forex_nexus/signals/` – Signale, Prüfung, Abstimmung, Bericht.
+- `forex_nexus/models/`, `forex_nexus/ledger/pipeline.py` – Spannen-Prognose, Ledger, train/promote/forecast/evaluate.
+- `forex_nexus/ingestion/` – FRED, EZB, CFTC, Kalender, Dukascopy.
+- `forex_nexus/reports/site_export.py` – Daten → `site/index.html` aus `site/template.html`.
+- `tests/` – pytest; `conftest.py` startet temporäres PostgreSQL 16.
 
 ## Regeln und Entscheidungen
-- Sprache: Python 3.12+ (lokal 3.13), PostgreSQL 16, psycopg 3, pandas, scikit-learn, LightGBM, statsmodels; Website = Vanilla JS/SVG in einer Datei (keine Frameworks), Schriften Inter / Inter Tight / JetBrains Mono.
-- Alle Texte für den Nutzer auf Deutsch, verständlich, deutsches Zahlenformat.
-- Keine Zukunftsdaten: jeder Wert mit `available_at`; COT erst ab Freitag 15:30 NY; VIX vom Vortag; Saison nur Vorjahre.
-- Ehrlichkeit: Signale nur mit historischer Trefferquote zeigen; nie Modelle/Schwellen/Tests ändern, damit Ergebnisse besser aussehen; Schwankungs-Referenz gegen Scheinvorteile.
-- Kein automatisches Umstellen im Live-Betrieb: neue Modelle nur über `train` + `promote` (mit Namen); täglicher Lauf nutzt eingefrorenen `train_end`.
-- „Validiert“ bei Wirtschaftsbeziehungen nur durch eine Person mit bestandenem Test (DB-Trigger).
-- Repo ist **öffentlich**: `site/index.html` und Dukascopy-Daten (`data/`) nicht committen (Lizenz: nur privat).
-- Abrufe mit ehrlicher Programmkennung, nie als Browser tarnen.
-- Netzwerk-Umgebung „worlddriver“: FRED, EZB, Dukascopy, CFTC, nfs.faireconomy.media freigegeben.
-- Nie auf `main` pushen; PRs nur auf Wunsch; Commits mit Co-Authored-By-Zeile.
+- Siehe `CLAUDE.md`. Kurz: keine Zukunftsdaten; Prüfregeln nie nachträglich zugunsten der Ergebnisse ändern;
+  Ledger unveränderlich; Migrationen nur ergänzen; `site/index.html` und `data/` nie committen; nie auf `main` pushen.

@@ -1,1380 +1,372 @@
 <title>WorlᗡDriver</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="WorlᗡDriver – Prognosen und Wirtschaftsbeziehungen für die 8 Hauptwährungen und ihre 28 Paare">
+<meta name="description" content="WorlᗡDriver – geprüfte Signale und Signal-Abstimmung für die 28 Paare der 8 Hauptwährungen">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: Kopfzeile mit Logo + Status, darunter Reiter; Inhalt als ruhige Spalte (max. 1100px), Karten nur wo sie Objekte trennen */
-/* Layout: Kopfleiste mit Menü-Knopf und Seitentitel, ausklappbares Seitenmenü; Inhalt als ruhige Spalte bis 1100px.
-   Ton: redaktionell – große Aussage oben, darunter belegte Fakten mit Quellen-Verweisen [1]. */
+/* Aufbau: Kopfleiste mit Menü, eine ruhige Spalte bis 1000px. Jede Seite beantwortet eine Frage:
+   Übersicht „Wohin zeigen die Signale?“, Paar „Warum?“, Prüfung „Kann ich dem trauen?“. */
 :root{
   color-scheme:dark;
-  --bg:#0c0e13; --surface:#13161d; --surface-2:#1a1e27; --line:#272c38; --line-soft:#1d212b;
-  --fg:#eef0f4; --fg-2:#a7adbb; --fg-3:#767d8e;
-  --accent:#7b93ff; --accent-ink:#0c0e13;
-  --strong:#7cb6ff; --weak:#f2a65e; --bull:#4fb3a4; --bear:#ef8d4f; --neutral:#7f8697;
-  --pink:#ef6f8f; --red:#e5484d; --orange:#f0913a; --yellow:#e2b43c; --holiday:#8a90a0;
-  --good:#3fb97e; --warn:#e2b43c; --bad:#e5484d;
+  --bg:#0c0e13;--surface:#13161d;--surface-2:#1a1e27;--line:#272c38;--line-soft:#1d212b;
+  --fg:#eef0f4;--fg-2:#a7adbb;--fg-3:#767d8e;--accent:#7b93ff;
+  --bull:#4fb3a4;--bear:#ef8d4f;--neutral:#5b6070;--good:#3fb97e;--warn:#e2b43c;--bad:#e5484d;--red:#e5484d;--orange:#f0913a;
   --font-display:"Inter Tight","Inter",ui-sans-serif,system-ui,sans-serif;
   --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-data:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --r:14px;
+  --font-data:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;--r:14px;
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  color-scheme:light;--bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
-  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--accent-ink:#ffffff;
-  --strong:#2367c9;--weak:#c0661c;--bull:#17806f;--bear:#c25a1a;--neutral:#7a8090;
-  --pink:#c9416a;--red:#d1343a;--orange:#d9761e;--yellow:#b88a0e;--holiday:#7a8090;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}}
+  color-scheme:light;--bg:#f6f7f9;--surface:#fff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
+  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--bull:#17806f;--bear:#c25a1a;--neutral:#b4b9c4;
+  --good:#1f8a50;--warn:#a87508;--bad:#c23a24;--red:#d1343a;--orange:#d9761e}}
 :root[data-theme="light"]{
-  color-scheme:light;--bg:#f6f7f9;--surface:#ffffff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
-  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--accent-ink:#ffffff;
-  --strong:#2367c9;--weak:#c0661c;--bull:#17806f;--bear:#c25a1a;--neutral:#7a8090;
-  --pink:#c9416a;--red:#d1343a;--orange:#d9761e;--yellow:#b88a0e;--holiday:#7a8090;--good:#1f8a50;--warn:#a87508;--bad:#c23a24}
+  color-scheme:light;--bg:#f6f7f9;--surface:#fff;--surface-2:#eef0f4;--line:#d9dde6;--line-soft:#e7eaf0;
+  --fg:#12141a;--fg-2:#4a5162;--fg-3:#6f7687;--accent:#4a5fe0;--bull:#17806f;--bear:#c25a1a;--neutral:#b4b9c4;
+  --good:#1f8a50;--warn:#a87508;--bad:#c23a24;--red:#d1343a;--orange:#d9761e}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:var(--accent)}
-h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
-h2{font-size:1.25rem}
-h3{font-size:1rem}
+h1,h2,h3{font-family:var(--font-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:clamp(1.9rem,7vw,2.8rem);font-weight:800;letter-spacing:-.03em;line-height:1.08}
+h2{font-size:1.15rem} h3{font-size:1rem}
 p{margin:0}
 .num{font-family:var(--font-data);font-variant-numeric:tabular-nums}
-.muted{color:var(--fg-2)} .faint{color:var(--fg-3)}
-.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-
-/* Kopf und Seitenmenü */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
+.muted{color:var(--fg-2)} .faint{color:var(--fg-3)} .small{font-size:.82rem}
+.wrap{max-width:1000px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft);padding-top:env(safe-area-inset-top,0px)}
 .top-row{display:flex;align-items:center;gap:12px;padding-block:10px}
-.iconbtn{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:12px;color:var(--fg);flex:none}
-.iconbtn:hover{background:var(--surface-2)}
-.top-title{font-weight:600;font-size:1rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.brand{display:flex;align-items:center;text-decoration:none;color:var(--fg)}
-.brand svg{height:22px;width:auto;display:block}
-.status{display:flex;gap:6px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.76rem;color:var(--fg-2);white-space:nowrap;background:var(--surface);font-family:var(--font-data)}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--fg-3);flex:none}
-.dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)} .dot.live{background:var(--accent)}
+.iconbtn{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:12px;flex:none}
+.top-title{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand{font-family:var(--font-display);font-weight:800;font-size:1.1rem;text-decoration:none;color:var(--fg);letter-spacing:-.02em}
+.brand i{font-style:normal;color:var(--accent)} .brand i.m{display:inline-block;transform:scaleX(-1)}
 .scrim{position:fixed;inset:0;background:rgb(0 0 0 / .45);z-index:40}
-aside.drawer{position:fixed;top:0;bottom:0;left:0;width:min(340px,88vw);z-index:50;background:var(--surface);border-right:1px solid var(--line);
-  padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 18px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px;overflow-y:auto;transform:translateX(-102%);transition:transform .2s ease}
+aside.drawer{position:fixed;top:0;bottom:0;left:0;width:min(300px,86vw);z-index:50;background:var(--surface);border-right:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 16px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px;overflow-y:auto;transform:translateX(-102%);transition:transform .2s}
 aside.drawer.open{transform:none}
 @media (prefers-reduced-motion:reduce){aside.drawer{transition:none}}
-.drawer-head{display:flex;justify-content:space-between;align-items:center}
 .drawer nav{display:grid;gap:2px}
-.drawer nav a{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--fg);padding:10px 12px;border-radius:10px;font-size:1rem}
-.drawer nav a svg{width:20px;height:20px;color:var(--fg-2);flex:none}
+.drawer nav a{text-decoration:none;color:var(--fg);padding:10px 12px;border-radius:10px}
 .drawer nav a[aria-current="page"]{background:var(--surface-2)}
-.drawer nav a span.k{margin-left:auto;font-family:var(--font-data);font-size:.72rem;color:var(--fg-3)}
-.drawer .sep{height:1px;background:var(--line-soft)}
-.next-ev{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;text-decoration:none;color:var(--fg)}
-.next-ev small{grid-column:2;color:var(--fg-3);font-family:var(--font-data);font-size:.76rem}
-.folder{display:inline-block;width:16px;height:12px;flex:none;vertical-align:middle}
+@media (min-width:1100px){
+  aside.drawer{transform:none;width:240px;z-index:25}
+  #menu-btn,#close-btn{display:none} .scrim{display:none!important}
+  header.top,main,footer{margin-left:240px}
+}
 main{padding-block:20px 48px}
-section.view{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
-section.view>*,.grid-2>*,.grid-3>*,.kpis>*{min-width:0}
-.lede{display:grid;gap:6px}
-.lede h1{font-size:clamp(2.1rem,7.5vw,3.4rem);font-weight:800;letter-spacing:-.04em;line-height:1.04}
-.lede p{max-width:68ch;color:var(--fg-2)}
-.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:16px}
-.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.label{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3);font-weight:600}
-.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-@media (max-width:760px){.grid-3,.grid-2{grid-template-columns:minmax(0,1fr)}}
-
-/* Horizont-Karten */
-.hz{display:grid;gap:10px;align-content:start;min-width:0}
-.hz .verdict{font-size:.92rem}
-.kv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:6px 14px;font-size:.88rem}
-.hz .kv{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
-.kv dt{color:var(--fg-2)} .kv dd{margin:0;text-align:right}
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 9px;font-size:.76rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
-.pill.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent);background:color-mix(in srgb,var(--good) 12%,transparent)}
-.pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 12%,transparent)}
-.pill.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 12%,transparent)}
-.pill.info{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
-.pill.plain{color:var(--fg-2);border-color:var(--line)}
-.pill.dashed{color:var(--fg-3);border:1px dashed var(--line)}
-
-/* Währungsstärke */
-.ccy{font-family:var(--font-display);font-weight:600}
+section.view{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+section.view>*{min-width:0}
+.lede{display:grid;gap:8px} .lede p{color:var(--fg-2);max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:720px){.grid-2{grid-template-columns:minmax(0,1fr)}}
+.honest{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);background:color-mix(in srgb,var(--warn) 8%,transparent);border-radius:12px;padding:12px 14px;font-size:.9rem}
+.honest b{color:var(--fg)} .honest svg{color:var(--warn);margin-top:2px}
 .seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
-.seg button{all:unset;cursor:pointer;text-align:center;padding:5px 12px;border-radius:7px;font-size:.86rem;color:var(--fg-2);font-weight:500}
+.seg button{all:unset;cursor:pointer;padding:6px 14px;border-radius:7px;font-size:.88rem;color:var(--fg-2);font-weight:500}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgb(0 0 0 / .25)}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips button{all:unset;cursor:pointer;font-size:.82rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--fg-2)}
-.chips button[aria-pressed="true"]{border-color:var(--accent);color:var(--fg);background:color-mix(in srgb,var(--accent) 14%,transparent)}
-select{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:.86rem}
-
-/* Prognoseliste */
-.fc-list{display:grid;gap:8px}
-.fc{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden}
-.fc>button{all:unset;cursor:pointer;display:grid;grid-template-columns:96px minmax(0,1fr) 150px 90px;gap:14px;align-items:center;padding:12px 14px;width:100%;box-sizing:border-box}
-.fc>button:hover{background:var(--surface-2)}
-.fc .pair{font-family:var(--font-display);font-weight:600;font-size:1.02rem}
-.fc .price{font-size:.8rem;color:var(--fg-3)}
-.probbar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:2px;background:var(--bg)}
-.probbar span{display:flex;align-items:center;justify-content:center;font-size:.72rem;font-family:var(--font-data);color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
-.probbar .b{background:var(--bear)} .probbar .n{background:var(--neutral)} .probbar .u{background:var(--bull)}
-.probmeta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg-3);margin-top:4px}
-.interval{font-size:.82rem;text-align:right}
-.interval small{display:block;color:var(--fg-3);font-size:.72rem}
-.fc .conf{justify-self:end}
-.fc-detail{border-top:1px solid var(--line-soft);padding:16px 14px;display:grid;gap:16px}
-@media (max-width:760px){
-  .fc>button{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"pair conf" "bar bar" "int int";row-gap:10px}
-  .fc>button .c-pair{grid-area:pair} .fc>button .c-bar{grid-area:bar} .fc>button .c-int{grid-area:int} .fc>button .conf{grid-area:conf}
-  .interval{text-align:left}
-}
-.drivers{display:grid;gap:8px}
-.drv{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:center;font-size:.88rem}
-.drv-bar{position:relative;height:8px;background:var(--surface-2);border-radius:4px}
-.drv-bar i{position:absolute;top:0;height:8px;border-radius:4px}
-.drv-bar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
-ul.plain{margin:0;padding-left:18px;display:grid;gap:4px;color:var(--fg-2);font-size:.9rem}
-.note{font-size:.84rem;color:var(--fg-2);border-left:2px solid var(--line);padding-left:10px}
-
-/* Diagramme */
-svg.chart{width:100%;height:auto;display:block;overflow:visible}
-svg.chart text{fill:var(--fg-3);font-family:var(--font-body);font-size:11px}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2)}
-.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
-
-/* Tabellen */
-.tbl-wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.86rem}
-th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap}
-th:first-child,td:first-child{text-align:left}
-th{font-weight:600;color:var(--fg-3);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
-td.num,th.num{font-family:var(--font-data)}
-
-/* KPI */
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.kpi{display:grid;gap:2px}
-.kpi b{font-family:var(--font-display);font-size:1.5rem;font-weight:600}
-
-/* Karte */
-.map-wrap{position:relative}
-svg.map{width:100%;height:auto;display:block}
-svg.map path.land{fill:var(--surface-2);stroke:var(--bg);stroke-width:.4}
-svg.map path.eco{fill:color-mix(in srgb,var(--accent) 30%,var(--surface-2))}
-svg.map path.eco.sel{fill:color-mix(in srgb,var(--accent) 55%,var(--surface-2))}
-svg.map .flow{fill:none;stroke-width:1.6;stroke-linecap:round}
-svg.map .marker{cursor:pointer}
-svg.map .marker circle{fill:var(--bg);stroke:var(--accent);stroke-width:1.6}
-svg.map .marker circle.hit{fill:transparent;stroke:none}
-svg.map .marker.sel circle{fill:var(--accent)}
-svg.map .marker text{font-family:var(--font-display);font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--bg)}
-svg.map .flowlabel{fill:var(--fg-2);paint-order:stroke;stroke:var(--bg)}
-
-/* Beziehungen */
-.deps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-@media (max-width:760px){.deps{grid-template-columns:minmax(0,1fr)}}
-.dep{display:grid;gap:10px;align-content:start;min-width:0}
-.dep-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.dep-title{font-family:var(--font-display);font-weight:600}
-ol.chain{margin:0;padding-left:20px;display:grid;gap:3px;font-size:.88rem;color:var(--fg-2)}
-.stats{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2)}
-.stats b{color:var(--fg);font-weight:500}
-.subs{display:inline-flex;gap:4px;vertical-align:middle}
-.subs i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
-details summary{cursor:pointer;color:var(--fg-2);font-size:.86rem}
-.empty{padding:22px;border:1px dashed var(--line);border-radius:var(--r);color:var(--fg-2);display:grid;gap:6px}
-footer{border-top:1px solid var(--line-soft);padding-block:20px 32px;color:var(--fg-3);font-size:.8rem;display:grid;gap:6px}
-@media (prefers-reduced-motion:no-preference){.fc-detail{animation:open .18s ease-out}@keyframes open{from{opacity:.4;transform:translateY(-4px)}to{opacity:1;transform:none}}}
-
-/* Redaktionelle Seiten (Cockpit, Paare, Kalender, COT, Saisonalität) */
-h1,h2,h3{font-family:var(--font-display)}
-.eyebrow{font-family:var(--font-data);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-3)}
-.eyebrow b{color:var(--accent);font-weight:600}
-.hero{display:grid;gap:18px;padding-block:6px 4px}
-.hero h1{font-weight:800;font-size:clamp(2.5rem,10.5vw,5rem);line-height:1;letter-spacing:-.045em}
-.hero h1 .s{color:var(--strong)} .hero h1 .w{color:var(--weak)}
-.brief{font-family:var(--font-display);font-weight:500;font-size:clamp(1.12rem,4.4vw,1.55rem);line-height:1.5;color:var(--fg-2);max-width:42ch;letter-spacing:-.01em}
-.brief b{color:var(--fg);font-weight:600} .brief .s{color:var(--strong)} .brief .w{color:var(--weak)} .brief .y{color:var(--yellow)}
-sup.ref{font-family:var(--font-data);font-size:.58em;margin-left:2px}
-sup.ref a{color:var(--accent);text-decoration:none}
-.srcline{display:flex;gap:8px;align-items:center;font-size:.84rem;color:var(--fg-3)}
-.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.tile{display:grid;gap:4px}
-.tile .big{font-family:var(--font-display);font-weight:700;font-size:clamp(2.2rem,9vw,3.2rem);letter-spacing:-.03em;line-height:1}
-.honest{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:.88rem;color:var(--fg-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface)}
-.honest svg{color:var(--accent);margin-top:2px}
-ol.sources{margin:0;padding-left:0;list-style:none;display:grid;gap:6px;font-size:.84rem;color:var(--fg-2)}
-ol.sources li{display:grid;grid-template-columns:30px 1fr;gap:6px}
-ol.sources li span:first-child{font-family:var(--font-data);color:var(--accent)}
-.section-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.dir{display:inline-flex;align-items:center;justify-content:center;min-width:76px;font-family:var(--font-data);font-weight:600;font-size:.78rem;letter-spacing:.06em;border-radius:999px;padding:4px 10px;border:1px solid var(--line);color:var(--fg-3)}
-.dir.long{color:var(--strong);border-color:color-mix(in srgb,var(--strong) 50%,transparent);background:color-mix(in srgb,var(--strong) 12%,transparent)}
-.dir.short{color:var(--weak);border-color:color-mix(in srgb,var(--weak) 50%,transparent);background:color-mix(in srgb,var(--weak) 12%,transparent)}
-.cdots{display:inline-flex;gap:4px;align-items:center;vertical-align:middle}
-.cdots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--fg-3)}
-.cdots i.on{background:var(--fg);border-color:var(--fg)}
-.rows{display:grid}
-.prow{display:grid;grid-template-columns:minmax(84px,1.1fr) auto minmax(70px,.8fr) minmax(56px,.6fr) minmax(70px,.7fr);gap:12px;align-items:center;padding:13px 4px;border-bottom:1px dashed var(--line-soft);text-decoration:none;color:var(--fg)}
-.prow:hover{background:var(--surface)}
-.prow .pair{font-family:var(--font-display);font-weight:700;font-size:1.05rem}
-.prow.head{font-family:var(--font-data);font-size:.7rem;letter-spacing:.1em;color:var(--fg-3);text-transform:uppercase;border-bottom:1px solid var(--line)}
-.prow .val{font-family:var(--font-data);font-size:.86rem}
-.prow .val.s{color:var(--strong)} .prow .val.w{color:var(--weak)}
-@media (max-width:560px){.prow{grid-template-columns:minmax(78px,1fr) auto auto;}.prow .hide-s{display:none}}
-.ev{display:grid;grid-template-columns:72px 18px 38px minmax(0,1fr);gap:10px;align-items:center;padding:10px 4px;border-bottom:1px dashed var(--line-soft)}
-.ev.past{opacity:.5}
-.ev .t{font-family:var(--font-data);font-size:.82rem;color:var(--fg-2);white-space:nowrap;min-width:44px}
-.ev .c{font-family:var(--font-data);font-weight:600;font-size:.82rem}
-.ev.nodate{grid-template-columns:48px 18px 38px minmax(0,1fr)}
-.ev .vals span{white-space:nowrap}
-.ev .vals{grid-column:4;display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--font-data);font-size:.76rem;color:var(--fg-3)}
-.dayhead{display:flex;justify-content:space-between;align-items:baseline;padding:16px 4px 6px;border-bottom:1px solid var(--line)}
-.dayhead h3{font-size:1.05rem}
-.dayhead.today h3::after{content:"heute";margin-left:8px;font-family:var(--font-data);font-size:.68rem;letter-spacing:.08em;color:var(--accent);text-transform:uppercase;vertical-align:middle}
-.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-@media (max-width:760px){.days{grid-template-columns:minmax(0,1fr)}}
-.daycard{border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;display:grid;gap:6px;align-content:start;background:var(--surface)}
-.daycard .d{font-family:var(--font-data);font-size:.74rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.06em}
-.daycard .e{display:grid;grid-template-columns:auto 1fr;gap:6px;font-size:.84rem;align-items:start}
-.factor{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-bottom:1px dashed var(--line-soft)}
-.factor:last-child{border-bottom:0}
-.sig{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-data);font-weight:700;font-size:.8rem;border:1px solid var(--line);color:var(--fg-3)}
-.sig.up{color:var(--strong);border-color:color-mix(in srgb,var(--strong) 50%,transparent)}
-.sig.down{color:var(--weak);border-color:color-mix(in srgb,var(--weak) 50%,transparent)}
-.cotgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-@media (max-width:900px){.cotgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:330px){.cotgrid{grid-template-columns:minmax(0,1fr)}}
-@media (max-width:520px){.cot .idx{font-size:2.1rem}.cot .nums{font-size:.74rem}.cot{padding:12px}}
-.cot{display:grid;gap:10px;align-content:start}
-.cot .top{display:flex;justify-content:space-between;align-items:baseline}
-.cot .ccy{font-family:var(--font-data);font-weight:600;font-size:1.05rem}
-.cot .idx{font-family:var(--font-display);font-weight:800;font-size:2.6rem;line-height:1;letter-spacing:-.03em}
-.cot .idx.hi{color:var(--strong)} .cot .idx.lo{color:var(--weak)}
-.meter{position:relative;height:14px;border-radius:7px;background:var(--surface-2);overflow:hidden}
-.meter .z{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--yellow) 18%,transparent)}
-.meter .m{position:absolute;top:-2px;width:3px;height:18px;border-radius:2px;transform:translateX(-1.5px)}
-.mlabels{display:flex;justify-content:space-between;font-family:var(--font-data);font-size:.66rem;color:var(--fg-3)}
-.cot .nums{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.8rem;color:var(--fg-2)}
-.cot .nums b{font-family:var(--font-data);font-weight:500;color:var(--fg);text-align:right}
-.legend-s{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--fg-2);align-items:center}
-.legend-s i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
-.bigstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-@media (max-width:640px){.bigstat{grid-template-columns:minmax(0,1fr)}}
-.bigstat .tile .big{font-size:2.2rem}
-
-/* Version 2: Seitenleiste auf iPad/Desktop, Matrix, Checkliste, Pegel, Rechner */
-@media (min-width:1000px){
-  aside.drawer{transform:none;width:268px;z-index:25;padding-top:calc(env(safe-area-inset-top,0px) + 16px)}
-  #menu-btn,#close-btn{display:none}
-  .scrim{display:none!important}
-  body{padding-left:268px}
-  .wrap{max-width:1180px}
-}
-.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
-@media (max-width:900px){.split{grid-template-columns:minmax(0,1fr)}}
-.mx-wrap{overflow-x:auto;margin-top:12px}
-.mx{display:grid;gap:4px;min-width:320px}
-.mx-h,.mx-r{font-family:var(--font-data);font-weight:600;font-size:.8rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
-.mx-r{align-items:flex-start}
-.mx-h small,.mx-r small{font-weight:400;font-size:.62rem;color:var(--fg-3)}
-.mx-self{display:grid;place-items:center;font-family:var(--font-data);font-size:.62rem;color:var(--fg-3);border:1px dashed var(--line);border-radius:8px;aspect-ratio:1/1.15}
-.mx-cell{all:unset;cursor:pointer;display:grid;place-items:center;font-family:var(--font-data);font-weight:600;font-size:.74rem;border-radius:8px;aspect-ratio:1/1.15;color:var(--fg);transition:transform .12s}
-.mx-cell:hover{transform:scale(1.06)}
-.mx-cell.on{outline:2px solid var(--fg);outline-offset:1px}
-.mx-cell:focus-visible{outline:2px solid var(--accent)}
-.bdist{margin-top:16px}
-.bdist .track{position:relative;height:6px;border-radius:3px;background:var(--surface-2);margin:26px 0 30px}
-.bdist .seg-fill{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--weak),var(--strong))}
-.bdist .pin{position:absolute;top:-5px;width:16px;height:16px;border-radius:50%;background:var(--surface);border:2px solid var(--fg);transform:translateX(-8px)}
-.bdist .pin b{position:absolute;top:20px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:var(--font-data);font-size:.7rem;font-weight:600}
-.bdist .pin.top b{top:-20px}
-.checklist{display:grid}
-.ckrow{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;padding:9px 0;border-bottom:1px dashed var(--line-soft)}
-.ckrow:last-child{border-bottom:0}
-.ckrow b{display:block;font-size:.92rem}
-.ckrow span{font-size:.84rem;color:var(--fg-2)}
-.ck{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:.78rem;font-weight:700;border:1px solid var(--line);color:var(--fg-3)}
-.ck.ok{background:color-mix(in srgb,var(--strong) 18%,transparent);color:var(--strong);border-color:transparent}
-.ck.no{background:color-mix(in srgb,var(--weak) 18%,transparent);color:var(--weak);border-color:transparent}
-.ck.warn{background:color-mix(in srgb,var(--yellow) 20%,transparent);color:var(--yellow);border-color:transparent}
-.rank{display:grid;grid-template-columns:22px 40px minmax(0,1fr) 72px;gap:10px;align-items:center}
-.rank .num.pos{color:var(--strong);text-align:right} .rank .num.neg{color:var(--weak);text-align:right}
-.rank > .num:last-child{text-align:right}
-.rbar{position:relative;height:10px;border-radius:5px;background:var(--surface-2)}
-.rbar i{position:absolute;top:0;bottom:0;border-radius:5px}
-.rbar .mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
-.rbar .knob{position:absolute;top:-4px;width:14px;height:14px;border-radius:50%;border:2.5px solid;background:var(--surface);transform:translateX(-7px)}
-.tanks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-@media (max-width:640px){.tanks{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.tank{all:unset;cursor:pointer;display:grid;gap:8px;padding:12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line-soft)}
-.tank.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-.tank.ext{border-color:color-mix(in srgb,var(--yellow) 55%,transparent)}
-.tank.ext.on{border-color:var(--accent)}
-.tank .th{display:flex;justify-content:space-between;align-items:baseline}
-.tank .th b{font-family:var(--font-data);font-size:.95rem}
-.tank .th .num{font-family:var(--font-display);font-weight:800;font-size:1.7rem;letter-spacing:-.02em}
-.y{color:var(--yellow)}
-.tank .tv{position:relative;height:96px;border-radius:10px;background:var(--bg);overflow:hidden;border:1px solid var(--line-soft)}
-.tank .tv .fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,color-mix(in srgb,var(--strong) 85%,transparent),color-mix(in srgb,var(--strong) 35%,transparent))}
-.tank .tv .zl{position:absolute;left:0;right:0;border-top:1px dashed color-mix(in srgb,var(--yellow) 70%,transparent);z-index:1}
-.tank .tv .sm{position:absolute;right:8px;width:20px;height:3px;border-radius:2px;background:var(--pink);z-index:2}
-.tank .tf{display:flex;justify-content:space-between;font-size:.74rem;font-family:var(--font-data)}
-.hm{display:grid;gap:4px;margin-top:12px}
-.hm-h{font-family:var(--font-data);font-size:.7rem;color:var(--fg-3);text-align:center;text-transform:uppercase;letter-spacing:.06em}
-.hm-c{display:grid;place-items:center;height:34px;border-radius:7px;font-family:var(--font-data);font-weight:600;font-size:.8rem}
-.mood{border-color:var(--line)}
-.calc{display:grid;gap:8px}
-.fld{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--line-soft);border-radius:10px;background:var(--bg)}
-.fld span{font-size:.9rem;color:var(--fg-2)}
-.fld input,.fld select{width:130px;text-align:right;font-family:var(--font-data);font-size:.95rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
-.nextcard{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
-.nc-ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line)}
-.nc-ico .folder{width:22px;height:17px}
-.nc-cd{text-align:right;display:grid;gap:2px}
-.nc-cd b{font-size:1.4rem;font-family:var(--font-data);color:var(--accent)}
-@media (max-width:560px){.nextcard{grid-template-columns:auto minmax(0,1fr)}.nc-cd{grid-column:1/-1;text-align:left;display:flex;gap:10px;align-items:baseline}}
-.rows.compact .prow{grid-template-columns:minmax(78px,1fr) auto auto}.rows.compact .hide-s{display:none}
-.bigstat.four{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media (max-width:760px){.bigstat.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.mx.flat .mx-cell,.mx.flat .mx-self{aspect-ratio:auto;height:40px}
-.mx{max-width:720px}
-@media (max-width:640px){td.hide-s,th.hide-s{display:none}}
+select,input{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;font-size:.9rem;min-width:0}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:.76rem;font-weight:600;white-space:nowrap;border:1px solid var(--line);color:var(--fg-2)}
+.pill.long{color:var(--bull);border-color:color-mix(in srgb,var(--bull) 50%,transparent);background:color-mix(in srgb,var(--bull) 12%,transparent)}
+.pill.short{color:var(--bear);border-color:color-mix(in srgb,var(--bear) 50%,transparent);background:color-mix(in srgb,var(--bear) 12%,transparent)}
+.pill.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 50%,transparent)}
+.pill.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
+.votebar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;background:var(--surface-2)}
+.votebar i{display:block;height:100%} .votebar .u{background:var(--bull)} .votebar .n{background:var(--neutral)} .votebar .d{background:var(--bear)}
+.rows{display:grid;gap:8px}
+a.row{display:grid;grid-template-columns:86px minmax(0,1fr) 120px 92px;gap:14px;align-items:center;text-decoration:none;color:var(--fg);background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px}
+a.row:hover{background:var(--surface-2)}
+.row .pair{font-family:var(--font-display);font-weight:700;font-size:1.02rem}
+.row .meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.76rem;color:var(--fg-3);margin-top:5px}
+.row .rng{text-align:right;font-size:.84rem}
+@media (max-width:720px){a.row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"p l" "b b" "r r";row-gap:8px}
+  .row .c-p{grid-area:p} .row .c-b{grid-area:b} .row .c-r{grid-area:r} .row .c-l{grid-area:l} .row .rng{text-align:left}}
+.big{font-family:var(--font-display);font-weight:800;font-size:2.4rem;line-height:1;letter-spacing:-.03em}
+.sig{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 0;border-top:1px solid var(--line-soft)}
+.fam+.sig{border-top:0}
+.sig .rec{grid-column:1/-1;font-size:.78rem;color:var(--fg-3)}
+.sig>.pill{align-self:start}
+.fam{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3);font-weight:600;margin-top:10px}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;font-size:.9rem;margin:0}
+.kv dt{color:var(--fg-2)} .kv dd{margin:0;text-align:right}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1}
+th{font-weight:600;color:var(--fg-3);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+td.cell{font-family:var(--font-data)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{gap:2px} .kpi b{font-family:var(--font-display);font-size:1.5rem}
+.ev{display:grid;grid-template-columns:52px 40px minmax(0,1fr);gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line-soft);font-size:.9rem}
+h2+.ev{border-top:0}
+.imp{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;background:var(--warn)}
+.imp.High{background:var(--red)} .imp.Medium{background:var(--orange)}
+svg.chart{width:100%;height:auto;display:block}
+.fld{display:grid;gap:4px;font-size:.84rem;color:var(--fg-2);min-width:0}
+.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+footer{padding-block:0 32px;font-size:.78rem;color:var(--fg-3);display:grid;gap:4px}
 </style>
 
 <header class="top">
   <div class="wrap top-row">
     <button class="iconbtn" type="button" id="menu-btn" aria-label="Menü öffnen" aria-controls="drawer" aria-expanded="false">
-      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-    <span class="top-title" id="top-title">Cockpit</span>
-    <a class="brand" href="#cockpit" aria-label="WorlᗡDriver Startseite">
-      <svg viewBox="0 0 470 84" role="img" aria-hidden="true">
-        <g font-family="Inter Tight, Inter, Arial, sans-serif" font-size="64" font-weight="800" fill="currentColor">
-          <text x="0" y="62" textLength="146" lengthAdjust="spacingAndGlyphs">Worl</text>
-          <g transform="translate(198 0) scale(-1 1)"><text x="0" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text></g>
-          <text x="202" y="62" fill="var(--accent)" textLength="46" lengthAdjust="spacingAndGlyphs">D</text>
-          <text x="250" y="62" textLength="200" lengthAdjust="spacingAndGlyphs">river</text>
-        </g>
-      </svg>
-    </a>
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <span class="top-title" id="top-title">Übersicht</span>
+    <a class="brand" href="#start" aria-label="WorlᗡDriver Startseite">Worl<i class="m">D</i><i>D</i>river</a>
   </div>
 </header>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Menü"></aside>
-
 <main class="wrap" id="app"></main>
 <footer class="wrap" id="foot"></footer>
 
 <script>
 const D = /*__WORLDDRIVER_DATA__*/null;
-const $ = (s, el = document) => el.querySelector(s);
+const $ = (s) => document.querySelector(s);
 const nf = (d) => new Intl.NumberFormat("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
 const fmt = (x, d = 2) => x == null || isNaN(x) ? "–" : nf(d).format(x);
-const pct = (x, d = 2, sign = true) => { if (x == null || isNaN(x)) return "–"; const v = Math.abs(x * 100) < 0.5 * 10 ** -d ? 0 : x * 100; return (sign && v > 0 ? "+" : "") + nf(d).format(v) + " %"; };
-const pp = (x, d = 0) => x == null ? "–" : nf(d).format(x * 100) + " %";
-const dateDe = (s) => s ? new Date(s + (s.length === 10 ? "T12:00:00" : "")).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "–";
+const pct = (x, d = 1, sign = false) => x == null || isNaN(x) ? "–" : (sign && x > 0 ? "+" : "") + nf(d).format(x * 100) + " %";
+const dateDe = (s) => s ? new Date(s.length === 10 ? s + "T12:00:00" : s).toLocaleDateString("de-DE", {day: "2-digit", month: "2-digit", year: "numeric"}) : "–";
 const pairName = (p) => p.slice(0, 3) + "/" + p.slice(3);
+const digits = (p) => p.endsWith("JPY") ? 3 : 5;
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
-const HZ = {"1D": "Tag", "1W": "Woche", "1M": "Monat"};
-const HZ_LONG = {"1D": "1 Handelstag", "1W": "5 Handelstage", "1M": "20 Handelstage"};
-const state = {horizon: "1D", ccy: "ALLE", sort: "az", open: null, depCcy: "ALLE", mapSel: "AU"};
-try { const s = JSON.parse(localStorage.getItem("wd-state") || "{}"); Object.assign(state, {horizon: s.horizon || state.horizon, sort: s.sort || state.sort}); } catch (e) {}
-const save = () => { try { localStorage.setItem("wd-state", JSON.stringify({horizon: state.horizon, sort: state.sort})); } catch (e) {} };
+const INFO = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const PERIODS = {entdeckung: "Entdeckung", bestaetigung: "Bestätigung", schlusstest: "Schlusstest"};
+const state = {h: "1W", sort: "share", period: "schlusstest"};
+try { Object.assign(state, JSON.parse(localStorage.getItem("wd2") || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem("wd2", JSON.stringify({h: state.h, sort: state.sort, period: state.period})); } catch (e) {} };
 
-function regimeOf(v) { return v == null ? "unbekannt" : v < 15 ? "ruhig" : v <= 25 ? "normal" : "Stress"; }
+const S = () => D.signals;
+const H = () => S().horizons[state.h] || Object.values(S().horizons)[0];
+const SIG = Object.fromEntries((D ? D.signals.signals : []).map((s) => [s.key, s]));
+const voteCls = (v) => v > 0 ? "long" : v < 0 ? "short" : "";
+const voteTxt = (v) => v > 0 ? "long" : v < 0 ? "short" : "neutral";
+const labelCls = (l) => l.includes("long") ? "long" : l.includes("short") ? "short" : "";
+const lastPrice = (p) => { const r = D.prices[p]; return r && r.length ? r[r.length - 1][1] : null; };
+const rangeOf = (p, h) => ((D.ranges.pairs[p] || {})[h || state.h]) || {};
 
-/* ---------- Bewertung der Modellgüte in Alltagssprache ---------- */
-function horizonVerdict(h) {
-  const b = D.backtest[h]; if (!b || !b.champion) return {cls: "plain", short: "Noch nicht trainiert", text: ""};
-  const m = b.models[b.champion] || {}; const v = m.validation || {}, o = m.holdout || {};
-  const best = Object.entries(b.models).filter(([k]) => k !== "climatology")
-    .map(([k, x]) => [k, (x.validation || {}).bss]).sort((a, c) => (c[1] ?? -9) - (a[1] ?? -9))[0];
-  const bestDir = Object.entries(b.models).filter(([k]) => k === "logreg" || k === "lgbm")
-    .sort((a, c) => ((c[1].validation || {}).bss_vs_volref ?? -9) - ((a[1].validation || {}).bss_vs_volref ?? -9))[0];
-  if (b.champion === "logreg" || b.champion === "lgbm") {
-    return {cls: "good", short: "Richtungsvorteil",
-      text: `${m.label} sagt besser voraus als beide Referenzen (gegenüber der Schwankungs-Referenz ${pct(v.bss_vs_volref, 2)}, Hold-out ab 2022 ${pct(o.bss_vs_volref, 2)}). Trefferquote Richtung ${pp(v.hit_rate, 1)}.`};
-  }
-  if (b.champion === "volref") {
-    return {cls: "info", short: "Vorteil nur bei der Schwankung",
-      text: `Die Schwankungs-Referenz ist besser als die reine Häufigkeit (${pct(v.bss, 2)}): Sie erkennt, ob ein ruhiger oder bewegter Markt zu erwarten ist. Bei der Richtung schlägt kein Modell diese Referenz belastbar (bestes: ${bestDir ? esc(bestDir[1].label) + " mit " + pct((bestDir[1].validation || {}).bss_vs_volref, 2) : "–"}).`};
-  }
-  return {cls: "warn", short: "Kein Modell besser als die Referenz",
-    text: `Kein Modell schlägt die Referenz belastbar (bestes: ${best ? (b.models[best[0]].label) + " mit " + pct(best[1], 2) : "–"}). Angezeigt werden deshalb die historischen Häufigkeiten und die Schwankungsbreite.`};
+function horizonSwitch() {
+  return `<div class="seg" role="group" aria-label="Zeitraum">${Object.entries(S().horizons).map(([h, x]) =>
+    `<button type="button" data-h="${h}" aria-pressed="${state.h === h}">${x.label}</button>`).join("")}</div>`;
+}
+function bindHorizon() { document.querySelectorAll("[data-h]").forEach((b) => b.onclick = () => { state.h = b.dataset.h; save(); route(); }); }
+function voteBar(v) {
+  const t = Math.max(v.total, 1);
+  return `<div class="votebar" role="img" aria-label="${v.bull} long, ${v.neutral} neutral, ${v.bear} short"><i class="u" style="width:${v.bull / t * 100}%"></i><i class="n" style="width:${v.neutral / t * 100}%"></i><i class="d" style="width:${v.bear / t * 100}%"></i></div>`;
+}
+function shareTxt(v) { return v.share_bull == null ? "keine Stimme" : v.share_bull >= 0.5 ? `${pct(v.share_bull, 0)} long` : `${pct(1 - v.share_bull, 0)} short`; }
+function bucketHit(test, label) {
+  const b = (test.buckets || {})[label];
+  return !b || b.hit == null ? "–" : `<b>${pct(b.hit, 1)}</b> <span class="faint">(95-%-Bereich ${fmt(b.ci[0] * 100, 0)}–${fmt(b.ci[1] * 100, 0)} %)</span>`;
+}
+function statusBox() {
+  const rows = Object.values(S().horizons).map((x) => `<li><b>${x.label}:</b> ${x.valid.length} von ${S().rules.tests} Kombinationen bestanden. Die Fundamental-Mehrheit lag seit 2020 in <b>${pct(x.fundamental.test.all.hit, 1)}</b> der Fälle richtig (Zufall = 50 %).</li>`).join("");
+  const any = Object.values(S().horizons).some((x) => x.valid.length);
+  return `<div class="honest">${INFO}<div><b>${any ? "Es gibt geprüfte Signale." : "Noch kein Signal hat die Prüfung bestanden."}</b>
+    ${any ? "" : "Die Abstimmung unten zählt deshalb die Fundamental-Signale in ihrer erwarteten Richtung. Sie beschreibt die Lage – eine belegte Vorhersage ist sie nicht."}
+    <ul style="margin:6px 0;padding-left:18px">${rows}</ul><a href="#pruefung">So wird geprüft</a></div></div>`;
 }
 
-/* ---------- Kopf und Fuß ---------- */
-function renderChrome() {
-  $("#foot").innerHTML = `
-    <div>WorlᗡDriver · Prognose-Engine FOREX NEXUS AI · Version ${esc(D.meta.code_commit)} · erzeugt ${new Date(D.meta.generated_at).toLocaleString("de-DE")}</div>
-    <div>Kursbasis: ${esc(D.meta.price_basis)}. ${esc(D.map.attribution)}.</div>
-    <div>Persönliches Analysewerkzeug. Statistische Prognosen sind keine Anlageberatung und keine Handelssignale.</div>`;
-}
-
-/* ---------- Prognosen ---------- */
-function hzCard(h) {
-  const b = D.backtest[h], v = horizonVerdict(h), m = (b.models[b.champion] || {});
-  const val = m.validation || {}, hold = m.holdout || {};
-  return `<article class="panel hz">
-    <div class="panel-head"><h3>${HZ[h]} <span class="faint">· ${HZ_LONG[h]}</span></h3><span class="pill ${v.cls}">${v.short}</span></div>
-    <p class="verdict muted">${v.text}</p>
-    <dl class="kv"><dt>Angezeigtes Modell</dt><dd>${esc(m.label || "–")}</dd><dt>Trefferquote Richtung</dt><dd class="num">${pp(val.hit_rate, 1)}</dd>
-      <dt>80-%-Intervall traf</dt><dd class="num">${pp(val.coverage_80, 1)}</dd><dt>Hold-out ab 2022 (BSS)</dt><dd class="num">${pct(hold.bss, 2)}</dd></dl></article>`;
-}
-function viewForecasts() {
-  const ccys = ["ALLE", ...D.majors];
+/* ---------- Übersicht ---------- */
+function viewStart() {
+  const h = H(), checked = h.checked.pairs, fund = h.fundamental.pairs;
+  const pairs = [...D.pairs];
+  if (state.sort === "share") pairs.sort((a, b) => Math.abs((fund[b].share_bull ?? .5) - .5) - Math.abs((fund[a].share_bull ?? .5) - .5));
+  const rows = pairs.map((p) => {
+    const f = fund[p], c = checked[p], r = rangeOf(p);
+    const ev = D.events.filter((e) => e.impact === "High" && p.includes(e.currency)).length;
+    return `<a class="row" href="#paar-${p}">
+      <span class="c-p"><span class="pair">${pairName(p)}</span><br><span class="faint small num">${fmt(r.price ?? lastPrice(p), digits(p))}</span></span>
+      <span class="c-b">${voteBar(f)}<span class="meta"><span>${f.bull} long · ${f.neutral} neutral · ${f.bear} short</span><span>${c.total ? `geprüft: ${shareTxt(c)}` : "geprüft: –"}</span></span></span>
+      <span class="c-r rng"><span class="num">${r.pips != null ? `±${r.pips} Pips` : "–"}</span><br><span class="faint small">${ev ? `${ev} rote Termine` : "keine roten Termine"}</span></span>
+      <span class="c-l" style="justify-self:end"><span class="pill ${labelCls(f.label)}">${esc(f.label)}</span></span></a>`; }).join("");
   return `<section class="view">
-    <div class="lede"><h1>Prognosen</h1>
-      <p>Wahrscheinlichkeit für fallend, seitwärts und steigend, das 80-%-Prognoseintervall und die Konfidenz – je Horizont aus einem eigenen Modell. Tippe ein Paar an für Einflussfaktoren, Ungültigkeitsbedingungen und Modellgüte.</p></div>
-    <div class="grid-3">${["1D", "1W", "1M"].map(hzCard).join("")}</div>
-    <div class="toolbar">
-      <div class="seg" role="group" aria-label="Horizont">${Object.keys(HZ).map((h) => `<button type="button" data-hz="${h}" aria-pressed="${state.horizon === h}">${HZ[h]}</button>`).join("")}</div>
-      <label class="faint" style="font-size:.84rem">Sortieren <select id="sort">
-        <option value="az">Paar A–Z</option><option value="bull">Wahrscheinlichkeit steigend</option>
-        <option value="bear">Wahrscheinlichkeit fallend</option><option value="vol">Größte Schwankungsbreite</option></select></label>
-    </div>
-    <div class="chips" role="group" aria-label="Währung">${ccys.map((c) => `<button type="button" data-ccy="${c}" aria-pressed="${state.ccy === c}">${c === "ALLE" ? "Alle 28" : c}</button>`).join("")}</div>
-    <div class="note" id="hz-note"></div>
-    <div class="fc-list" id="fc-list"></div>
+    <div class="lede"><h1>Wohin zeigen die Signale?</h1>
+      <p>Für jedes Paar zählen wir, wie viele Signale aus Zinsen, Zinserwartung, Inflation, Arbeitsmarkt, Positionierung (COT), Saison, Risikostimmung und Rohstoffen gerade für long oder short stimmen.</p></div>
+    ${statusBox()}
+    <div class="toolbar">${horizonSwitch()}
+      <label class="faint small">Sortieren <select id="sort"><option value="share" ${state.sort === "share" ? "selected" : ""}>deutlichste Mehrheit</option><option value="az" ${state.sort === "az" ? "selected" : ""}>A–Z</option></select></label></div>
+    <p class="faint small">Balken: grün long, grau neutral, orange short · Spanne: 80-%-Bereich bis ${state.h === "1D" ? "zum nächsten Handelstag" : "in 5 Handelstagen"} · Signale vom ${dateDe(h.fundamental.date)}</p>
+    <div class="rows">${rows}</div>
   </section>`;
 }
-function bindForecasts() {
-  document.querySelectorAll("[data-hz]").forEach((b) => b.onclick = () => { state.horizon = b.dataset.hz; state.open = null; save(); route(); });
-  document.querySelectorAll("[data-ccy]").forEach((b) => b.onclick = () => { state.ccy = b.dataset.ccy; route(); });
-  const s = $("#sort"); s.value = state.sort; s.onchange = () => { state.sort = s.value; save(); renderList(); };
-  const v = horizonVerdict(state.horizon);
-  $("#hz-note").innerHTML = `<b>${HZ[state.horizon]}:</b> ${v.text}`;
-  renderList();
-}
-function renderList() {
-  let rows = D.forecasts.filter((f) => f.horizon === state.horizon && (state.ccy === "ALLE" || f.pair.includes(state.ccy)));
-  const key = {az: (f) => f.pair, bull: (f) => -f.p_bull, bear: (f) => -f.p_bear, vol: (f) => -(f.quantiles.q90 - f.quantiles.q10)}[state.sort];
-  rows.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
-  if (!rows.length) { $("#fc-list").innerHTML = `<div class="empty"><b>Keine Prognosen für diese Auswahl.</b><span>Prognosen entstehen täglich nach Kursschluss.</span></div>`; return; }
-  $("#fc-list").innerHTML = rows.map((f) => {
-    const q = f.quantiles, open = state.open === f.pair;
-    const cls = f.confidence_label === "hoch" ? "good" : f.confidence_label === "mittel" ? "info" : "plain";
-    return `<article class="fc"><button type="button" data-open="${f.pair}" aria-expanded="${open}">
-      <div class="c-pair"><div class="pair">${pairName(f.pair)}</div><div class="price num">${fmt(f.price, f.pair.endsWith("JPY") ? 3 : 5)}</div></div>
-      <div class="c-bar">${probBar(f)}</div>
-      <div class="c-int interval num">${pct(q.q10)} … ${pct(q.q90)}<small>80-%-Intervall bis ${dateDe(f.target_date)}</small></div>
-      <span class="conf pill ${cls}">Konfidenz ${f.confidence_label}</span>
-    </button>${open ? detail(f) : ""}</article>`;}).join("");
-  document.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => { state.open = state.open === b.dataset.open ? null : b.dataset.open; renderList(); });
-}
-function probBar(f) {
-  const s = (p, c, t) => `<span class="${c}" style="width:${(p * 100).toFixed(1)}%" title="${t} ${pp(p, 0)}">${p >= 0.16 ? pp(p, 0) : ""}</span>`;
-  return `<div class="probbar" role="img" aria-label="fallend ${pp(f.p_bear)}, seitwärts ${pp(f.p_neutral)}, steigend ${pp(f.p_bull)}">${s(f.p_bear, "b", "fallend")}${s(f.p_neutral, "n", "seitwärts")}${s(f.p_bull, "u", "steigend")}</div>
-    <div class="probmeta"><span>fallend</span><span>seitwärts</span><span>steigend</span></div>`;
-}
-function detail(f) {
-  const b = D.backtest[f.horizon], m = (b.models[f.model] || {}), v = m.validation || {};
-  const cur = (m.currency || {});
-  const maxc = Math.max(...f.drivers.map((d) => Math.abs(d.contribution)), 0.01);
-  const dirTxt = f.direction > 0 ? "leicht steigend" : f.direction < 0 ? "leicht fallend" : "keine klare Richtung";
-  const er = f.expected_return === 0 ? `<b>0,00 %</b> <span class="faint">– keine verlässliche Renditeprognose (Out-of-Sample nicht besser als 0)</span>` : `<b>${pct(f.expected_return)}</b>`;
-  const range = f.range_high == null ? `<span class="faint">Für den Tageshorizont folgt die Handelsspanne mit den Hoch-/Tiefkursen (Dukascopy).</span>`
-    : `<b class="num">${pct(f.range_low)} … ${pct(f.range_high)}</b> <span class="faint">(typische Spanne der Schlusskurse bis zum Zieldatum)</span>`;
-  return `<div class="fc-detail">
-    <div class="grid-2">
-      <div style="display:grid;gap:10px;min-width:0">
-        <div class="label">Kurs der letzten 12 Monate und Prognosefächer</div>
-        ${fanChart(f)}
-        <div class="legend"><span><i style="background:var(--accent)"></i>Kurs</span><span><i style="background:color-mix(in srgb,var(--accent) 45%,transparent);height:8px"></i>80-%-Intervall</span><span><i style="background:color-mix(in srgb,var(--accent) 20%,transparent);height:8px"></i>90-%-Intervall</span></div>
-      </div>
-      <dl class="kv" style="align-content:start">
-        <dt>Erwartete Richtung</dt><dd>${dirTxt}</dd>
-        <dt>Erwartete Veränderung</dt><dd>${er}</dd>
-        <dt>90-%-Intervall</dt><dd class="num">${pct(f.quantiles.q05)} … ${pct(f.quantiles.q95)}</dd>
-        <dt>Handelsspanne</dt><dd>${range}</dd>
-        <dt>Erwartete Schwankung (1σ)</dt><dd class="num">${pct(f.expected_vol, 2, false)}</dd>
-        <dt>Seitwärts bedeutet</dt><dd class="num">± ${pct(f.expected_vol * 0.5, 2, false)}</dd>
-        <dt>Vergleich zur Vorprognose</dt><dd>${f.change_p_bull == null ? '<span class="faint">erste Prognose</span>' : `steigend ${pct(f.change_p_bull, 1)}, fallend ${pct(f.change_p_bear, 1)}`}</dd>
-        <dt>Marktregime</dt><dd>${esc(f.regime || "–")}</dd>
-      </dl>
-    </div>
-    <div class="grid-2">
-      <div style="display:grid;gap:10px;min-width:0">
-        <div class="label">Wichtigste Einflussfaktoren</div>
-        <div class="drivers">${f.drivers.map((d) => { const w = Math.abs(d.contribution) / maxc * 50; return `<div class="drv"><span>${esc(d.label)}<br><span class="faint" style="font-size:.78rem">${d.contribution > 0 ? "spricht für steigend" : "spricht für fallend"}</span></span>
-          <div class="drv-bar" role="img" aria-label="${esc(d.label)}"><span class="mid"></span><i style="left:${d.contribution >= 0 ? 50 : 50 - w}%;width:${w}%;background:${d.contribution >= 0 ? "var(--bull)" : "var(--bear)"}"></i></div></div>`; }).join("") || '<span class="faint">Das Referenzmodell nutzt keine Einflussfaktoren.</span>'}</div>
-        <p class="faint" style="font-size:.8rem">Beiträge aus dem logistischen Modell. Bei der Referenz zeigen sie, wohin die Faktoren zeigen würden – ohne dass das Modell sie nutzt.</p>
-      </div>
-      <div style="display:grid;gap:10px;min-width:0">
-        <div class="label">Die Prognose wird ungültig, wenn</div>
-        <ul class="plain">${(f.invalidation || []).map((r) => `<li>${r.rule === "kursbewegung" && r.threshold_log != null ? `Kurs bewegt sich mehr als ${pct(r.threshold_log, 2, false)} gegen die erwartete Richtung` : esc(r.text_de)}</li>`).join("")}</ul>
-        <div class="label" style="margin-top:6px">Modell und Güte (${HZ[f.horizon]})</div>
-        <dl class="kv">
-          <dt>Modell</dt><dd>${esc(f.model_label)} <span class="faint">${esc(f.version)}</span></dd>
-          <dt>Brier Skill Score 2006–2021</dt><dd class="num">${pct(v.bss, 2)}</dd>
-          <dt>Trefferquote Richtung</dt><dd class="num">${pp(v.hit_rate, 1)}</dd>
-          <dt>80-%-Intervall traf</dt><dd class="num">${pp(v.coverage_80, 1)}</dd>
-          <dt>Wahrscheinlichkeiten</dt><dd>${f.calibrated ? '<span class="pill good">validiert</span>' : '<span class="pill plain">Referenzwerte</span>'}</dd>
-        </dl>
-      </div>
-    </div>
-  </div>`;
-}
-function fanChart(f) {
-  const series = (D.prices[f.pair] || []).map((r) => r[1]);
-  const W = Math.max(320, Math.min(560, innerWidth - 64)), H = 190, padL = 46, padR = 54, padT = 10, padB = 22, n = series.length;
-  const q = f.quantiles, p0 = f.price;
-  const lv = (x) => p0 * Math.exp(x);
-  const ext = [q.q05, q.q95].map(lv);
-  const all = series.concat(ext);
-  const mn = Math.min(...all), mx = Math.max(...all), pad = (mx - mn) * 0.06;
-  const y = (v) => padT + (1 - (v - mn + pad) / (mx - mn + 2 * pad)) * (H - padT - padB);
-  const plotW = W - padL - padR, xEnd = padL + plotW * 0.86, x = (i) => padL + i / (n - 1) * (xEnd - padL);
-  const d = series.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1)).join("");
-  const xF = W - padR, yp = y(p0);
-  const fan = (a, b) => `M${xEnd},${yp}L${xF},${y(lv(q[b])).toFixed(1)}L${xF},${y(lv(q[a])).toFixed(1)}Z`;
-  const dec = f.pair.endsWith("JPY") ? 2 : 4;
-  const ticks = [mn, (mn + mx) / 2, mx];
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Kursverlauf ${pairName(f.pair)} mit Prognosefächer">
-    ${ticks.map((t) => `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line-soft)"/><text x="${padL - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t, dec)}</text>`).join("")}
-    <path d="${fan("q05", "q95")}" fill="color-mix(in srgb,var(--accent) 20%,transparent)"/>
-    <path d="${fan("q10", "q90")}" fill="color-mix(in srgb,var(--accent) 45%,transparent)"/>
-    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
-    <circle cx="${xEnd}" cy="${yp}" r="3.2" fill="var(--accent)"/>
-    <text x="${xF + 4}" y="${y(lv(q.q90)) + 4}">${fmt(lv(q.q90), dec)}</text>
-    <text x="${xF + 4}" y="${y(lv(q.q10)) + 4}">${fmt(lv(q.q10), dec)}</text>
-    <text x="${padL}" y="${H - 4}">${dateDe((D.prices[f.pair][0] || [])[0])}</text>
-    ${xF - xEnd > 80 ? `<text x="${xEnd}" y="${H - 4}" text-anchor="middle">${dateDe(f.as_of)}</text>` : ""}
-    <text x="${xF}" y="${H - 4}" text-anchor="end">${dateDe(f.target_date)}</text>
-  </svg>`;
-}
+function bindStart() { bindHorizon(); $("#sort").onchange = (e) => { state.sort = e.target.value; save(); route(); }; }
 
-/* ---------- Tracker ---------- */
-function viewTracker() {
-  const L = D.ledger;
-  const due = Object.entries(L.next_due || {}).sort();
-  const live = L.monthly || [];
+/* ---------- Paar ---------- */
+function viewPair(p) {
+  const h = H(), f = h.fundamental.pairs[p], c = h.checked.pairs[p], r = rangeOf(p);
+  const base = p.slice(0, 3), quote = p.slice(3);
+  const valid = new Set(h.valid.filter(([, ccy]) => ccy === base || ccy === quote).map(([k]) => k));
+  const byFam = {};
+  S().signals.forEach((s) => { if (s.key in f.votes || valid.has(s.key)) (byFam[s.family] = byFam[s.family] || []).push(s); });
+  const rec = (k, ccy) => { const x = h.stats[k].ccy[ccy]; return `${ccy} ${x ? pct(x.schlusstest[0], 1, true) : "–"}`; };
+  const list = Object.entries(byFam).map(([fam, items]) => `<div class="fam">${esc(fam)}</div>${items.map((s) => {
+    const v = f.votes[s.key] ?? (c.votes || {})[s.key] ?? 0;
+    return `<div class="sig"><span><b>${esc(s.label)}</b>${valid.has(s.key) ? ' <span class="pill good">geprüft</span>' : ""}<br><span class="muted small">${esc(s.idea)}</span></span>
+      <span class="pill ${voteCls(v)}">${voteTxt(v)}</span>
+      <span class="rec">Ergebnis seit 2020, Rendite pro Jahr nach Kosten: ${rec(s.key, base)} · ${rec(s.key, quote)}</span></div>`; }).join("")}`).join("");
+  const ev = D.events.filter((e) => [base, quote].includes(e.currency) && e.impact !== "Low");
   return `<section class="view">
-    <div class="lede"><h1>Forecast-Tracker</h1>
-      <p>Jede Prognose wird mit Zeitstempel und den damals verfügbaren Daten unveränderlich gespeichert. Nach Ablauf des Horizonts vergleicht das System Prognose und tatsächliche Entwicklung. So siehst du, ob das System wirklich besser wird.</p></div>
-    <div class="panel kpis">
-      <div class="kpi"><span class="label">Prognosen im Ledger</span><b class="num">${nf(0).format(L.forecasts)}</b><span class="faint" style="font-size:.8rem">davon ${nf(0).format(L.shadow)} im Schattenbetrieb</span></div>
-      <div class="kpi"><span class="label">Ausgewertet</span><b class="num">${nf(0).format(L.evaluated)}</b><span class="faint" style="font-size:.8rem">Live-Bilanz seit ${dateDe((L.first_run || "").slice(0, 10))}</span></div>
-      <div class="kpi"><span class="label">Prognoseläufe</span><b class="num">${L.runs}</b><span class="faint" style="font-size:.8rem">ein Lauf pro Handelstag</span></div>
-      <div class="kpi"><span class="label">Nächste Auswertung</span><b class="num" style="font-size:1.1rem">${due.length ? dateDe(due.map((x) => x[1]).sort()[0]) : "–"}</b><span class="faint" style="font-size:.8rem">${due.sort((a, b) => a[1] < b[1] ? -1 : 1).map(([h, d]) => HZ[h] + " " + dateDe(d)).join(" · ")}${due.some(([, d]) => d <= D.meta.generated_at.slice(0, 10)) ? " · fällig, wartet auf neue Kurse" : ""}</span></div>
-    </div>
-    <article class="panel">
-      <div class="panel-head"><h2>Live-Bilanz</h2><span class="pill ${live.length ? "info" : "plain"}">${live.length ? "läuft" : "beginnt"}</span></div>
-      ${live.length ? liveTable(live) : `<div class="empty"><b>Noch keine Prognose ist fällig.</b><span>Die erste Tagesprognose ist für den ${dateDe((L.next_due || {})["1D"])} fällig und wird ausgewertet, sobald der Kurs dieses Tages vorliegt (FRED liefert wöchentlich), die erste Monatsprognose am ${dateDe((L.next_due || {})["1M"])}. Bis dahin zeigt der Backtest unten, wie die Modelle in der Vergangenheit abgeschnitten hätten.</span></div>`}
-    </article>
-    <article class="panel">
-      <div class="panel-head"><h2>Wird das System besser? Backtest 2006 bis heute</h2>
-        <div class="seg" role="group" aria-label="Horizont">${Object.keys(HZ).map((h) => `<button type="button" data-thz="${h}" aria-pressed="${state.horizon === h}">${HZ[h]}</button>`).join("")}</div></div>
-      <p class="muted" style="font-size:.88rem;margin-bottom:10px">Brier Skill Score je Jahr: über 0 % ist das Modell besser als die Referenz (historische Häufigkeit), darunter schlechter. Die Schwankungs-Referenz kennt nur die Marktschwankung; ein echter Richtungsvorteil zeigt sich erst, wenn ein Modell auch über ihr liegt. Jedes Jahr wurde mit Modellen vorhergesagt, die dieses Jahr nie gesehen haben (Walk-Forward). Ab 2022 schattiert: Hold-out-Zeitraum, der bei der Modellauswahl verschlossen blieb.</p>
-      <div id="yearly"></div>
-    </article>
-    <article class="panel"><div class="panel-head"><h2>Modelle im Vergleich</h2></div><div class="tbl-wrap" id="cmp"></div></article>
+    <div class="toolbar"><a href="#start" class="small">← Übersicht</a>${horizonSwitch()}</div>
+    <div class="lede"><h1>${pairName(p)}</h1><p class="num">${fmt(r.price ?? lastPrice(p), digits(p))} · Kurs vom ${dateDe(D.meta.as_of)}</p></div>
     <div class="grid-2">
-      <article class="panel"><div class="panel-head"><h2>Je Währung</h2><span class="faint" style="font-size:.8rem">angezeigtes Modell, Backtest</span></div><div class="tbl-wrap" id="byccy"></div></article>
-      <article class="panel"><div class="panel-head"><h2>Je Marktregime</h2><span class="faint" style="font-size:.8rem">nach VIX des Vortags</span></div><div class="tbl-wrap" id="byreg"></div></article>
+      <article class="panel"><div class="panel-head"><h2>Abstimmung ${h.label}</h2><span class="pill ${labelCls(f.label)}">${esc(f.label)}</span></div>
+        <div class="big num">${shareTxt(f)}</div>${voteBar(f)}
+        <p class="muted small">${f.bull} von ${f.total} Signalen long, ${f.bear} short, ${f.neutral} ohne Aussage.</p>
+        <p class="small">So oft lag „${esc(f.label)}“ seit 2020 richtig: ${bucketHit(h.fundamental.test, f.label)}</p>
+        <p class="faint small">${c.total ? `Geprüfte Signale: ${shareTxt(c)} (${c.bull} long, ${c.bear} short).` : "Für dieses Paar hat noch kein Signal die Prüfung bestanden – diese Abstimmung ist ungeprüft."}</p></article>
+      <article class="panel"><div class="panel-head"><h2>Erwartete Spanne</h2><span class="faint small">80 %</span></div>
+        ${r.low != null ? `<div class="big num" style="font-size:1.8rem">±${r.pips} Pips</div>
+        <dl class="kv"><dt>Unten</dt><dd class="num">${fmt(r.low, digits(p))}</dd><dt>Oben</dt><dd class="num">${fmt(r.high, digits(p))}</dd><dt>bis</dt><dd>${dateDe(r.target)}</dd>
+        <dt>So oft traf die Spanne im Test</dt><dd class="num">${pct(D.ranges.coverage_backtest[state.h], 0)}</dd></dl>
+        <p class="faint small">Mit 80 % Wahrscheinlichkeit liegt der Kurs dann in diesem Bereich. Diese Vorhersage funktioniert nachweislich – über die Richtung sagt sie nichts.</p>` : '<p class="muted">Noch keine Prognose im Ledger.</p>'}</article>
     </div>
+    <article class="panel"><div class="panel-head"><h2>Die Signale im Einzelnen</h2><span class="faint small">Stand ${dateDe(h.fundamental.date)}</span></div><div>${list}</div></article>
+    <article class="panel"><h2>Termine diese Woche</h2>${ev.length ? ev.map(evRow).join("") : '<p class="muted">Keine wichtigen Termine für diese Währungen.</p>'}</article>
+    <article class="panel"><h2>Kursverlauf (6 Monate)</h2>${priceChart(p)}</article>
   </section>`;
 }
-function liveTable(rows) {
-  return `<div class="tbl-wrap"><table><thead><tr><th>Monat</th><th>Horizont</th><th>Modell</th><th class="num">n</th><th class="num">Brier</th><th class="num">Treffer</th><th class="num">80-%-Int.</th></tr></thead><tbody>
-    ${rows.map((r) => `<tr><td>${esc(r.month.slice(0, 7))}</td><td>${HZ[r.horizon]}</td><td>${esc(r.model)}</td><td class="num">${r.n}</td><td class="num">${fmt(r.brier, 3)}</td><td class="num">${pp(r.hit_rate, 1)}</td><td class="num">${pp(r.coverage_80, 1)}</td></tr>`).join("")}</tbody></table></div>`;
+function evRow(e) {
+  return `<div class="ev"><span class="faint num small">${new Date(e.at).toLocaleDateString("de-DE", {weekday: "short", day: "2-digit"})}<br>${e.time}</span><b>${e.currency}</b><span><span class="imp ${e.impact}"></span>${esc(e.title)}${e.forecast || e.previous ? `<br><span class="faint small">Erwartet ${esc(e.forecast || "–")} · zuvor ${esc(e.previous || "–")}${e.actual ? ` · <b>Ist ${esc(e.actual)}</b>` : ""}</span>` : ""}</span></div>`;
 }
-const MODEL_COLORS = {logreg: "var(--accent)", lgbm: "#c76bd6", volref: "#4fc1c9", climatology: "var(--fg-3)"};
-const SHORT = {logreg: "Log. Regr.", lgbm: "LightGBM", volref: "Schwankung"};
-function bindTracker() {
-  document.querySelectorAll("[data-thz]").forEach((b) => b.onclick = () => { state.horizon = b.dataset.thz; save(); document.querySelectorAll("[data-thz]").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderTracker(); });
-  renderTracker();
-}
-function renderTracker() {
-  const b = D.backtest[state.horizon];
-  const ser = Object.entries(b.yearly).filter(([m]) => m !== "climatology");
-  const years = [...new Set(ser.flatMap(([, v]) => v.map((r) => r[0])))].sort();
-  const vals = ser.flatMap(([, v]) => v.map((r) => r[1]));
-  const W = Math.max(340, Math.min(720, ($("#yearly").clientWidth || 640))), H = W < 500 ? 240 : 220, pl = 46, pr = 70, pt = 12, pb = 24;
-  const lim = Math.max(0.01, ...vals.map(Math.abs)) * 1.15;
-  const x = (yr) => pl + (yr - years[0]) / Math.max(1, years[years.length - 1] - years[0]) * (W - pl - pr);
-  const y = (v) => pt + (1 - (v + lim) / (2 * lim)) * (H - pt - pb);
-  const ticks = [-lim * 0.8, -lim * 0.4, 0, lim * 0.4, lim * 0.8];
-  const holdX = x(2021.5);
-  const lines = ser.map(([m, v]) => {
-    const d = v.map((r, i) => (i ? "L" : "M") + x(r[0]).toFixed(1) + "," + y(r[1]).toFixed(1)).join("");
-    const last = v[v.length - 1];
-    return {m, v, last, svg: `<path d="${d}" fill="none" stroke="${MODEL_COLORS[m]}" stroke-width="2"/>${v.map((r) => `<circle cx="${x(r[0])}" cy="${y(r[1])}" r="3" fill="${MODEL_COLORS[m]}" stroke="var(--surface)" stroke-width="1.5"><title>${b.models[m].label} ${r[0]}: ${pct(r[1], 2)}</title></circle>`).join("")}
-`};
-  });
-  // Endbeschriftungen ohne Überlappung (mindestens 13 Einheiten Abstand)
-  const ends = lines.map((l) => ({...l, ly: y(l.last[1]) + 4})).sort((a, b) => a.ly - b.ly);
-  for (let i = 1; i < ends.length; i++) if (ends[i].ly - ends[i - 1].ly < 13) ends[i].ly = ends[i - 1].ly + 13;
-  const linesSvg = ends.map((l) => l.svg + `<text x="${x(l.last[0]) + 8}" y="${l.ly}" style="fill:var(--fg-2)">${SHORT[l.m] || l.m}</text>`).join("");
-  $("#yearly").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Brier Skill Score je Jahr">
-    <rect x="${holdX}" y="${pt}" width="${W - pr - holdX}" height="${H - pt - pb}" fill="color-mix(in srgb,var(--accent) 7%,transparent)"/>
-    <text x="${holdX + 4}" y="${pt + 12}">Hold-out</text>
-    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line-soft)"/><text x="${pl - 6}" y="${y(t) + 4}" text-anchor="end">${pct(t, 1)}</text>`).join("")}
-    <line x1="${pl}" x2="${W - pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--fg-3)" stroke-dasharray="4 3"/>
-    <text x="${W - pr + 8}" y="${y(0) + 4}">Referenz</text>
-    ${years.filter((yr, i) => i % (W < 500 ? 5 : 3) === 0 || yr === years[years.length - 1]).map((yr) => `<text x="${x(yr)}" y="${H - 6}" text-anchor="middle">${yr}</text>`).join("")}
-    ${linesSvg}</svg>
-    <div class="legend">${ser.map(([m]) => `<span><i style="background:${MODEL_COLORS[m]}"></i>${b.models[m].label}</span>`).join("")}<span><i style="background:var(--fg-3)"></i>Referenz = 0 %</span></div>`;
-  const keys = [["bss", "BSS", 2, "pct"], ["bss_vs_volref", "ggü. Schwankungs-Ref.", 2, "pct"], ["bss_ci_low", "BSS untere 95-%-Grenze", 2, "pct"], ["hit_rate", "Trefferquote", 1, "pp"], ["coverage_80", "80-%-Intervall", 1, "pp"], ["ece", "Kalibrierungsfehler", 3, "n"]];
-  const cell = (val, k) => k[3] === "pct" ? pct(val, k[2]) : k[3] === "pp" ? pp(val, k[2]) : fmt(val, k[2]);
-  $("#cmp").innerHTML = `<table><thead><tr><th>Modell (${HZ[state.horizon]})</th><th>Zeitraum</th>${keys.map((k) => `<th class="num">${k[1]}</th>`).join("")}</tr></thead><tbody>
-    ${Object.entries(b.models).flatMap(([m, x]) => [["2006–2021", x.validation], ["Hold-out ab 2022", x.holdout]].map(([lab, s], i) => `<tr><td>${i ? "" : esc(x.label) + (b.champion === m ? ' <span class="pill info">angezeigt</span>' : "")}</td><td class="faint">${lab}</td>${keys.map((k) => `<td class="num">${cell((s || {})[k[0]], k)}</td>`).join("")}</tr>`)).join("")}</tbody></table>`;
-  const seg = (obj) => `<table><thead><tr><th></th><th class="num">BSS</th><th class="num">Treffer</th><th class="num">80-%-Int.</th><th class="num">n</th></tr></thead><tbody>
-    ${Object.entries(obj || {}).map(([k, s]) => `<tr><td>${esc(k)}</td><td class="num">${pct(s.bss, 2)}</td><td class="num">${pp(s.hit_rate, 1)}</td><td class="num">${pp(s.coverage_80, 1)}</td><td class="num">${nf(0).format(s.n || 0)}</td></tr>`).join("")}</tbody></table>`;
-  const model = (b.champion === "climatology" || b.champion === "volref") ? "logreg" : b.champion;
-  $("#byccy").innerHTML = seg(b.currency[model]) + `<p class="faint" style="font-size:.78rem;margin-top:6px">${esc(b.models[model].label)}; Paare, die die Währung enthalten.</p>`;
-  $("#byreg").innerHTML = seg(b.regime[model]);
+function priceChart(p) {
+  const pts = D.prices[p] || [], v = pts.map((x) => x[1]); if (v.length < 2) return "";
+  const W = 600, Hh = 140, mn = Math.min(...v), mx = Math.max(...v), y = (x) => Hh - 6 - (x - mn) / ((mx - mn) || 1) * (Hh - 12);
+  const d = v.map((x, i) => (i ? "L" : "M") + (i / (v.length - 1) * W).toFixed(1) + "," + y(x).toFixed(1)).join("");
+  return `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Kursverlauf ${pairName(p)}"><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>
+    <div class="toolbar faint small num"><span>${dateDe(pts[0][0])}</span><span>Tief ${fmt(mn, digits(p))} · Hoch ${fmt(mx, digits(p))}</span></div>`;
 }
 
-/* ---------- Weltkarte ---------- */
-const FLOWS = [
-  {from: "AU", to: "CN", label: "Eisenerz, Kohle", dep: ["AUD", "metals:iron_ore"], t: 0.62},
-  {from: "NZ", to: "CN", label: "Milch, Holz", dep: ["NZD", "agriculture:logs"]},
-  {from: "CA", to: "US", label: "Öl", dep: ["CAD", "energy:oil_wti"]},
-  {from: "AU", to: "JP", label: "LNG", dep: ["AUD", "energy:lng_asia"], t: 0.3},
-  {from: "US", to: "EA", label: "LNG", dep: ["EUR", "energy:natgas_eu"]},
-  {from: "EA", to: "CN", label: "Maschinen, Autos", dep: ["EUR", "industry:china_activity"]},
-];
-const MAP_VIEWS = {welt: {label: "Welt", box: [0, 15, 1000, 430]}, europa: {label: "Europa", box: [450, 28, 140, 92]},
-  asien: {label: "Asien-Pazifik", box: [700, 60, 290, 360]}, amerika: {label: "Amerika", box: [110, 15, 300, 170]}};
-const LABEL_POS = {GB: [-1, -0.6], CH: [0.6, 1.6], EA: [1, -0.4], CN: [-1, -0.8], JP: [1, 0.2]};
-if (!state.mapView) state.mapView = innerWidth < 700 ? "asien" : "welt";
-const VERDICT_STYLE = {"vorauslaufend": ["good", "var(--good)"], "erklärend": ["info", "var(--accent)"], "schwächer werdend": ["warn", "var(--warn)"],
-  "instabil": ["warn", "var(--warn)"], "gegenteilig": ["bad", "var(--bad)"], "nicht belegt": ["plain", "var(--fg-3)"], "keine Daten": ["dashed", "var(--fg-3)"], "nicht geprüft": ["plain", "var(--fg-3)"]};
-const depOf = (ccy, key) => D.dependencies.find((d) => d.currency === ccy && d.driver_key === key);
-function viewMap() {
+/* ---------- Prüfung ---------- */
+function viewCheck() {
+  const h = H(), sig = S().signals, rules = S().rules, t = h.fundamental.test;
+  const valid = new Set(h.valid.map(([k, c]) => k + c));
+  const cell = (x, ok) => { if (!x || x[0] == null) return '<td class="cell faint">–</td>';
+    const strong = Math.min(1, Math.abs(x[1]) / 3);
+    return `<td class="cell" style="background:color-mix(in srgb,var(${x[0] >= 0 ? "--bull" : "--bear"}) ${Math.round(strong * 45)}%,transparent)" title="t-Wert ${fmt(x[1], 1)}">${pct(x[0], 1, true)}${ok ? " ✓" : ""}</td>`; };
+  const rows = sig.map((s) => `<tr><td>${esc(s.label)}<br><span class="faint small">${esc(s.family)}</span></td>${D.majors.map((c) => {
+    const x = h.stats[s.key].ccy[c]; return x ? cell(x[state.period], valid.has(s.key + c)) : '<td class="cell faint">–</td>'; }).join("")}</tr>`).join("");
   return `<section class="view">
-    <div class="lede"><h1>Weltkarte der Abhängigkeiten</h1>
-      <p>Wichtige Handelsströme der acht Währungsräume. Die Farbe einer Linie zeigt, ob der zugehörige Zusammenhang in den Daten belegt ist. Tippe auf eine Währung.</p></div>
-    <div class="seg" role="group" aria-label="Ausschnitt">${Object.entries(MAP_VIEWS).map(([k, v]) => `<button type="button" data-mv="${k}" aria-pressed="${state.mapView === k}">${v.label}</button>`).join("")}</div>
-    <article class="panel map-wrap" id="map"></article>
-    <div class="legend">${Object.entries(VERDICT_STYLE).filter(([k]) => k !== "nicht geprüft").map(([k, [, c]]) => `<span><i style="background:${c}"></i>${k}</span>`).join("")}</div>
-    <article class="panel" id="map-detail"></article>
+    <div class="lede"><h1>Kann ich dem trauen?</h1>
+      <p>Jedes Signal wurde für jede Währung über 27 Jahre gegen die tatsächliche Kursentwicklung getestet – mit ${pct(rules.cost, 2)} Kosten pro Trade und nur mit Daten, die am jeweiligen Tag schon veröffentlicht waren.</p></div>
+    <div class="toolbar">${horizonSwitch()}</div>
+    <div class="kpis">
+      <div class="panel kpi"><span class="faint small">Geprüfte Kombinationen</span><b class="num">${rules.tests}</b><span class="faint small">${sig.length} Signale × 8 Währungen</span></div>
+      <div class="panel kpi"><span class="faint small">Bestanden</span><b class="num" style="color:var(${h.valid.length ? "--good" : "--warn"})">${h.valid.length}</b><span class="faint small">Entdeckung und Bestätigung</span></div>
+      <div class="panel kpi"><span class="faint small">Fundamental-Mehrheit seit 2020</span><b class="num">${pct(t.all.hit, 1)}</b><span class="faint small">richtig, Zufall = 50 %</span></div></div>
+    <article class="panel"><h2>Die Regeln in drei Schritten</h2>
+      <ol style="margin:0;padding-left:20px;display:grid;gap:6px" class="muted">
+        <li><b>Entdeckung 1999–2012:</b> Hat das Signal nach Kosten Geld verdient – auch nachdem berücksichtigt ist, dass ${rules.tests} Kombinationen gleichzeitig getestet wurden? (Benjamini-Hochberg, ${pct(rules.fdr, 0)}). Sonst ist es vermutlich Zufall.</li>
+        <li><b>Bestätigung 2013–2019:</b> Funktioniert es danach weiter (t-Wert über ${fmt(rules.confirm_t, 0)})?</li>
+        <li><b>Schlusstest ab 2020:</b> Wird für keine Entscheidung genutzt. Er zeigt ehrlich, was danach passiert ist.</li></ol>
+      <p class="small">Nur Signale, die Schritt 1 und 2 bestehen, kommen in die <b>geprüfte Abstimmung</b>. Die <b>Fundamental-Abstimmung</b> zählt dagegen alle ${sig.filter((s) => s.fundamental).length} Fundamental-Signale in ihrer erwarteten Richtung, ohne Prüfung.</p></article>
+    <article class="panel"><div class="panel-head"><h2>Fundamental-Mehrheit seit ${dateDe(t.from)}</h2><span class="faint small">vor Kosten</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Stufe</th><th>Fälle</th><th>Richtig</th><th>95-%-Bereich</th></tr></thead><tbody>
+      ${Object.entries(t.buckets).map(([k, b]) => `<tr><td>${esc(k)}</td><td class="cell">${nf(0).format(b.n)}</td><td class="cell">${pct(b.hit, 1)}</td><td class="cell">${b.ci ? pct(b.ci[0], 0) + "–" + pct(b.ci[1], 0) : "–"}</td></tr>`).join("")}</tbody></table></div>
+      <p class="faint small">Enthält der 95-%-Bereich die 50 %, ist die Stufe nicht von Zufall zu unterscheiden.</p></article>
+    <article class="panel"><div class="panel-head"><h2>Alle Signale je Währung</h2>
+      <div class="seg" role="group" aria-label="Prüfzeitraum">${Object.entries(PERIODS).map(([k, l]) => `<button type="button" data-per="${k}" aria-pressed="${state.period === k}">${l}</button>`).join("")}</div></div>
+      <p class="faint small">Rendite pro Jahr nach Kosten, wenn man dem Signal bei allen 7 Paaren der Währung gefolgt wäre. Kräftige Farbe = statistisch deutlicher. ✓ = bestanden.</p>
+      <div class="tbl-wrap"><table><thead><tr><th>Signal</th>${D.majors.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></article>
   </section>`;
 }
-const bez = (p0, p1, p2, t) => (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
-function bindMap() {
-  const M = D.map, eco = M.economies;
-  const iso = new Set(Object.values(eco).flatMap((e) => e.iso));
-  const selIso = new Set((eco[state.mapSel] || {}).iso || []);
-  const box = MAP_VIEWS[state.mapView].box;
-  const k = box[2] / Math.max(320, ($("#map").clientWidth || 360) - 32);   // Bildschirmpixel -> Kartenkoordinaten
-  const paths = Object.entries(M.countries).map(([id, d]) => `<path class="land${iso.has(id) ? " eco" : ""}${selIso.has(id) ? " sel" : ""}" d="${d}" style="stroke-width:${0.6 * k}"/>`).join("");
-  const flows = FLOWS.map((f) => {
-    const a = eco[f.from].xy, b = eco[f.to].xy, dep = depOf(...f.dep), col = (VERDICT_STYLE[dep ? dep.verdict : "nicht geprüft"] || VERDICT_STYLE["nicht geprüft"])[1];
-    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.22;
-    return `<path class="flow" d="M${a[0]},${a[1]}Q${mx},${my} ${b[0]},${b[1]}" stroke="${col}" style="stroke-width:${2 * k}" ${dep && dep.verdict === "keine Daten" ? `stroke-dasharray="${5 * k} ${4 * k}"` : ""}/>
-      <text class="flowlabel" x="${bez(a[0], mx, b[0], f.t ?? 0.5)}" y="${bez(a[1], my, b[1], f.t ?? 0.5) - 5 * k}" text-anchor="middle" style="font-size:${11 * k}px;stroke-width:${3 * k}px">${esc(f.label)}</text>`;
-  }).join("");
-  const markers = Object.entries(eco).map(([c, e]) => { const [dx, dy] = LABEL_POS[c] || [1, 0.3];
-    return `<g class="marker${state.mapSel === c ? " sel" : ""}" data-eco="${c}" tabindex="0" role="button" aria-label="${esc(e.label)}">
-      <circle class="hit" cx="${e.xy[0]}" cy="${e.xy[1]}" r="${12 * k}"/>
-      <circle cx="${e.xy[0]}" cy="${e.xy[1]}" r="${5.5 * k}" style="stroke-width:${1.8 * k}"/>
-      <text x="${e.xy[0] + dx * 9 * k}" y="${e.xy[1] + dy * 10 * k + 4 * k}" text-anchor="${dx < 0 ? "end" : dx === 0.6 ? "middle" : "start"}" style="font-size:${13 * k}px;stroke-width:${3.5 * k}px">${esc(e.label)}</text></g>`; }).join("");
-  $("#map").innerHTML = `<svg class="map" viewBox="${box.join(" ")}" role="img" aria-label="Weltkarte, Ausschnitt ${MAP_VIEWS[state.mapView].label}">${paths}${flows}${markers}</svg>`;
-  document.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => { state.mapView = b.dataset.mv; document.querySelectorAll("[data-mv]").forEach((x) => x.setAttribute("aria-pressed", x === b)); bindMap(); });
-  document.querySelectorAll("[data-eco]").forEach((g) => { const go = () => { state.mapSel = g.dataset.eco; bindMap(); }; g.onclick = go; g.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") go(); }; });
-  const e = D.economies.find((x) => x.code === state.mapSel) || {};
-  const deps = D.dependencies.filter((d) => d.currency === e.currency);
-  $("#map-detail").innerHTML = `<div class="panel-head"><h2>${esc(e.name || "")} ${e.currency ? `<span class="faint">· ${e.currency}</span>` : ""}</h2></div>
-    <p class="muted" style="margin-bottom:12px">${esc(e.notes || "")}</p>
-    ${deps.length ? `<div style="display:grid;gap:8px">${deps.map((d) => `<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line-soft);padding-bottom:8px"><span>${esc(d.driver)} <span class="faint">→ ${d.currency} ${d.expected_sign > 0 ? "▲" : d.expected_sign < 0 ? "▼" : "?"}</span></span><span class="pill ${(VERDICT_STYLE[d.verdict] || ["plain"])[0]}">${esc(d.verdict)}</span></div>`).join("")}</div>` : `<p class="faint">China ist hier als Handelspartner erfasst und keine der acht Währungen.</p>`}
-    ${e.currency ? `<p style="margin-top:12px"><a href="#makro" data-goto="${e.currency}">Alle Details zu ${e.currency}</a></p>` : ""}`;
-  const g = $("[data-goto]"); if (g) g.onclick = () => { state.depCcy = g.dataset.goto; };
-}
+function bindCheck() { bindHorizon(); document.querySelectorAll("[data-per]").forEach((b) => b.onclick = () => { state.period = b.dataset.per; save(); route(); }); }
 
-/* ---------- Wirtschaftsbeziehungen ---------- */
-function viewDeps() {
-  const counts = {}; D.dependencies.forEach((d) => counts[d.verdict] = (counts[d.verdict] || 0) + 1);
-  return `<section class="view">
-    <div class="lede"><h1>Wirtschaftsbeziehungen</h1>
-      <p>Welche Rohstoffe und Faktoren beeinflussen welche Währung? Jede Beziehung startet als Hypothese und wird mit Daten seit 1999 geprüft: gleichzeitig (erklärt Bewegungen) und mit Vorlauf (sagt Bewegungen voraus). Als validiert gilt eine Beziehung erst, wenn du sie freigibst.</p></div>
-    <div class="chips">${Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="pill ${(VERDICT_STYLE[k] || ["plain"])[0]}">${n} ${esc(k)}</span>`).join("")}</div>
-    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-dccy="${c}" aria-pressed="${state.depCcy === c}">${c === "ALLE" ? "Alle" : c}</button>`).join("")}</div>
-    <div class="deps" id="deps"></div>
-  </section>`;
-}
-function bindDeps() {
-  document.querySelectorAll("[data-dccy]").forEach((b) => b.onclick = () => { state.depCcy = b.dataset.dccy; route(); });
-  const rows = D.dependencies.filter((d) => state.depCcy === "ALLE" || d.currency === state.depCcy);
-  $("#deps").innerHTML = rows.map((d) => {
-    const st = VERDICT_STYLE[d.verdict] || ["plain"];
-    const c = d.contemporaneous, p = d.predictive;
-    const subs = (d.subperiods || []).map((s) => s ? `<i title="${s.from}–${s.to}: β ${fmt(s.beta, 2)}, p ${fmt(s.p, 3)}" style="background:${s.p < 0.1 ? (Math.sign(s.beta) === Math.sign(c ? c.beta : 0) ? "var(--accent)" : "var(--bear)") : "transparent"}"></i>` : "<i></i>").join("");
-    return `<article class="panel dep">
-      <div class="dep-head"><div><div class="dep-title">${esc(d.driver)} → ${d.currency}</div>
-        <div class="faint" style="font-size:.8rem">erwartet: ${d.expected_sign > 0 ? "steigt der Treiber, wird " + d.currency + " stärker" : d.expected_sign < 0 ? "steigt der Treiber, wird " + d.currency + " schwächer" : "Richtung unklar oder wechselnd"}</div></div>
-        <span class="pill ${st[0]}">${esc(d.verdict)}</span></div>
-      <p style="font-size:.92rem">${esc(d.mechanism)}</p>
-      <p class="note">${esc(d.verdict_text)}</p>
-      ${c ? `<div class="stats"><span>Beta <b class="num">${fmt(c.beta, 3)}</b></span><span>p <b class="num">${fmt(c.p, 3)}</b></span><span>erklärt <b class="num">${pp(c.r2, 1)}</b> der Monatsbewegung</span>
-        <span>Teilperioden <span class="subs" aria-label="2000–08, 2009–15, ab 2016">${subs}</span></span>
-        ${p ? `<span>Vorlauf ${p.lead_months} M: OOS-R² <b class="num">${pct((p.oos || {}).r2, 1)}</b></span>` : ""}</div>` : ""}
-      <details><summary>Wirkungskette und Bedingungen</summary>
-        <ol class="chain" style="margin-top:8px">${(d.chain || []).map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
-        ${d.conditions ? `<p class="faint" style="font-size:.84rem;margin-top:8px">${esc(d.conditions)}</p>` : ""}
-      </details>
-      <div class="faint" style="font-size:.78rem">Status: ${d.status === "hypothesis" ? "Hypothese – Freigabe durch dich" : esc(d.status)}</div>
-    </article>`;}).join("");
-}
-
-/* ---------- Daten ---------- */
-function viewData() {
-  const q = D.quality;
-  const label = {gap: "Lücken", spike: "Verdacht auf Datenfehler", extreme_move: "Extreme Marktbewegungen (echt)", source_mismatch: "Abweichung FRED/EZB", stale: "Veraltete Daten", source_revision: "Nachträglich geänderte Werte"};
-  return `<section class="view">
-    <div class="lede"><h1>Daten und Grenzen</h1><p>Woher die Zahlen kommen, wie aktuell sie sind und was noch fehlt.</p></div>
-    <div class="grid-2">
-      <article class="panel"><div class="panel-head"><h2>Quellen</h2></div><div class="tbl-wrap"><table><thead><tr><th>Quelle</th><th>Letzter Abruf</th><th>Status</th></tr></thead><tbody>
-        ${D.sources.map((s) => `<tr><td>${esc(s.source)}</td><td class="num">${s.last_run ? new Date(s.last_run).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"}) : "–"}</td><td><span class="pill ${s.status === "ok" ? "good" : "bad"}">${esc(s.status)}</span></td></tr>`).join("")}</tbody></table></div></article>
-      <article class="panel"><div class="panel-head"><h2>Datenqualität seit 1999</h2></div><div class="tbl-wrap"><table><thead><tr><th>Prüfung</th><th>Einstufung</th><th class="num">Anzahl</th></tr></thead><tbody>
-        ${q.length ? q.map((r) => `<tr><td>${esc(label[r.check] || r.check)}</td><td><span class="pill ${r.severity === "info" ? "info" : r.severity === "warning" ? "warn" : "bad"}">${esc(r.severity)}</span></td><td class="num">${r.count}</td></tr>`).join("") : `<tr><td colspan="3" class="faint">Noch keine Prüfung gelaufen.</td></tr>`}</tbody></table></div></article>
-    </div>
-    <article class="panel"><div class="panel-head"><h2>Bekannte Grenzen</h2></div><ul class="plain">
-      <li>Kurse sind vorläufig FRED-Mittagskurse (12:00 New York) und erscheinen nur wöchentlich. Marktübliche Schlusskurse um 17:00 New York mit Hoch/Tief (Dukascopy) folgen auf einem eigenen Server.</li>
-      <li>Die Tagesprognose hat deshalb noch keine Handelsspanne.</li>
-      <li>Zinsdifferenzen, Inflation und COT-Positionierung sind noch nicht angebunden (nächste Phase). Bisher nutzen die Modelle Kursdynamik, Schwankung und Risikostimmung.</li>
-      <li>Milchpreise, Gold und die Industrieaktivität Chinas fehlen noch als Datenquellen.</li>
-      <li>Rohstoffpreise von FRED sind meist Monatsdurchschnitte und erscheinen mit etwa 45 Tagen Verzögerung. Das System rechnet damit und nutzt keine Werte, die damals noch unbekannt waren.</li>
-    </ul></article>
-    <article class="panel"><div class="panel-head"><h2>Letzte Werte der Treiber</h2></div><div class="chips">${Object.entries(D.series_last).sort().map(([k, v]) => `<span class="chip">${esc(k)} <span class="num">${dateDe(v)}</span></span>`).join("")}</div></article>
-  </section>`;
-}
-
-/* ---------- Fundamentale Seiten ---------- */
-const F = () => D.fund;
-const CCY = {USD: "US-Dollar", EUR: "Euro", JPY: "Yen", GBP: "Pfund", CHF: "Franken", CAD: "Kanadischer Dollar", AUD: "Australischer Dollar", NZD: "Neuseeland-Dollar"};
-const IMPACT = {High: ["var(--red)", "Hoch (roter Ordner)"], Medium: ["var(--orange)", "Mittel"], Low: ["var(--yellow)", "Niedrig"], Holiday: ["var(--holiday)", "Feiertag"]};
-const folder = (imp) => `<svg class="folder" viewBox="0 0 16 12" aria-label="${(IMPACT[imp] || IMPACT.Low)[1]}" role="img"><path d="M1 2.2C1 1.5 1.5 1 2.2 1h3.6l1.5 1.6h6.5c.7 0 1.2.5 1.2 1.2v6c0 .7-.5 1.2-1.2 1.2H2.2C1.5 11 1 10.5 1 9.8z" fill="${(IMPACT[imp] || IMPACT.Low)[0]}"/></svg>`;
-const dirChip = (d) => `<span class="dir ${d > 0 ? "long" : d < 0 ? "short" : ""}">${d > 0 ? "LONG" : d < 0 ? "SHORT" : "NEUTRAL"}</span>`;
-const dots = (k) => `<span class="cdots" aria-label="${k} von 3 Faktoren">${[0, 1, 2].map((i) => `<i class="${i < k ? "on" : ""}"></i>`).join("")}</span>`;
-const bias = (score) => Math.round(50 + 50 * (score || 0));
-const fmtK = (x) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "") + nf(1).format(Math.abs(x) / 1000) + "K";
-const dayName = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", {weekday: "long", day: "2-digit", month: "2-digit"});
-const shortDay = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", {weekday: "short", day: "2-digit", month: "2-digit"});
-const todayIso = () => new Date().toLocaleDateString("sv-SE", {timeZone: "Europe/Berlin"});
-const nowIso = () => new Date().toISOString();
-const valText = (v) => v == null ? "" : `${pp(v.hit_rate, 1)} Treffer (n = ${nf(0).format(v.n)})`;
-const verdictOf = (v) => !v || v.hit_rate == null ? "noch nicht messbar" : (v.ci && v.ci[0] > 0.5) ? "kleiner, aber messbarer Vorteil" : "keine verlässliche Vorhersagekraft";
-const INFO_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7v4M8 4.6v.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-
-function nextHigh() { return (F().events || []).find((e) => e.impact === "High" && e.at >= nowIso()); }
-function untilText(iso) {
-  const ms = new Date(iso) - new Date(); if (ms < 0) return "läuft";
-  const h = Math.floor(ms / 36e5), m = Math.floor(ms % 36e5 / 6e4);
-  return h >= 24 ? `in ${Math.floor(h / 24)} T ${h % 24} h` : `in ${h} h ${m} min`;
-}
-
-function viewCockpit() {
-  const f = F(), h = f.headline, conf = f.validation.confluence || {}, c3 = conf[3] || conf["3"];
-  const cs = Object.fromEntries(f.currencies.map((c) => [c.ccy, c]));
-  const s = cs[h.strong], w = cs[h.weak], ev = h.top_event;
-  const bp = f.pairs.find((p) => p.pair === h.best_pair);
-  const highs = f.events.filter((e) => e.impact === "High");
-  const top = [...f.pairs].filter((p) => p.direction).sort((a, b) => b.confluence - a.confluence || Math.abs(b.cot_diff || 0) - Math.abs(a.cot_diff || 0)).slice(0, 6);
-  return `<section class="view">
-    <div class="hero">
-      <div class="eyebrow">Cockpit · KW ${f.week.kw} · Was ist diese Woche wichtig?</div>
-      <h1>Diese Woche: ${esc(h.strong_name)} <span class="s">stark</span>, ${esc(h.weak_name)} <span class="w">schwach.</span></h1>
-      <div class="eyebrow"><b>Die Woche in Kürze</b> · ${dateDe(f.week.start)} – ${dateDe(f.week.end)}</div>
-      <p class="brief">Der <b class="s">${esc(h.strong_name)}</b> wird von den Faktoren am stärksten gestützt<sup class="ref"><a href="#quellen">[1]</a></sup>, der <b class="w">${esc(h.weak_name)}</b> liegt hinten<sup class="ref"><a href="#quellen">[2]</a></sup>.
-        ${ev ? `Wichtigster Termin: <b class="y">${esc(CCY[ev.currency])} – ${esc(ev.title)}, ${shortDay(ev.day)} um ${ev.time}</b><sup class="ref"><a href="#quellen">[3]</a></sup>.` : "Diese Woche stehen keine roten Ordner mehr an."}
-        ${bp ? `Stärkste Übereinstimmung: <b>${pairName(bp.pair)} ${bp.direction > 0 ? "long" : "short"}</b> (${bp.confluence}/3)<sup class="ref"><a href="#quellen">[4]</a></sup>${bp.day_range_pips ? `, typische Tagesbewegung ±${bp.day_range_pips} Pips` : ""}.` : ""}</p>
-      <div style="display:grid;gap:4px">
-        <div class="srcline"><span class="dot live"></span>COT · Bericht vom ${dateDe((f.cot[h.strong] || {}).report_date)}, veröffentlicht ${dateDe(((f.cot[h.strong] || {}).released || "").slice(0, 10))}</div>
-        <div class="srcline"><span class="dot live"></span>Kalender · ${esc(D.meta.calendar_source)} · Stand ${new Date(D.meta.generated_at).toLocaleString("de-DE", {dateStyle: "short", timeStyle: "short"})}</div>
-        <div class="srcline"><span class="dot live"></span>Kurse · bis ${dateDe(D.meta.as_of)}</div>
-      </div>
-    </div>
-    <div class="tiles">
-      <div class="panel tile"><span class="eyebrow"><b>[1]</b> ${h.strong}-Bias</span><span class="big num" style="color:var(--strong)">${bias(s.score)}</span><span class="faint" style="font-size:.8rem">von 100 · COT, Trend und Saison</span></div>
-      <div class="panel tile"><span class="eyebrow"><b>[2]</b> ${h.weak}-Bias</span><span class="big num" style="color:var(--weak)">${bias(w.score)}</span><span class="faint" style="font-size:.8rem">von 100 · COT, Trend und Saison</span></div>
-    </div>
-    <div class="honest">${INFO_ICON}<span>Ehrlich geprüft: Mit genau diesen Regeln lag die Richtung bei voller Übereinstimmung (3/3) seit 2008 in ${c3 ? pp(c3.hit_rate, 0) : "–"} der Wochen richtig – <b>${verdictOf(c3)}</b>. Nutze die Faktoren als Überblick über die Fundamentaldaten, nicht als Signal. <a href="#paare">Details je Paar</a></span></div>
-    <div class="grid-2">
-      <article class="panel">
-        <div class="section-title"><h2>Rote Ordner diese Woche</h2><a href="#kalender" class="faint" style="font-size:.84rem">Kalender</a></div>
-        <div class="rows" style="margin-top:6px">${highs.length ? highs.map((e) => evRow(e, true)).join("") : '<p class="faint" style="padding:10px 0">Keine Termine mit hoher Wichtigkeit.</p>'}</div>
-      </article>
-      <article class="panel">
-        <div class="section-title"><h2>Höchste Übereinstimmung</h2><a href="#paare" class="faint" style="font-size:.84rem">Alle 28 Paare</a></div>
-        <div class="rows compact" style="margin-top:6px">${top.map(pairRow).join("")}</div>
-      </article>
-    </div>
-    <article class="panel">
-      <div class="section-title"><h2>Währungen dieser Woche</h2><a href="#waehrungen" class="faint" style="font-size:.84rem">Details</a></div>
-      <div style="display:grid;gap:8px;margin-top:10px">${f.currencies.map(ccyBar).join("")}</div>
-    </article>
-    <article class="panel" id="quellen">
-      <h3 style="margin-bottom:10px">Quellen und Belege</h3>
-      <ol class="sources">
-        <li><span>[1]</span><span>${esc(h.strong_name)}: COT-Index Commercials ${fmt(s.cot_idx, 0)}, Stärke 20 Tage ${pct((s.trend_pct || 0) / 100)}, ${esc(f.season.month_name)} im Schnitt ${pct(s.season_mean)} (in ${pp(s.season_hit, 0)} der Jahre gestiegen).</span></li>
-        <li><span>[2]</span><span>${esc(h.weak_name)}: COT-Index Commercials ${fmt(w.cot_idx, 0)}, Stärke 20 Tage ${pct((w.trend_pct || 0) / 100)}, ${esc(f.season.month_name)} im Schnitt ${pct(w.season_mean)} (in ${pp(w.season_hit, 0)} der Jahre gestiegen).</span></li>
-        <li><span>[3]</span><span>${ev ? `${esc(D.meta.calendar_source)}-Kalender, Wichtigkeit hoch. Vorher: ${esc(ev.previous || "–")}, Prognose: ${esc(ev.forecast || "–")}.` : "–"}</span></li>
-        <li><span>[4]</span><span>Regel: Mehrheit aus COT-Differenz (≥ ${f.rules.cot_diff} Punkte), Trend (≥ ${fmt(f.rules.trend_min, 1)} %) und Saison (≥ ${pp(f.rules.season_hit, 0)} der Jahre). Historisch 3/3: ${valText(c3)}. Tagesbewegung aus dem 80-%-Intervall der Tagesprognose.</span></li>
-      </ol>
-    </article>
-  </section>`;
-}
-function evRow(e, withDay = true) {
-  const past = e.at < nowIso();
-  const wd = new Date(e.day + "T12:00:00").toLocaleDateString("de-DE", {weekday: "short"}).replace(".", "");
-  return `<div class="ev ${past ? "past" : ""} ${withDay ? "" : "nodate"}"><span class="t">${withDay ? wd + " " : ""}${e.time}</span>${folder(e.impact)}<span class="c">${e.currency}</span><span>${esc(e.title)}</span>
-    ${(e.forecast || e.previous || e.actual) ? `<span class="vals">${e.actual ? `<span>Ist ${esc(e.actual)}</span>` : ""}${e.forecast ? `<span>Prog. ${esc(e.forecast)}</span>` : ""}${e.previous ? `<span>Vorher ${esc(e.previous)}</span>` : ""}</span>` : ""}</div>`;
-}
-function pairRow(p) {
-  const d = p.cot_diff;
-  return `<a class="prow" href="#paar-${p.pair}"><span class="pair">${pairName(p.pair)}</span>${dirChip(p.direction)}<span class="val">${dots(p.confluence)} ${p.confluence}/3</span>
-    <span class="val hide-s ${d > 0 ? "s" : d < 0 ? "w" : ""}">${d == null ? "–" : (d > 0 ? "+" : "") + fmt(d, 0)}</span><span class="val hide-s">${p.day_range_pips ? "±" + p.day_range_pips : "–"}</span></a>`;
-}
-function ccyBar(c) {
-  const b = bias(c.score), col = b >= 50 ? "var(--strong)" : "var(--weak)";
-  return `<div style="display:grid;grid-template-columns:46px minmax(0,1fr) 34px;gap:10px;align-items:center">
-    <span class="ccy" style="font-family:var(--font-data);font-weight:600">${c.ccy}</span>
-    <div class="meter" style="height:10px" role="img" aria-label="${c.ccy} Bias ${b}"><span class="z" style="left:50%;width:1px;background:var(--line)"></span><span style="position:absolute;top:0;bottom:0;border-radius:5px;background:${col};left:${Math.min(b, 50)}%;width:${Math.abs(b - 50)}%"></span></div>
-    <span class="num" style="text-align:right">${b}</span></div>`;
-}
-
-function viewPair(pair) {
-  const f = F(), p = f.pairs.find((x) => x.pair === pair);
-  if (!p) return `<section class="view"><div class="empty"><b>Paar nicht gefunden.</b><a href="#paare">Zur Übersicht</a></div></section>`;
-  const b = pair.slice(0, 3), q = pair.slice(3), w1 = D.forecasts.find((x) => x.pair === pair && x.horizon === "1W"), d1 = D.forecasts.find((x) => x.pair === pair && x.horizon === "1D");
-  const names = {cot: "Positionierung (COT)", trend: "Trend (Stärke 20 Tage)", season: `Saison (${f.season.month_name})`};
-  const verdict = p.direction > 0 ? `leicht <span class="s">long</span>` : p.direction < 0 ? `leicht <span class="w">short</span>` : "ohne klare Richtung";
-  const today = todayIso();
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow"><a href="#paare" style="color:inherit">Paare</a> · ${pairName(pair)} · KW ${f.week.kw}</div>
-      <h1 style="font-size:clamp(2.3rem,9vw,4rem)">${pairName(pair)} diese Woche: ${verdict}.</h1>
-      <p class="brief" style="font-size:1.15rem">${p.confluence}/3 Faktoren zeigen in diese Richtung${p.against.length ? `, ${p.against.length} dagegen` : ""}. ${p.week_range_pips ? `In 80 % der Wochen bewegte sich das Paar um weniger als <b>±${p.week_range_pips} Pips</b>, an einem Tag um weniger als <b>±${p.day_range_pips} Pips</b>.` : ""} ${p.high_events ? `<b class="y">${p.high_events} rote Ordner</b> betreffen ${b} oder ${q}.` : "Keine roten Ordner für dieses Paar."}</p>
-      <div>${dirChip(p.direction)} <span class="val" style="margin-left:8px">${dots(p.confluence)} ${p.confluence}/3</span></div></div>
-    <article class="panel"><h2 style="margin-bottom:6px">Die Woche Tag für Tag</h2>
-      <div class="days">${p.days.map((d) => `<div class="daycard" ${d.date === today ? 'style="border-color:var(--accent)"' : ""}><span class="d">${esc(d.weekday)} · ${dateDe(d.date).slice(0, 5)}</span>
-        ${d.events.length ? d.events.map((e) => `<div class="e">${folder(e.impact)}<span><span class="num faint">${e.time}</span> ${e.currency} ${esc(e.title)}</span></div>`).join("") : '<span class="faint" style="font-size:.84rem">keine wichtigen Termine</span>'}
-        ${p.day_range_pips ? `<span class="faint num" style="font-size:.76rem">typisch ±${p.day_range_pips} Pips</span>` : ""}</div>`).join("")}</div>
-    </article>
-    <div class="grid-2">
-      <article class="panel"><h2 style="margin-bottom:4px">Faktoren</h2>
-        ${Object.entries(p.factors).map(([k, x]) => `<div class="factor"><span class="sig ${x.signal > 0 ? "up" : x.signal < 0 ? "down" : ""}">${x.signal > 0 ? "▲" : x.signal < 0 ? "▼" : "–"}</span>
-          <span><b>${names[k]}</b> <span class="faint">· ${x.signal > 0 ? "spricht für " + b : x.signal < 0 ? "spricht für " + q : "neutral"}</span><br><span class="muted" style="font-size:.88rem">${esc(x.text)}</span></span></div>`).join("")}
-      </article>
-      <article class="panel"><h2 style="margin-bottom:8px">Kurs und Wochenfächer</h2>${w1 ? fanChart(w1) : '<p class="faint">Keine Wochenprognose.</p>'}
-        <p class="faint" style="font-size:.8rem;margin-top:6px">Fächer = 80-/90-%-Intervall der validierten Wochenprognose. <a href="#prognosen">Zu den Prognosen</a></p></article>
-    </div>
-    <div class="grid-2">
-      <article class="panel"><h2 style="margin-bottom:8px">Saisonalität ${pairName(pair)}</h2>${seasonChart(f.season.pairs[pair], f.season.month)}</article>
-      <article class="panel"><h2 style="margin-bottom:10px">Positionierung</h2><div style="display:grid;gap:16px">${[b, q].map((c) => cotMini(c)).join("")}</div></article>
-    </div>
-  </section>`;
-}
-function cotMini(c) {
-  const x = F().cot[c]; if (!x) return `<div class="faint">${c}: keine COT-Daten</div>`;
-  return `<div style="display:grid;gap:6px"><div style="display:flex;justify-content:space-between"><span class="num"><b>${c}</b> Commercials</span><span class="num">${fmt(x.comm_idx, 0)} · Spekulanten ${fmt(x.spec_idx, 0)}</span></div>${meter(x)}</div>`;
-}
-function meter(x) {
-  const [lo, hi] = F().rules.cot_extreme;
-  return `<div class="meter" role="img" aria-label="Commercials ${x.comm_idx}, Spekulanten ${x.spec_idx}">
-    <span class="z" style="left:0;width:${lo}%"></span><span class="z" style="left:${hi}%;width:${100 - hi}%"></span>
-    ${x.spec_idx != null ? `<span class="m" style="left:${x.spec_idx}%;background:var(--weak)"></span>` : ""}
-    ${x.comm_idx != null ? `<span class="m" style="left:${x.comm_idx}%;background:var(--strong);width:4px"></span>` : ""}</div>
-    <div class="mlabels"><span>0</span><span>${lo}</span><span>50</span><span>${hi}</span><span>100</span></div>`;
-}
-function seasonChart(st, curMonth) {
-  if (!st) return '<p class="faint">Keine Daten.</p>';
-  const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-  const vals = months.map((_, i) => st[i + 1] || st[String(i + 1)] || null);
-  const W = Math.max(300, Math.min(520, innerWidth - 64)), H = 170, pl = 34, pr = 6, pt = 18, pb = 22;
-  const lim = Math.max(0.003, ...vals.map((v) => Math.abs(v ? v.mean : 0))) * 1.15;
-  const bw = (W - pl - pr) / 12, y = (v) => pt + (1 - (v + lim) / (2 * lim)) * (H - pt - pb);
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Durchschnittliche Monatsrendite">
-    <line x1="${pl}" x2="${W - pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>
-    <text x="${pl - 4}" y="${y(lim * 0.8) + 4}" text-anchor="end">${pct(lim * 0.8, 1)}</text><text x="${pl - 4}" y="${y(-lim * 0.8) + 4}" text-anchor="end">${pct(-lim * 0.8, 1)}</text>
-    ${vals.map((v, i) => { if (!v) return ""; const x = pl + i * bw + bw * 0.18, top = Math.min(y(v.mean), y(0)), h = Math.max(1.5, Math.abs(y(v.mean) - y(0)));
-      const col = v.mean >= 0 ? "var(--strong)" : "var(--weak)", cur = i + 1 === curMonth;
-      return `<rect x="${x}" y="${top}" width="${bw * 0.64}" height="${h}" rx="2" fill="${col}" opacity="${cur ? 1 : 0.55}"><title>${months[i]}: Ø ${pct(v.mean, 2)}, ${pp(v.hit, 0)} der Jahre positiv (n = ${v.n})</title></rect>
-        ${cur ? `<text x="${x + bw * 0.32}" y="${v.mean >= 0 ? top - 4 : top + h + 11}" text-anchor="middle" style="fill:var(--fg)">${pp(v.hit, 0)}</text>` : ""}`; }).join("")}
-    ${months.map((m, i) => `<text x="${pl + i * bw + bw / 2}" y="${H - 6}" text-anchor="middle" ${i + 1 === curMonth ? 'style="fill:var(--fg);font-weight:600"' : ""}>${m}</text>`).join("")}
-  </svg><p class="faint" style="font-size:.78rem;margin-top:4px">Ø Monatsrendite ${F().season.years[0]}–${F().season.years[1]}; Zahl über dem aktuellen Monat = Anteil positiver Jahre.</p>`;
-}
-
+/* ---------- Kalender ---------- */
 function viewCalendar() {
-  const f = F(), imp = state.imp || ["High", "Medium"], ccys = state.calCcy || "ALLE", today = todayIso();
-  const evs = f.events.filter((e) => imp.includes(e.impact) && (ccys === "ALLE" || e.currency === ccys));
-  const byDay = {}; evs.forEach((e) => (byDay[e.day] = byDay[e.day] || []).push(e));
+  const imp = state.imp || ["High", "Medium"], ev = D.events.filter((e) => imp.includes(e.impact));
+  const days = [...new Set(ev.map((e) => e.day))];
   return `<section class="view">
-    <div class="hero"><div class="eyebrow">Kalender · KW ${f.week.kw} · Zeiten in deutscher Zeit</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Termine der Woche</h1></div>
-    <div class="toolbar"><div class="chips" role="group" aria-label="Wichtigkeit">${["High", "Medium", "Low", "Holiday"].map((k) => `<button type="button" data-imp="${k}" aria-pressed="${imp.includes(k)}">${folder(k)} ${IMPACT[k][1].replace(" (roter Ordner)", "")}</button>`).join("")}</div></div>
-    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-cal="${c}" aria-pressed="${ccys === c}">${c === "ALLE" ? "Alle" : c}</button>`).join("")}</div>
-    <div>${Object.keys(byDay).sort().map((d) => `<div class="dayhead ${d === today ? "today" : ""}"><h3>${dayName(d)}</h3><span class="faint num" style="font-size:.78rem">${byDay[d].length} Termine</span></div>${byDay[d].map((e) => evRow(e, false)).join("")}`).join("") || '<div class="empty"><b>Keine Termine für diese Auswahl.</b></div>'}</div>
-    <p class="faint" style="font-size:.8rem">Quelle: ${esc(D.meta.calendar_source)}. Nur zur persönlichen Nutzung. Ist-Werte erscheinen, sobald der Kalender sie meldet.</p>
+    <div class="lede"><h1>Termine KW ${D.meta.week.kw}</h1><p>Wirtschaftsdaten und Notenbank-Termine der 8 Währungen, deutsche Zeit. Quelle: ${esc(D.meta.calendar_source)}.</p></div>
+    <div class="seg" role="group" aria-label="Wichtigkeit">${[["High", "hoch"], ["Medium", "mittel"], ["Low", "gering"]].map(([k, l]) => `<button type="button" data-imp="${k}" aria-pressed="${imp.includes(k)}"><span class="imp ${k}"></span>${l}</button>`).join("")}</div>
+    ${days.map((d) => `<article class="panel"><h2>${new Date(d + "T12:00:00").toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"})}</h2>${ev.filter((e) => e.day === d).map(evRow).join("")}</article>`).join("") || '<p class="muted">Keine Termine.</p>'}
   </section>`;
 }
-function bindCalendar() {
-  document.querySelectorAll("[data-imp]").forEach((b) => b.onclick = () => { const k = b.dataset.imp, cur = state.imp || ["High", "Medium"]; state.imp = cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]; route(); });
-  document.querySelectorAll("[data-cal]").forEach((b) => b.onclick = () => { state.calCcy = b.dataset.cal; route(); });
-}
+function bindCalendar() { document.querySelectorAll("[data-imp]").forEach((b) => b.onclick = () => { const k = b.dataset.imp, cur = state.imp || ["High", "Medium"]; state.imp = cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]; route(); }); }
 
-function viewToday() {
-  const f = F(), t = todayIso(), evs = f.events.filter((e) => e.day === t && e.impact !== "Low");
-  const highs = evs.filter((e) => e.impact === "High"), ccys = [...new Set(highs.map((e) => e.currency))];
-  const weekend = !f.week.days.includes(t);
-  const affected = f.pairs.map((p) => ({...p, n: evs.filter((e) => p.pair.includes(e.currency)).length, nh: highs.filter((e) => p.pair.includes(e.currency)).length}))
-    .filter((p) => p.n).sort((a, b) => b.nh - a.nh || b.n - a.n || (b.day_range_pips || 0) - (a.day_range_pips || 0));
-  const next = evs.find((e) => e.at >= nowIso());
-  const title = new Date(t + "T12:00:00").toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"});
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow">Tages-Update · ${esc(title)}</div>
-      <h1 style="font-size:clamp(2.3rem,9vw,4.2rem)">${weekend ? "Heute ist Wochenende." : highs.length ? `Heute: ${highs.length} rote Ordner${ccys.length ? ` für ${ccys.slice(0, 3).join(", ")}` : ""}.` : "Heute: ein ruhiger Tag."}</h1>
-      <p class="brief" style="font-size:1.12rem">${weekend ? "Die Wochenvorbereitung für die kommende Woche findest du im Cockpit." : `${evs.length} wichtige Termine${next ? `, als Nächstes <b class="y">${esc(next.currency)} ${esc(next.title)} um ${next.time}</b> (${untilText(next.at)})` : ", alle bereits vorbei"}. ${affected.length} Paare sind betroffen.`}</p></div>
-    <article class="panel"><div class="section-title"><h2>Termine heute</h2><a href="#kalender" class="faint" style="font-size:.84rem">Ganze Woche</a></div>
-      <div class="rows" style="margin-top:6px">${evs.length ? evs.map((e) => evRow(e, false)).join("") : '<p class="faint" style="padding:10px 0">Keine Termine mit mittlerer oder hoher Wichtigkeit.</p>'}</div></article>
-    <article class="panel"><div class="section-title"><h2>Betroffene Paare</h2><span class="faint" style="font-size:.8rem">typische Tagesbewegung (80 %)</span></div>
-      <div class="rows" style="margin-top:6px">${affected.length ? affected.map((p) => `<a class="prow" href="#paar-${p.pair}" style="grid-template-columns:minmax(84px,1fr) auto 64px 70px">
-        <span class="pair">${pairName(p.pair)}</span>${dirChip(p.direction)}<span class="val">${p.nh ? `<span style="color:var(--red)">${p.nh}</span> rot` : `${p.n} Term.`}</span><span class="val">${p.day_range_pips ? "±" + p.day_range_pips : "–"}</span></a>`).join("") : '<p class="faint" style="padding:10px 0">Kein Paar mit wichtigen Terminen.</p>'}</div></article>
-    <div class="honest">${INFO_ICON}<span>Die Tagesbewegung stammt aus dem 80-%-Intervall der validierten Tagesprognose: An 8 von 10 Tagen blieb die Kursänderung bis zum nächsten Tag innerhalb dieser Spanne. An Tagen mit roten Ordnern kann sie größer ausfallen.</span></div>
-  </section>`;
-}
-
-/* ---------- Version 2: Matrix, Stärke, COT-Verlauf, Saison-Verlauf, Makro, Rechner ---------- */
-const X = () => F().extra || {};
-const csMap = () => Object.fromEntries(F().currencies.map((c) => [c.ccy, c]));
-const marketPair = (a, b) => D.pairs.includes(a + b) ? a + b : b + a;
-const heat = (v, max) => { const a = Math.min(1, Math.abs(v || 0) / max); return v == null ? "transparent" : `color-mix(in srgb, ${v >= 0 ? "var(--strong)" : "var(--weak)"} ${Math.round(12 + a * 70)}%, transparent)`; };
-const segBtns = (key, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-${key}="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
-let ticker = null;
-
-/* Paare: Matrix + Checkliste */
-function viewPairs() {
-  const f = F(), cs = csMap(), order = [...f.currencies].map((c) => c.ccy);
-  const sel = state.selPair || (f.headline.best_pair || "EURUSD");
-  const conf = f.validation.confluence || {};
-  let rows = f.pairs.filter((p) => state.ccy === "ALLE" || p.pair.includes(state.ccy));
-  rows = [...rows].sort((a, b) => b.confluence - a.confluence || Math.abs(b.cot_diff || 0) - Math.abs(a.cot_diff || 0));
-  const cell = (b, q) => {
-    if (b === q) return `<span class="mx-self">${b}</span>`;
-    const d = bias(cs[b].score) - bias(cs[q].score), mp = marketPair(b, q), on = mp === sel;
-    return `<button type="button" class="mx-cell ${on ? "on" : ""}" data-sel="${mp}" style="background:${heat(d, 40)}" aria-label="${b} gegen ${q}: ${d > 0 ? "+" : ""}${d}">${d > 0 ? "+" : ""}${d}</button>`;
-  };
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow">Paare · KW ${f.week.kw} · Wochenvorbereitung</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Welche Paare passen diese Woche?</h1>
-      <p class="brief" style="font-size:1.08rem">Die Matrix zeigt den Bias-Abstand jeder Währung (Zeile) gegen jede andere (Spalte). Blau = Zeilenwährung stärker, orange = schwächer. Tippe ein Feld an.</p></div>
-    <div class="split">
-      <article class="panel"><div class="section-title"><h2>Paar-Matrix</h2><span class="faint num" style="font-size:.74rem">Zeile = Basis · stark → schwach</span></div>
-        <div class="mx-wrap"><div class="mx" style="grid-template-columns:54px repeat(${order.length},minmax(30px,1fr))">
-          <span></span>${order.map((q) => `<span class="mx-h">${q}<small>${bias(cs[q].score)}</small></span>`).join("")}
-          ${order.map((b) => `<span class="mx-r">${b}<small>COT ${fmt(cs[b].cot_idx, 0)}</small></span>${order.map((q) => cell(b, q)).join("")}`).join("")}
-        </div></div></article>
-      <article class="panel" id="check">${pairCheck(sel)}</article>
-    </div>
-    <div class="section-title"><h2>Alle 28 Paare</h2></div>
-    <div class="chips" role="group" aria-label="Währung">${["ALLE", ...D.majors].map((c) => `<button type="button" data-ccy="${c}" aria-pressed="${state.ccy === c}">${c === "ALLE" ? "Alle 28" : c}</button>`).join("")}</div>
-    <div class="rows"><div class="prow head"><span>Paar</span><span>Richtung</span><span>Konfluenz</span><span class="hide-s">COT-Diff.</span><span class="hide-s">Tag ±Pips</span></div>${rows.map(pairRow).join("")}</div>
-    <div class="honest">${INFO_ICON}<span>Historische Trefferquote der Regel (Richtung der Folgewoche, seit 2008): 1/3 ${valText(conf[1] || conf["1"])} · 2/3 ${valText(conf[2] || conf["2"])} · 3/3 ${valText(conf[3] || conf["3"])}. Ergebnis: <b>${verdictOf(conf[3] || conf["3"])}</b>.</span></div>
-  </section>`;
-}
-function pairCheck(pair) {
-  const f = F(), p = f.pairs.find((x) => x.pair === pair), cs = csMap(); if (!p) return "";
-  const b = pair.slice(0, 3), q = pair.slice(3), bb = bias(cs[b].score), bq = bias(cs[q].score), dist = bb - bq;
-  const dir = p.direction || Math.sign(dist);
-  const rank = [...f.pairs].sort((x, y) => y.confluence - x.confluence || Math.abs(y.cot_diff || 0) - Math.abs(x.cot_diff || 0)).findIndex((x) => x.pair === pair) + 1;
-  const icon = (s) => s === "ok" ? '<span class="ck ok">✓</span>' : s === "no" ? '<span class="ck no">✕</span>' : s === "warn" ? '<span class="ck warn">!</span>' : '<span class="ck">–</span>';
-  const st = (sig) => !sig ? "neutral" : sig === dir ? "ok" : "no";
-  const names = {cot: "Positionierung (COT)", trend: "Trend (20 Tage)", season: `Saison (${f.season.month_name})`};
-  const reds = p.days.flatMap((d) => d.events.filter((e) => e.impact === "High").map((e) => ({...e, wd: d.weekday})));
-  const x = (v) => `${Math.max(0, Math.min(100, v))}%`;
-  return `<div class="eyebrow">Prüfen · Rang ${rank} von 28</div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:6px"><h2 style="font-size:2rem;letter-spacing:-.03em">${pairName(pair)}</h2><div style="text-align:right">${dirChip(p.direction)}<div class="num" style="margin-top:6px">${dots(p.confluence)} ${p.confluence}/3</div></div></div>
-    <div class="bdist"><div class="track"><span class="seg-fill" style="left:${x(Math.min(bb, bq))};width:${Math.abs(dist)}%"></span>
-      <span class="pin" style="left:${x(bq)}"><b>${q} ${bq}</b></span><span class="pin top" style="left:${x(bb)}"><b>${b} ${bb}</b></span></div>
-      <div class="mlabels"><span>0</span><span>Bias-Abstand ${dist > 0 ? "+" : ""}${dist} Punkte</span><span>100</span></div></div>
-    <div class="label" style="margin:14px 0 4px">Konfluenz-Checkliste</div>
-    <div class="checklist">
-      <div class="ckrow">${icon(Math.abs(dist) >= 10 ? (Math.sign(dist) === dir ? "ok" : "no") : "neutral")}<div><b>Fundament (Bias)</b><span>${b} ${bb} gegen ${q} ${bq} · Abstand ${Math.abs(dist)} Punkte${Math.abs(dist) < 10 ? " · knapp" : ""}</span></div></div>
-      ${Object.entries(p.factors).map(([k, v]) => `<div class="ckrow">${icon(st(v.signal))}<div><b>${names[k]}</b><span>${esc(v.text)}</span></div></div>`).join("")}
-      ${(() => { const rc = R().currencies, cb = (rc[b] || {}).short, cq = (rc[q] || {}).short; if (!cb || !cq) return "";
-        const cd = cb.value - cq.value; return `<div class="ckrow"><span class="ck">i</span><div><b>Zinsdifferenz (Carry)</b><span>${b} ${fmt(cb.value, 2)} % gegen ${q} ${fmt(cq.value, 2)} % · ${cd > 0 ? "+" : ""}${fmt(cd, 2)} Prozentpunkte – ${dir > 0 ? (cd > 0 ? "Long bringt eher Swap" : "Long kostet eher Swap") : dir < 0 ? (cd < 0 ? "Short bringt eher Swap" : "Short kostet eher Swap") : "nur zur Information"}</span></div></div>`; })()}
-      <div class="ckrow">${icon(reds.length ? "warn" : "ok")}<div><b>Event-Lage</b><span>${reds.length ? reds.slice(0, 3).map((e) => `${e.wd.slice(0, 2)} ${e.time} ${e.currency} ${esc(e.title)}`).join(" · ") + (reds.length > 3 ? ` · +${reds.length - 3}` : "") : "keine roten Ordner für beide Währungen"}</span></div></div>
-    </div>
-    ${p.against.length ? `<div class="label" style="margin:12px 0 4px">Gegenargumente</div><p class="muted" style="font-size:.88rem">${p.against.map((k) => names[k]).join(", ")} ${p.against.length > 1 ? "sprechen" : "spricht"} gegen die Richtung.</p>` : ""}
-    <p style="margin-top:12px"><a href="#paar-${pair}">Wochen- und Tagesansicht öffnen →</a></p>`;
-}
-function bindPairs() {
-  document.querySelectorAll("[data-ccy]").forEach((b) => b.onclick = () => { state.ccy = b.dataset.ccy; route(); });
-  document.querySelectorAll("[data-sel]").forEach((b) => b.onclick = () => { state.selPair = b.dataset.sel; document.querySelectorAll(".mx-cell").forEach((c) => c.classList.toggle("on", c.dataset.sel === state.selPair)); $("#check").innerHTML = pairCheck(state.selPair); if (innerWidth < 900) $("#check").scrollIntoView({behavior: "smooth", block: "start"}); });
-}
-
-/* Währungen: Stärke-Ranking 1T/1W/1M + Bias */
-function viewCurrencies() {
-  const f = F(), w = state.sw || "1W", sw = (X().strength_windows || {})[w] || {};
-  const ranked = Object.entries(sw).sort((a, b) => b[1] - a[1]), max = Math.max(0.3, ...ranked.map((r) => Math.abs(r[1])));
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow">Währungen · KW ${f.week.kw}</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Wer ist stark, wer schwach?</h1></div>
-    <div class="split">
-      <article class="panel"><div class="section-title"><h2>Währungsstärke</h2>${segBtns("sw", [["1T", "1 Tag"], ["1W", "1 Woche"], ["1M", "1 Monat"]], w)}</div>
-        <div style="display:grid;gap:9px;margin-top:12px">${ranked.map(([c, v], i) => `<div class="rank"><span class="faint num">${i + 1}.</span><span class="ccy num"><b>${c}</b></span>
-          <div class="rbar"><span class="mid"></span><i style="${v >= 0 ? `left:50%;width:${v / max * 50}%;background:var(--strong)` : `left:${50 - Math.abs(v) / max * 50}%;width:${Math.abs(v) / max * 50}%;background:var(--weak)`}"></i></div>
-          <span class="num ${v >= 0 ? "pos" : "neg"}">${v > 0 ? "+" : ""}${fmt(v, 2)} %</span></div>`).join("")}</div>
-        <p class="faint" style="font-size:.8rem;margin-top:10px">Gegen den Korb der anderen sieben. Die stärkste gegen die schwächste Währung ist die klarste Kursbewegung – mit Fundament, Positionierung und Saison gegenprüfen.</p></article>
-      <article class="panel"><div class="section-title"><h2>Bias-Rangliste</h2><span class="faint num" style="font-size:.74rem">COT · Trend · Saison</span></div>
-        <div style="display:grid;gap:9px;margin-top:12px">${f.currencies.map((c, i) => { const b = bias(c.score); return `<div class="rank"><span class="faint num">${i + 1}.</span><span class="ccy num"><b>${c.ccy}</b></span>
-          <div class="rbar"><span class="mid"></span><span class="knob" style="left:${b}%;border-color:${b >= 50 ? "var(--strong)" : "var(--weak)"}"></span></div><span class="num">${b}</span></div>`; }).join("")}</div></article>
-    </div>
-    <div class="rows">
-      <div class="prow head" style="grid-template-columns:minmax(110px,1.4fr) 56px repeat(3,minmax(58px,1fr))"><span>Währung</span><span>Bias</span><span>COT</span><span>Trend 20 T</span><span>Saison</span></div>
-      ${f.currencies.map((c) => `<div class="prow" style="grid-template-columns:minmax(110px,1.4fr) 56px repeat(3,minmax(58px,1fr))">
-        <span><span class="pair">${c.ccy}</span><br><span class="faint" style="font-size:.78rem">${esc(c.name)}</span></span>
-        <span class="val ${bias(c.score) >= 50 ? "s" : "w"}" style="font-size:1.1rem">${bias(c.score)}</span>
-        <span class="val">${fmt(c.cot_idx, 0)}</span><span class="val ${c.trend_pct > 0 ? "s" : "w"}">${pct((c.trend_pct || 0) / 100)}</span>
-        <span class="val">${c.season_hit == null ? "–" : pp(c.season_hit, 0)}</span></div>`).join("")}
-    </div>
-  </section>`;
-}
-function bindCurrencies() { document.querySelectorAll("[data-sw]").forEach((b) => b.onclick = () => { state.sw = b.dataset.sw; route(); }); }
-
-/* COT: Kacheln + Verlauf */
-function viewCot() {
-  const f = F(), v = f.validation.cot || {}, any = Object.values(f.cot)[0] || {};
-  const order = [...D.majors].sort((a, b) => ((f.cot[b] || {}).comm_idx ?? -1) - ((f.cot[a] || {}).comm_idx ?? -1));
-  const sel = state.cotSel || order[0], yrs = state.cotYrs || "2";
-  const next = new Date(new Date(any.released || Date.now()).getTime() + 7 * 864e5);
-  const age = Math.round((Date.now() - new Date((any.report_date || "") + "T12:00:00")) / 864e5);
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow">Positionierung · Wochenbericht · nur Futures</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">COT · Commitments of Traders</h1>
-      <p class="brief" style="font-size:1.05rem">Wo stehen Absicherer und Banken (<b>Commercials</b>), Fonds (<b>Spekulanten</b>) und <b>Kleinanleger</b>? Der Index zeigt die Netto-Position im 3-Jahres-Vergleich: 0 = so niedrig wie nie, 100 = so hoch wie nie.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip"><span class="dot live"></span>Bericht ${dateDe(any.report_date)}</span><span class="chip">veröffentlicht ${dateDe((any.released || "").slice(0, 10))} · ${age} Tage alt</span><span class="chip">nächster Bericht ${next.toLocaleDateString("de-DE", {weekday: "short", day: "2-digit", month: "2-digit"})}</span></div></div>
-    <div class="tanks">${order.map((c) => { const x = f.cot[c]; if (!x) return ""; const ext = x.comm_idx >= 80 || x.comm_idx <= 20;
-      return `<button type="button" class="tank ${sel === c ? "on" : ""} ${ext ? "ext" : ""}" data-cot="${c}"><div class="th"><b>${c}</b><span class="num ${ext ? "y" : ""}">${fmt(x.comm_idx, 0)}</span></div>
-        <div class="tv" role="img" aria-label="Commercials ${x.comm_idx}"><span class="zl" style="bottom:80%"></span><span class="zl" style="bottom:20%"></span><span class="fill" style="height:${x.comm_idx}%"></span>
-          ${x.small_idx != null ? `<span class="sm" style="bottom:${x.small_idx}%"></span>` : ""}</div>
-        <div class="tf"><span class="num">${fmtK(x.comm_net)}</span><span class="${ext ? "y" : "faint"}">${x.comm_idx >= 80 ? "Extrem hoch" : x.comm_idx <= 20 ? "Extrem tief" : "4W " + fmtK(x.comm_chg_4w)}</span></div></button>`; }).join("")}</div>
-    <div class="legend-s"><span><i style="background:var(--strong)"></i>Pegel = Commercials-Index</span><span><i style="background:var(--pink)"></i>Strich = Kleinanleger-Index</span><span><i style="background:var(--yellow)"></i>Linien bei 20 und 80 = Extremzone</span></div>
-    <article class="panel"><div class="section-title"><h2>${sel} · Netto-Positionen in Kontrakten</h2>${segBtns("cy", [["1", "1 Jahr"], ["2", "2 Jahre"], ["3", "3 Jahre"]], yrs)}</div>
-      <div class="legend-s" style="margin:8px 0"><span><i style="background:var(--strong)"></i>Commercials</span><span><i style="background:var(--weak)"></i>Spekulanten</span><span><i style="background:var(--pink)"></i>Kleinanleger</span><span><i style="background:color-mix(in srgb,var(--yellow) 30%,transparent)"></i>Commercials im Extrem</span></div>
-      ${cotChart(f.cot[sel], +yrs)}<p class="faint" style="font-size:.78rem;margin-top:6px">${esc((f.cot[sel] || {}).contract || "")} · jede Stufe = ein Wochenbericht (Stichtag Dienstag)</p></article>
-    <div class="honest">${INFO_ICON}<span>Ehrlich geprüft (seit 2005, 4 Wochen ab Veröffentlichung): Commercials-Index über 80 → Währung danach stärker in ${valText(v.hoch)} (<b>${verdictOf(v.hoch)}</b>); unter 20 → schwächer in ${valText(v.tief)} (<b>${verdictOf(v.tief)}</b>). Ein Extremwert beschreibt die Positionierung, er ist kein verlässliches Signal.</span></div>
-  </section>`;
-}
-function cotChart(x, yrs) {
-  if (!x || !x.weekly) return '<p class="faint">Keine Daten.</p>';
-  const rows = x.weekly.slice(-52 * yrs), hist = x.history.slice(-52 * yrs);
-  const W = Math.max(320, Math.min(980, ($("#app").clientWidth || 360) - 40)), H = W < 500 ? 230 : 300, pl = 8, pr = 64, pt = 10, pb = 24;
-  const vals = rows.flatMap((r) => [r[1], r[2], r[3]]).filter((v) => v != null), lim = Math.max(...vals.map(Math.abs)) * 1.1;
-  const n = rows.length, xs = (i) => pl + i / (n - 1) * (W - pl - pr), ys = (v) => pt + (1 - (v + lim) / (2 * lim)) * (H - pt - pb);
-  const step = (k) => rows.map((r, i) => r[k] == null ? "" : `${i ? "H" + xs(i).toFixed(1) + "V" : "M" + xs(i).toFixed(1) + ","}${ys(r[k]).toFixed(1)}`).join("");
-  const bands = hist.map((h, i) => (h[1] >= 80 || h[1] <= 20) && i < n - 1 ? `<rect x="${xs(i)}" y="${pt}" width="${xs(i + 1) - xs(i) + .5}" height="${H - pt - pb}" fill="color-mix(in srgb,var(--yellow) 13%,transparent)"/>` : "").join("");
-  const ticks = [-lim * 0.66, -lim * 0.33, 0, lim * 0.33, lim * 0.66];
-  const months = rows.map((r, i) => [r[0], i]).filter(([d], i) => i === 0 || d.slice(5, 7) !== rows[i - 1][0].slice(5, 7)).filter(([d]) => ["01", "04", "07", "10"].includes(d.slice(5, 7)));
-  const last = rows[n - 1], lab = (v, col) => v == null ? "" : `<rect x="${W - pr + 4}" y="${ys(v) - 9}" width="${pr - 6}" height="18" rx="4" fill="${col}"/><text x="${W - pr + 4 + (pr - 6) / 2}" y="${ys(v) + 4}" text-anchor="middle" style="fill:var(--accent-ink);font-weight:600">${fmtK(v)}</text>`;
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="COT Netto-Positionen">${bands}
-    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${ys(t)}" y2="${ys(t)}" stroke="var(--line-soft)"/>`).join("")}
-    <line x1="${pl}" x2="${W - pr}" y1="${ys(0)}" y2="${ys(0)}" stroke="var(--fg-3)"/>
-    <path d="${step(3)}" fill="none" stroke="var(--pink)" stroke-width="1.4" opacity=".85"/><path d="${step(2)}" fill="none" stroke="var(--weak)" stroke-width="1.6"/><path d="${step(1)}" fill="none" stroke="var(--strong)" stroke-width="2.2"/>
-    ${months.map(([d, i]) => `<text x="${xs(i)}" y="${H - 6}" text-anchor="middle">${["Jan", "Apr", "Jul", "Okt"][["01", "04", "07", "10"].indexOf(d.slice(5, 7))]} ${d.slice(2, 4)}</text>`).join("")}
-    ${lab(last[3], "var(--pink)")}${lab(last[2], "var(--weak)")}${lab(last[1], "var(--strong)")}
-    <text x="${pl + 4}" y="${pt + 12}">netto long</text><text x="${pl + 4}" y="${H - pb - 6}">netto short</text></svg>`;
-}
-function bindCot() {
-  document.querySelectorAll("[data-cot]").forEach((b) => b.onclick = () => { state.cotSel = b.dataset.cot; route(); });
-  document.querySelectorAll("[data-cy]").forEach((b) => b.onclick = () => { state.cotYrs = b.dataset.cy; route(); });
-}
-
-/* Saisonalität: Verlauf + Screener */
-function viewSeason() {
-  const f = F(), tab = state.seasonTab || "analyse";
-  return `<section class="view">
-    <div class="hero"><div class="eyebrow">Saisonalität · ${tab === "analyse" ? "Muster-Analyse · Basis 100" : "Screener · alle 28 Paare"}</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">${tab === "analyse" ? "Saisonalität" : "Saison-Screener"}</h1></div>
-    ${segBtns("st", [["analyse", "Analyse"], ["screener", "Screener"]], tab)}
-    ${tab === "analyse" ? seasonAnalyse() : seasonScreener()}
-  </section>`;
-}
-function seasonAnalyse() {
-  const f = F(), sel = state.seasonSel || "EURUSD", lb = state.seasonLb || "10", paths = (X().season_paths || {})[sel] || {}, p = paths[lb];
-  const v = f.validation.season || {};
-  return `<article class="panel"><div class="toolbar"><select id="season-sel" aria-label="Paar">${D.pairs.map((x) => `<option value="${x}">${pairName(x)}</option>`).join("")}</select>
-      ${segBtns("lb", [["5", "5 J"], ["10", "10 J"], ["15", "15 J"], ["20", "20 J"], ["max", "Max"]], lb)}</div>
-      <p class="faint num" style="font-size:.76rem;margin-top:10px">${pairName(sel)} · ${p ? `${p.n} Jahre · ${p.years[0]}–${p.years[1]}` : "zu wenige Jahre"} · Kurse: FRED-Mittagskurse New York</p></article>
-    <article class="panel"><div class="section-title"><h2>Saisonaler Verlauf · ${pairName(sel)}</h2><span class="faint num" style="font-size:.74rem">Ø je Kalendertag · Basis 100</span></div>${seasonPath(p)}</article>
-    <div class="split">
-      <article class="panel"><h2 style="margin-bottom:8px">Monatsrenditen</h2>${seasonChart(f.season.pairs[sel], f.season.month)}</article>
-      <article class="panel"><h2 style="margin-bottom:8px">Ehrlich geprüft</h2><p class="muted" style="font-size:.92rem">Hätte man jedes Jahr nur mit den Vorjahren gearbeitet, lag die Saisonalität in ${valText(v)} richtig – <b>${verdictOf(v)}</b>.</p>
-        <p class="muted" style="font-size:.92rem;margin-top:8px">Der Verlauf zeigt, was im Schnitt passiert ist. Ein Durchschnitt aus 10 Jahren entsteht schnell auch aus Zufall – darum prüft der <a href="#saisonalitaet" data-st2="screener">Screener</a> jedes Muster mit einem statistischen Test.</p></article>
-    </div>`;
-}
-function seasonPath(p) {
-  if (!p) return '<p class="faint">Zu wenige Jahre für diesen Zeitraum.</p>';
-  const y = p.path, W = Math.max(320, Math.min(980, ($("#app").clientWidth || 360) - 40)), H = W < 500 ? 220 : 290, pl = 46, pr = 10, pt = 12, pb = 24;
-  const mn = Math.min(...y), mx = Math.max(...y), pad = (mx - mn) * 0.08 || 0.2;
-  const xs = (i) => pl + i / 364 * (W - pl - pr), ys = (v) => pt + (1 - (v - mn + pad) / (mx - mn + 2 * pad)) * (H - pt - pb);
-  const d = y.map((v, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join("");
-  const today = new Date(), doy = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 864e5) - 1;
-  const mstart = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334], ml = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
-  const ticks = [mn, (mn + mx) / 2, mx];
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Saisonaler Verlauf">
-    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${ys(t)}" y2="${ys(t)}" stroke="var(--line-soft)"/><text x="${pl - 6}" y="${ys(t) + 4}" text-anchor="end">${fmt(t, 2)}</text>`).join("")}
-    ${mn < 100 && mx > 100 ? `<line x1="${pl}" x2="${W - pr}" y1="${ys(100)}" y2="${ys(100)}" stroke="var(--fg-3)" stroke-dasharray="3 4"/>` : ""}
-    <path d="${d}L${xs(364)},${H - pb}L${pl},${H - pb}Z" fill="color-mix(in srgb,var(--accent) 14%,transparent)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
-    <line x1="${xs(doy)}" x2="${xs(doy)}" y1="${pt}" y2="${H - pb}" stroke="var(--fg)" stroke-dasharray="3 3"/><text x="${xs(doy)}" y="${pt + 10}" text-anchor="${doy > 300 ? "end" : "start"}" style="fill:var(--fg)">&nbsp;heute&nbsp;</text>
-    ${mstart.map((s, i) => (W > 500 || i % 2 === 0) ? `<text x="${xs(s + 15)}" y="${H - 6}" text-anchor="middle">${ml[i]}</text>` : "").join("")}</svg>`;
-}
-function seasonScreener() {
-  const rows = X().screener || [], found = rows.filter((r) => r.pattern).length, t = (rows[0] || {}).tests;
-  const dd = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", {day: "numeric", month: "short"});
-  return `<p class="brief" style="font-size:1.02rem">Für jedes Paar das Zeitfenster (Start in den nächsten 4 Wochen, Länge 10, 20 oder 30 Tage), das in den letzten 15 Jahren am häufigsten in dieselbe Richtung lief. Als <b>Muster</b> gilt es nur, wenn es einen Binomialtest gegen 50 % besteht – korrigiert für alle ${t || "–"} durchsuchten Fenster.</p>
-    <div class="honest">${INFO_ICON}<span><b>${found} von ${rows.length} Paaren</b> zeigen derzeit ein Muster, das die Korrektur besteht. ${found ? "" : "Die scheinbar deutlichen Fenster entstehen in dieser Menge auch in reinen Zufallsdaten."}</span></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Timing</th><th>Paar</th><th>Zeitfenster</th><th>Jahre</th><th class="num">Ø Rendite</th><th class="num">Treffer</th><th class="num">p (korr.)</th><th>Bewertung</th></tr></thead><tbody>
-    ${rows.map((r) => `<tr><td class="num" style="color:var(--accent)">${r.in_days === 0 ? "heute" : "in " + r.in_days + " T"}</td><td><a href="#paar-${r.pair}" style="color:var(--fg);font-weight:600;text-decoration:none">${pairName(r.pair)}</a><br><span class="faint num" style="font-size:.72rem">${r.direction > 0 ? "steigt meist" : "fällt meist"}</span></td>
-      <td class="num">${dd(r.start)} – ${dd(r.end)}<br><span class="faint">${r.days} T</span></td><td>${yearBars(r.yearly)}</td>
-      <td class="num">${pct(r.mean / 1, 2)}<br><span class="faint">Med ${pct(r.median, 2)}</span></td><td class="num">${r.hits} / ${r.n}</td><td class="num">${fmt(r.p_adj, 2)}</td>
-      <td>${r.pattern ? `<span class="pill ${r.direction > 0 ? "info" : "warn"}">${r.direction > 0 ? "Long" : "Short"}-Muster</span>` : '<span class="pill plain">kein Muster</span>'}</td></tr>`).join("")}</tbody></table></div>`;
-}
-function yearBars(ys) {
-  const m = Math.max(...ys.map(Math.abs), 0.1), w = 4, H = 26;
-  return `<svg width="${ys.length * (w + 1)}" height="${H}" aria-hidden="true">${ys.map((v, i) => `<rect x="${i * (w + 1)}" y="${v >= 0 ? H / 2 - v / m * (H / 2 - 1) : H / 2}" width="${w}" height="${Math.max(1, Math.abs(v) / m * (H / 2 - 1))}" fill="${v >= 0 ? "var(--strong)" : "var(--weak)"}"/>`).join("")}</svg>`;
-}
-function bindSeason() {
-  document.querySelectorAll("[data-st]").forEach((b) => b.onclick = () => { state.seasonTab = b.dataset.st; route(); });
-  document.querySelectorAll("[data-st2]").forEach((b) => b.onclick = (e) => { e.preventDefault(); state.seasonTab = b.dataset.st2; route(); });
-  document.querySelectorAll("[data-lb]").forEach((b) => b.onclick = () => { state.seasonLb = b.dataset.lb; route(); });
-  const s = $("#season-sel"); if (s) { s.value = state.seasonSel || "EURUSD"; s.onchange = () => { state.seasonSel = s.value; route(); }; }
-}
-
-/* Makro: Übersicht (Stimmung, Quadrant, Heatmap) + Beziehungen */
-function viewMakro() {
-  const tab = state.makroTab || "uebersicht";
-  return tab === "beziehungen" ? viewDeps().replace('<section class="view">', `<section class="view">${segBtns("mt", [["uebersicht", "Übersicht"], ["beziehungen", "Wirtschaftsbeziehungen"]], tab)}`) : makroOverview(tab);
-}
-function makroOverview(tab) {
-  const f = F(), m = X().mood, cs = f.currencies;
-  const col = m ? (m.label === "Risk-on" ? "var(--strong)" : m.label === "Risk-off" ? "var(--weak)" : "var(--yellow)") : "var(--fg)";
-  return `<section class="view">${segBtns("mt", [["uebersicht", "Übersicht"], ["beziehungen", "Wirtschaftsbeziehungen"]], tab)}
-    <div class="hero"><div class="eyebrow">Marktweit · alle 8 Währungen</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Makro-Übersicht</h1></div>
-    ${m ? `<article class="panel mood"><div class="eyebrow">Marktstimmung · Risk-on oder Risk-off?</div>
-      <h2 style="font-size:clamp(1.8rem,6vw,2.8rem);color:${col};letter-spacing:-.03em;margin:6px 0">${esc(m.label)}</h2><p class="muted">${esc(m.text)}</p>
-      <div class="bigstat" style="margin-top:14px">
-        <div class="tile"><span class="eyebrow">VIX</span><span class="big num">${fmt(m.vix, 1)}</span><span class="faint" style="font-size:.8rem">Jahresmittel ${fmt(m.vix_median_1y, 1)} · höher als an ${pp(m.vix_percentile_1y, 0)} der Tage</span></div>
-        <div class="tile"><span class="eyebrow">AUD/JPY 20 T</span><span class="big num" style="color:${m.audjpy_20d >= 0 ? "var(--strong)" : "var(--weak)"}">${m.audjpy_20d > 0 ? "+" : ""}${fmt(m.audjpy_20d, 2)} %</span><span class="faint" style="font-size:.8rem">klassisches Risiko-Barometer</span></div>
-        <div class="tile"><span class="eyebrow">US-Dollar 20 T</span><span class="big num" style="color:${m.usd_20d >= 0 ? "var(--strong)" : "var(--weak)"}">${m.usd_20d > 0 ? "+" : ""}${fmt(m.usd_20d, 2)} %</span><span class="faint" style="font-size:.8rem">gegen den Korb</span></div>
-      </div><p class="faint" style="font-size:.78rem;margin-top:10px">Beschreibt die aktuelle Lage, keine Prognose.</p></article>` : ""}
-    <div class="split">
-      <article class="panel"><div class="section-title"><h2>Quadrant</h2><span class="faint num" style="font-size:.74rem">Trend × Positionierung</span></div>${quadrant(cs)}</article>
-      <article class="panel"><div class="section-title"><h2>Stärke-Heatmap</h2><span class="faint num" style="font-size:.74rem">blau stützt · orange belastet</span></div>${heatmap(cs)}</article>
-    </div>
-  </section>`;
-}
-function quadrant(cs) {
-  const W = 380, H = 360, p = 10, inner = 50, tr = cs.map((c) => c.trend_pct || 0), lim = Math.max(1, ...tr.map(Math.abs)) * 1.1;
-  const xs = (v) => p + inner + (v + lim) / (2 * lim) * (W - 2 * (p + inner)), ys = (v) => p + inner + (1 - v / 100) * (H - 2 * (p + inner));
-  const pts = cs.filter((c) => c.cot_idx != null).map((c) => ({c, x: xs(c.trend_pct || 0), y: ys(c.cot_idx)}));
-  for (let k = 0; k < 40; k++) for (let a = 0; a < pts.length; a++) for (let b = a + 1; b < pts.length; b++) {
-    const dx = pts[b].x - pts[a].x, dy = pts[b].y - pts[a].y, d = Math.hypot(dx, dy) || 0.01;
-    if (d < 32) { const m = (32 - d) / 2, ux = dx / d, uy = dy / d; pts[a].x -= ux * m; pts[a].y -= uy * m; pts[b].x += ux * m; pts[b].y += uy * m; }
-  }
-  pts.forEach((q) => { q.x = Math.max(p + 16, Math.min(W - p - 16, q.x)); q.y = Math.max(p + 16, Math.min(H - p - 16, q.y)); });
-  const lab = (x, y, a, t, s2) => `<text x="${x}" y="${y}" text-anchor="${a}" style="fill:var(--fg-2);font-weight:600;font-size:10.5px">${t}</text><text x="${x}" y="${y + 12}" text-anchor="${a}" style="font-size:9.5px">${s2}</text>`;
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Quadrant Trend gegen Positionierung" style="max-width:560px">
-    <rect x="${W / 2}" y="${p}" width="${W / 2 - p}" height="${H / 2 - p}" rx="8" fill="color-mix(in srgb,var(--strong) 9%,transparent)"/><rect x="${p}" y="${H / 2}" width="${W / 2 - p}" height="${H / 2 - p}" rx="8" fill="color-mix(in srgb,var(--weak) 9%,transparent)"/>
-    <line x1="${W / 2}" x2="${W / 2}" y1="${p}" y2="${H - p}" stroke="var(--line)"/><line x1="${p}" x2="${W - p}" y1="${H / 2}" y2="${H / 2}" stroke="var(--line)"/>
-    ${lab(W - p - 6, p + 14, "end", "Rückenwind", "steigt · Commercials long")}${lab(p + 6, p + 14, "start", "Absicherer kaufen", "fällt · Commercials long")}
-    ${lab(W - p - 6, H - p - 18, "end", "Ohne Absicherer", "steigt · Commercials short")}${lab(p + 6, H - p - 18, "start", "Gegenwind", "fällt · Commercials short")}
-    <text x="${W - p - 4}" y="${H / 2 - 5}" text-anchor="end" style="font-size:9.5px">Trend 20 T →</text><text x="${W / 2 + 5}" y="${p + 50}" style="font-size:9.5px">COT-Index ↑</text>
-    ${pts.map(({c, x, y}) => `<g><circle cx="${x}" cy="${y}" r="15" fill="var(--surface)" stroke="${bias(c.score) >= 50 ? "var(--strong)" : "var(--weak)"}" stroke-width="2"/><text x="${x}" y="${y + 4}" text-anchor="middle" style="fill:var(--fg);font-weight:700;font-size:10px">${c.ccy}</text></g>`).join("")}</svg>`;
-}
-function heatmap(cs) {
-  const cols = [["Bias", (c) => bias(c.score) - 50, 40], ["COT", (c) => c.cot_idx == null ? null : c.cot_idx - 50, 50], ["Trend", (c) => c.trend_pct, 2], ["Saison", (c) => c.season_hit == null ? null : (c.season_hit - 0.5) * 100, 30]];
-  const txt = (k, c) => k === "Bias" ? bias(c.score) : k === "COT" ? fmt(c.cot_idx, 0) : k === "Trend" ? (c.trend_pct > 0 ? "+" : "") + fmt(c.trend_pct, 1) : c.season_hit == null ? "–" : pp(c.season_hit, 0);
-  return `<div class="hm" style="grid-template-columns:48px repeat(${cols.length},minmax(0,1fr))"><span></span>${cols.map(([k]) => `<span class="hm-h">${k}</span>`).join("")}
-    ${cs.map((c) => `<span class="mx-r">${c.ccy}</span>${cols.map(([k, fn, m]) => `<span class="hm-c" style="background:${heat(fn(c), m)}">${txt(k, c)}</span>`).join("")}`).join("")}</div>
-    <p class="faint" style="font-size:.76rem;margin-top:8px">Bias und COT als Abstand zur Mitte (50), Trend in %, Saison = Anteil positiver Jahre im ${esc(F().season.month_name)}.</p>`;
-}
-function bindMakro() { document.querySelectorAll("[data-mt]").forEach((b) => b.onclick = () => { state.makroTab = b.dataset.mt; route(); }); if ((state.makroTab || "") === "beziehungen") bindDeps(); }
-
-/* Rechner */
+/* ---------- Rechner ---------- */
 function usdPer() {
-  const last = (p) => { const r = D.prices[p]; return r && r.length ? r[r.length - 1][1] : null; };
-  const u = {USD: 1, EUR: last("EURUSD"), GBP: last("GBPUSD"), AUD: last("AUDUSD"), NZD: last("NZDUSD")};
-  ["CAD", "CHF", "JPY"].forEach((c) => { const v = last("USD" + c); u[c] = v ? 1 / v : null; });
+  const u = {USD: 1, EUR: lastPrice("EURUSD"), GBP: lastPrice("GBPUSD"), AUD: lastPrice("AUDUSD"), NZD: lastPrice("NZDUSD")};
+  ["CAD", "CHF", "JPY"].forEach((c) => { u[c] = 1 / lastPrice("USD" + c); });
   return u;
 }
 function viewCalc() {
-  const s = state.calc || {pair: "EURUSD", acct: "EUR", size: 10000, risk: 1, sl: 25, tp: 50};
+  const s = state.calc || {pair: "EURUSD", acct: "EUR", size: 10000, risk: 1, sl: 25};
+  const fld = (id, label, val, step) => `<label class="fld"><span>${label}</span><input id="c-${id}" type="number" inputmode="decimal" min="0" step="${step}" value="${val}"></label>`;
   return `<section class="view">
-    <div class="hero"><div class="eyebrow">Werkzeuge · Risiko und Positionsgröße</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Rechner</h1>
-      <p class="brief" style="font-size:1.05rem">Positionsgröße aus deinem Risiko – mit der typischen Bewegung des Paares als Gegencheck für den Stop.</p></div>
-    <div class="split">
-      <article class="panel calc"><div class="section-title"><h2>Lot-Rechner</h2><span class="faint num" style="font-size:.74rem">Positionsgröße aus Risiko</span></div>
-        <label class="fld"><span>Paar</span><select id="c-pair">${D.pairs.map((p) => `<option value="${p}" ${p === s.pair ? "selected" : ""}>${pairName(p)}</option>`).join("")}</select></label>
-        <label class="fld"><span>Kontowährung</span><select id="c-acct">${["EUR", "USD", "GBP", "CHF", "AUD", "CAD", "JPY", "NZD"].map((c) => `<option ${c === s.acct ? "selected" : ""}>${c}</option>`).join("")}</select></label>
-        <label class="fld"><span>Kontogröße</span><input id="c-size" type="number" inputmode="decimal" min="0" step="100" value="${s.size}"></label>
-        <label class="fld"><span>Risiko pro Trade (%)</span><input id="c-risk" type="number" inputmode="decimal" min="0" step="0.1" value="${s.risk}"></label>
-        <label class="fld"><span>Stop-Loss (Pips)</span><input id="c-sl" type="number" inputmode="decimal" min="0" step="1" value="${s.sl}"></label>
-        <label class="fld"><span>Ziel (Pips)</span><input id="c-tp" type="number" inputmode="decimal" min="0" step="1" value="${s.tp}"></label>
-      </article>
-      <article class="panel" id="c-out"></article>
-    </div>
-    <p class="faint" style="font-size:.8rem">Umrechnung mit den letzten Kursen (${dateDe(D.meta.as_of)}). Pip = 0,0001 (JPY-Paare 0,01), Standard-Lot = 100.000 Einheiten. Dein Broker kann leicht abweichen.</p>
+    <div class="lede"><h1>Positionsgröße</h1><p>Wie groß darf die Position sein, wenn du höchstens einen festen Anteil deines Kontos riskieren willst?</p></div>
+    <article class="panel"><div class="calc">
+      <label class="fld"><span>Paar</span><select id="c-pair">${D.pairs.map((p) => `<option value="${p}" ${p === s.pair ? "selected" : ""}>${pairName(p)}</option>`).join("")}</select></label>
+      <label class="fld"><span>Kontowährung</span><select id="c-acct">${D.majors.map((c) => `<option ${c === s.acct ? "selected" : ""}>${c}</option>`).join("")}</select></label>
+      ${fld("size", "Kontogröße", s.size, 100)}${fld("risk", "Risiko pro Trade (%)", s.risk, 0.1)}${fld("sl", "Stop-Loss (Pips)", s.sl, 1)}</div></article>
+    <article class="panel" id="c-out"></article>
+    <p class="faint small">Kurse vom ${dateDe(D.meta.as_of)}. Pip = 0,0001 (JPY-Paare 0,01), 1 Lot = 100.000 Einheiten. Dein Broker kann leicht abweichen.</p>
   </section>`;
 }
 function bindCalc() {
-  const ids = ["pair", "acct", "size", "risk", "sl", "tp"], u = usdPer();
+  const ids = ["pair", "acct", "size", "risk", "sl"], u = usdPer();
   const calc = () => {
-    const v = Object.fromEntries(ids.map((k) => [k, $("#c-" + k).value]));
-    state.calc = {...v, size: +v.size, risk: +v.risk, sl: +v.sl, tp: +v.tp};
-    const p = v.pair, q = p.slice(3), pip = p.endsWith("JPY") ? 0.01 : 0.0001;
-    const pipVal = pip * 100000 * (u[q] / u[v.acct]);
+    const v = Object.fromEntries(ids.map((k) => [k, $("#c-" + k).value])), p = v.pair;
+    state.calc = {...v, size: +v.size, risk: +v.risk, sl: +v.sl};
+    const pipVal = (p.endsWith("JPY") ? 0.01 : 0.0001) * 100000 * (u[p.slice(3)] / u[v.acct]);
     const riskAmt = state.calc.size * state.calc.risk / 100, lots = state.calc.sl > 0 ? riskAmt / (state.calc.sl * pipVal) : 0;
-    const d1 = F().pairs.find((x) => x.pair === p) || {}, crv = state.calc.sl ? state.calc.tp / state.calc.sl : 0;
-    const money = (x) => isFinite(x) ? nf(2).format(x) + " " + v.acct : "–";
-    $("#c-out").innerHTML = `<div class="bigstat" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-      <div class="tile"><span class="eyebrow">Positionsgröße</span><span class="big num" style="color:var(--accent)">${fmt(lots, 2)}</span><span class="faint" style="font-size:.8rem">Lots · ${nf(0).format(lots * 100000)} Einheiten</span></div>
-      <div class="tile"><span class="eyebrow">Risiko</span><span class="big num">${money(riskAmt)}</span><span class="faint" style="font-size:.8rem">${fmt(state.calc.risk, 1)} % des Kontos</span></div></div>
-      <dl class="kv" style="margin-top:14px"><dt>Pip-Wert je Standard-Lot</dt><dd class="num">${money(pipVal)}</dd><dt>Möglicher Gewinn am Ziel</dt><dd class="num">${money(lots * state.calc.tp * pipVal)}</dd>
-        <dt>Chance-Risiko-Verhältnis</dt><dd class="num">1 : ${fmt(crv, 2)}</dd><dt>Typische Tagesbewegung ${pairName(p)}</dt><dd class="num">±${d1.day_range_pips ?? "–"} Pips</dd><dt>Typische Wochenbewegung</dt><dd class="num">±${d1.week_range_pips ?? "–"} Pips</dd></dl>
-      ${d1.day_range_pips && state.calc.sl < d1.day_range_pips * 0.5 ? `<div class="honest" style="margin-top:12px">${INFO_ICON}<span>Dein Stop (${state.calc.sl} Pips) ist kleiner als die Hälfte der typischen Tagesbewegung (±${d1.day_range_pips}). Er wird dadurch leicht vom normalen Rauschen ausgelöst.</span></div>` : ""}`;
+    const day = rangeOf(p, "1D").pips;
+    $("#c-out").innerHTML = `<div class="big num" style="color:var(--accent)">${fmt(lots, 2)} Lots</div>
+      <dl class="kv"><dt>Risiko</dt><dd class="num">${fmt(riskAmt, 2)} ${v.acct}</dd><dt>Pip-Wert je Lot</dt><dd class="num">${fmt(pipVal, 2)} ${v.acct}</dd><dt>Typische Tagesspanne (80 %)</dt><dd class="num">±${day ?? "–"} Pips</dd></dl>
+      ${day && state.calc.sl < day * 0.5 ? `<div class="honest">${INFO}<span>Dein Stop ist kleiner als die Hälfte der typischen Tagesspanne. Er wird leicht vom normalen Auf und Ab ausgelöst.</span></div>` : ""}`;
   };
   ids.forEach((k) => $("#c-" + k).addEventListener("input", calc)); calc();
 }
 
-/* Kalender mit Countdown */
-function viewCalendarV2() {
-  const ev = nextHigh();
-  const card = ev ? `<article class="panel nextcard"><div class="nc-ico">${folder("High")}</div><div style="min-width:0"><div class="eyebrow">Nächster wichtiger Termin</div>
-      <h2 style="margin:4px 0">${esc(ev.currency)} · ${esc(ev.title)}</h2><span class="faint num" style="font-size:.82rem">${shortDay(ev.day)} · ${ev.time} · Prog. ${esc(ev.forecast || "–")} · Vorher ${esc(ev.previous || "–")}</span></div>
-      <div class="nc-cd"><span class="eyebrow">verbleibt</span><b class="num" id="countdown" data-at="${ev.at}">–</b></div></article>` : "";
-  return viewCalendar().replace('<div class="toolbar">', card + '<div class="toolbar">');
-}
-function startTicker() {
-  clearInterval(ticker); const el = $("#countdown"); if (!el) return;
-  const tick = () => { const ms = new Date(el.dataset.at) - new Date(); if (ms <= 0) { el.textContent = "jetzt"; return; } const s = Math.floor(ms / 1000);
-    el.textContent = `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
-  tick(); ticker = setInterval(tick, 1000);
-}
-function bindCalendarV2() { bindCalendar(); startTicker(); }
-
-/* Zinsen & Notenbanken */
-const R = () => (X().rates || {currencies: {}, carry: {}});
-const bp = (x) => x == null ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "±") + nf(0).format(Math.abs(x * 100)) + " bp";
-function viewRates() {
-  const r = R().currencies, sel = state.rateSel || "USD", e = r[sel] || {};
-  const order = [...D.majors].sort((a, b) => ((r[b] || {}).short || {}).value - ((r[a] || {}).short || {}).value);
-  const tile = (lab, val, sub, cls = "") => `<div class="panel tile"><span class="eyebrow">${lab}</span><span class="big num ${cls}" style="font-size:2.1rem">${val}</span><span class="faint" style="font-size:.78rem">${sub}</span></div>`;
-  const inf = e.inflation;
-  const lastWithStale = Object.values(r).filter((x) => x.inflation && x.inflation.stale).length;
+/* ---------- Daten ---------- */
+function viewData() {
+  const a = S().audit, stale = a.filter((x) => !x.fresh);
   return `<section class="view">
-    <div class="hero"><div class="eyebrow">Makro · Zinsen & Notenbanken</div><h1 style="font-size:clamp(2.2rem,8vw,3.6rem)">Zinsen & Notenbanken</h1>
-      <p class="brief" style="font-size:1.05rem">Zinsniveau, Zinsrichtung und Renditen der acht Währungsräume. Zinsunterschiede bestimmen, was es kostet oder bringt, ein Paar zu halten (Carry).</p></div>
-    <div class="chips" role="group" aria-label="Währung">${D.majors.map((c) => `<button type="button" data-rate="${c}" aria-pressed="${sel === c}">${c}</button>`).join("")}</div>
-    <article class="panel"><div class="section-title"><h2>${sel} · ${esc(e.bank || "")}</h2><span class="chip"><span class="dot live"></span>Stand ${e.short ? dateDe(e.short.date) : "–"}</span></div>
-      <div class="bigstat four" style="margin-top:12px">
-        ${tile("Kurzfristzins", e.short ? fmt(e.short.value, 2) + " %" : "–", e.short ? `12 Monate ${bp(e.short.chg_12m)} · 3 Monate ${bp(e.short.chg_3m)}` : "")}
-        ${tile("Inflation J/J", inf ? fmt(inf.value, 1) + " %" : "–", inf ? (inf.stale ? `<span style="color:var(--yellow)">veraltet · Stand ${inf.date}</span>` : `Stand ${inf.date}`) : "keine Quelle", inf && inf.stale ? "faint" : "")}
-        ${tile("10J-Rendite", e.y10 ? fmt(e.y10.value, 2) + " %" : "–", e.y10 ? `12 Monate ${bp(e.y10.chg_12m)}` : "")}
-        ${tile("Zinskurve 10J − kurz", e.curve == null ? "–" : (e.curve > 0 ? "+" : "") + fmt(e.curve, 2), e.curve == null ? "" : e.curve >= 0 ? "normal (steigend)" : "invers – oft Signal für erwartete Zinssenkungen", e.curve < 0 ? "y" : "")}
-      </div>
-      <div class="label" style="margin:14px 0 6px">Verlauf 5 Jahre</div>${rateChart(e)}
-      <div class="legend-s" style="margin-top:6px"><span><i style="background:var(--accent)"></i>Kurzfristzins</span><span><i style="background:var(--weak)"></i>10J-Rendite</span></div>
-      <p class="faint" style="font-size:.76rem;margin-top:6px">${esc((e.short || {}).source ? e.short.source.description : "")} · ${esc((e.y10 || {}).source ? e.y10.source.description : "")}</p></article>
-    <article class="panel"><h2 style="margin-bottom:6px">Alle Notenbanken</h2><div class="tbl-wrap"><table><thead><tr><th>Währung</th><th class="hide-s">Notenbank</th><th class="num">Zins</th><th class="num">12 M</th><th class="num">10J</th><th class="num">Kurve</th><th class="num">Inflation</th><th class="num">Realzins</th></tr></thead><tbody>
-      ${order.map((c) => { const x = r[c] || {}; const ch = (x.short || {}).chg_12m;
-        return `<tr><td><b class="num">${c}</b></td><td class="faint hide-s">${esc(x.bank)}</td><td class="num">${x.short ? fmt(x.short.value, 2) + " %" : "–"}</td>
-          <td class="num" style="color:${ch > 0.05 ? "var(--strong)" : ch < -0.05 ? "var(--weak)" : "var(--fg-3)"}">${ch > 0.05 ? "▲" : ch < -0.05 ? "▼" : "■"} ${bp(ch)}</td>
-          <td class="num">${x.y10 ? fmt(x.y10.value, 2) + " %" : "–"}</td><td class="num">${x.curve == null ? "–" : (x.curve > 0 ? "+" : "") + fmt(x.curve, 2)}</td>
-          <td class="num">${x.inflation ? (x.inflation.stale ? `<span class="faint">${fmt(x.inflation.value, 1)} % (${x.inflation.date})</span>` : fmt(x.inflation.value, 1) + " %") : "–"}</td>
-          <td class="num">${x.real == null ? "–" : (x.real > 0 ? "+" : "") + fmt(x.real, 2) + " %"}</td></tr>`; }).join("")}</tbody></table></div>
-      ${lastWithStale ? `<div class="honest" style="margin-top:12px">${INFO_ICON}<span>Für ${lastWithStale} Länder liefert die bisherige Quelle (OECD über FRED) keine aktuellen Inflationszahlen mehr. Sie sind grau markiert und fließen in keinen Realzins ein. Aktuelle Werte von den nationalen Statistikämtern folgen.</span></div>` : ""}</article>
-    <article class="panel"><div class="section-title"><h2>Zinsdifferenz-Matrix</h2><span class="faint num" style="font-size:.74rem">Zeile minus Spalte · Prozentpunkte</span></div>${carryMatrix(order)}
-      <p class="faint" style="font-size:.78rem;margin-top:8px">Positiv: Die Zeilenwährung bringt mehr Zins. Wer sie gegen die Spaltenwährung kauft, erhält meist Swap (Carry). Der genaue Swap hängt vom Broker ab.</p></article>
+    <div class="lede"><h1>Datenstand</h1><p>Jede Datenreihe mit ihrem letzten Wert und den Signalen, die sie speist. Veraltete Werte fließen in kein Signal ein.</p></div>
+    ${stale.length ? `<div class="honest">${INFO}<span><b>${stale.length} Reihen sind veraltet</b> und deshalb abgeschaltet: ${stale.map((x) => esc(x.description)).join(", ")}.</span></div>` : ""}
+    <article class="panel"><div class="tbl-wrap"><table><thead><tr><th>Reihe</th><th>Währung</th><th>letzter Wert</th><th>Status</th><th>speist</th></tr></thead><tbody>
+      ${a.map((x) => `<tr><td>${esc(x.description || x.code)}</td><td>${x.currency || "–"}</td><td class="cell">${dateDe(x.last)}</td><td><span class="pill ${x.fresh ? "good" : "bad"}">${x.fresh ? "aktuell" : "veraltet"}</span></td><td class="faint small" style="text-align:left">${x.used_by.map((k) => esc((SIG[k] || {}).label || k)).join(", ")}</td></tr>`).join("")}</tbody></table></div></article>
+    <article class="panel"><h2>Letzte Abrufe</h2><dl class="kv">${D.runs.map((r) => `<dt>${esc(r.source)}</dt><dd class="num small">${r.last_run ? new Date(r.last_run).toLocaleString("de-DE") : "–"}</dd>`).join("")}</dl></article>
+    <article class="panel"><h2>Offene Qualitätsbefunde</h2>${D.quality.length ? `<dl class="kv">${D.quality.map((q) => `<dt>${esc(q.check)} (${esc(q.severity)})</dt><dd class="num">${q.count}</dd>`).join("")}</dl>` : '<p class="muted">Keine.</p>'}</article>
   </section>`;
 }
-function rateChart(e) {
-  const a = (e.short || {}).history || [], b = (e.y10 || {}).history || [];
-  if (a.length < 2) return '<p class="faint">Keine Daten.</p>';
-  const W = Math.max(320, Math.min(980, ($("#app").clientWidth || 360) - 40)), H = 200, pl = 40, pr = 10, pt = 10, pb = 22;
-  const all = a.concat(b).map((r) => r[1]).filter((v) => v != null), mn = Math.min(0, ...all), mx = Math.max(...all) * 1.08;
-  const n = Math.max(a.length, b.length), xs = (i, len) => pl + (i + (n - len)) / (n - 1) * (W - pl - pr), ys = (v) => pt + (1 - (v - mn) / (mx - mn)) * (H - pt - pb);
-  const path = (h) => h.map((r, i) => `${i ? "L" : "M"}${xs(i, h.length).toFixed(1)},${ys(r[1]).toFixed(1)}`).join("");
-  const ticks = [mn, (mn + mx) / 2, mx];
-  const yrs = a.filter((r, i) => r[0].endsWith("-01")).map((r) => [r[0].slice(0, 4), a.indexOf(r)]);
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Zinsverlauf">
-    ${ticks.map((t) => `<line x1="${pl}" x2="${W - pr}" y1="${ys(t)}" y2="${ys(t)}" stroke="var(--line-soft)"/><text x="${pl - 6}" y="${ys(t) + 4}" text-anchor="end">${fmt(t, 1)} %</text>`).join("")}
-    ${mn < 0 ? `<line x1="${pl}" x2="${W - pr}" y1="${ys(0)}" y2="${ys(0)}" stroke="var(--fg-3)"/>` : ""}
-    <path d="${path(b)}" fill="none" stroke="var(--weak)" stroke-width="1.6"/><path d="${path(a)}" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
-    ${yrs.map(([y, i]) => `<text x="${xs(i, a.length)}" y="${H - 6}" text-anchor="middle">${y}</text>`).join("")}</svg>`;
-}
-function carryMatrix(order) {
-  const r = R().currencies, v = (c) => ((r[c] || {}).short || {}).value;
-  return `<div class="mx-wrap"><div class="mx flat" style="grid-template-columns:54px repeat(${order.length},minmax(34px,1fr))"><span></span>${order.map((q) => `<span class="mx-h">${q}<small>${fmt(v(q), 2)}</small></span>`).join("")}
-    ${order.map((b) => `<span class="mx-r">${b}</span>${order.map((q) => b === q ? `<span class="mx-self">${b}</span>` : (() => { const d = v(b) - v(q);
-      return `<a class="mx-cell" href="#paar-${marketPair(b, q)}" style="background:${heat(d, 4)};text-decoration:none" aria-label="${b} minus ${q}: ${fmt(d, 2)}">${d > 0 ? "+" : ""}${fmt(d, 1)}</a>`; })()).join("")}`).join("")}</div></div>`;
-}
-function bindRates() { document.querySelectorAll("[data-rate]").forEach((b) => b.onclick = () => { state.rateSel = b.dataset.rate; route(); }); }
 
-/* ---------- Menü ---------- */
-const NAV = [
-  ["cockpit", "Cockpit", "M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z"],
-  ["heute", "Heute", "M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5M10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"],
-  ["waehrungen", "Währungen", "M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM7 8h6M7 12h6M10 5v10"],
-  ["paare", "Paare", "M3 7h12l-3-3M17 13H5l3 3"],
-  ["kalender", "Kalender", "M3 5h14v12H3zM3 9h14M7 3v4M13 3v4"],
-  ["cot", "Positionierung (COT)", "M7 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM14 9a2.5 2.5 0 1 0 0-5M2 17c0-3 2.5-5 5-5s5 2 5 5M13 12c2.5 0 5 2 5 5"],
-  ["saisonalitaet", "Saisonalität", "M3 4h14v13H3zM3 8h14M7 2v4M13 2v4M7 12h2M11 12h2M7 15h2"],
-  ["prognosen", "Prognosen", "M3 16l4-5 3 3 7-8"],
-  ["tracker", "Forecast-Tracker", "M3 17V9M8 17V5M13 17v-6M18 17V3"],
-  ["zinsen", "Zinsen & Notenbanken", "M3 17h14M4 8l6-5 6 5M5 9v6M8 9v6M12 9v6M15 9v6"],
-  ["makro", "Makro & Beziehungen", "M3 15c3-6 5-6 7-2s4 4 7-4"],
-  ["rechner", "Rechner", "M5 2h10v16H5zM7 5h6v3H7zM7 11h1M10 11h1M13 11h1M7 14h1M10 14h1M13 14h1"],
-  ["weltkarte", "Weltkarte", "M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 10h16M10 2c2.5 2.5 2.5 13.5 0 16M10 2c-2.5 2.5-2.5 13.5 0 16"],
-  ["daten", "Daten", "M4 4c0-1 12-1 12 0v12c0 1-12 1-12 0zM4 8c0 1 12 1 12 0M4 12c0 1 12 1 12 0"],
-];
-function renderDrawer(cur) {
-  const ev = nextHigh();
-  $("#drawer").innerHTML = `<div class="drawer-head"><span style="display:flex;flex-direction:column;gap:2px"><b style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:-.02em">Worl<span style="display:inline-block;transform:scaleX(-1);color:var(--accent)">D</span><span style="color:var(--accent)">D</span>river</b><span class="eyebrow">KW ${F().week.kw} · ${new Date().toLocaleDateString("de-DE", {weekday: "short", day: "2-digit", month: "2-digit"})}</span></span><button class="iconbtn" type="button" id="close-btn" aria-label="Menü schließen">
-      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-    <div class="seg" role="group" aria-label="Ansicht" style="display:grid;grid-template-columns:1fr 1fr">
-      <button type="button" data-mode="cockpit" aria-pressed="${cur !== "heute"}">Woche<br><span class="faint num" style="font-size:.68rem">Swing</span></button>
-      <button type="button" data-mode="heute" aria-pressed="${cur === "heute"}">Heute<br><span class="faint num" style="font-size:.68rem">Intraday</span></button></div>
-    <nav aria-label="Bereiche">${NAV.map(([id, label, d]) => `<a href="#${id}" ${cur === id ? 'aria-current="page"' : ""}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>${label}</a>`).join("")}</nav>
-    <div class="sep"></div>
-    ${ev ? `<a class="next-ev" href="#kalender">${folder("High")}<span><b>${ev.currency}</b> · ${esc(ev.title)}</span><small>${shortDay(ev.day)} ${ev.time} · ${untilText(ev.at)}</small></a>` : '<span class="faint" style="font-size:.86rem">Keine roten Ordner mehr diese Woche.</span>'}
-    <div class="sep"></div>
-    <div class="status" id="status"></div>`;
+/* ---------- Menü und Routing ---------- */
+const NAV = [["start", "Übersicht"], ["pruefung", "Signal-Prüfung"], ["kalender", "Kalender"], ["rechner", "Rechner"], ["daten", "Datenstand"]];
+const VIEWS = {start: ["Übersicht", viewStart, bindStart], pruefung: ["Signal-Prüfung", viewCheck, bindCheck],
+  kalender: ["Kalender", viewCalendar, bindCalendar], rechner: ["Rechner", viewCalc, bindCalc], daten: ["Datenstand", viewData, () => {}]};
+let cur = "start";
+function renderDrawer() {
+  $("#drawer").innerHTML = `<div class="toolbar"><a class="brand" href="#start">Worl<i class="m">D</i><i>D</i>river</a><button class="iconbtn" type="button" id="close-btn" aria-label="Menü schließen"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+    <nav aria-label="Bereiche">${NAV.map(([id, l]) => `<a href="#${id}" ${cur === id ? 'aria-current="page"' : ""}>${l}</a>`).join("")}</nav>
+    <p class="faint small">Kurse bis ${dateDe(D.meta.as_of)} · KW ${D.meta.week.kw}</p>`;
   $("#close-btn").onclick = closeDrawer;
-  document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { location.hash = "#" + b.dataset.mode; closeDrawer(); });
-  renderStatus();
 }
-function openDrawer() { renderDrawer(curView); $("#drawer").classList.add("open"); $("#scrim").hidden = false; $("#menu-btn").setAttribute("aria-expanded", "true"); $("#close-btn").focus(); }
+function openDrawer() { $("#drawer").classList.add("open"); $("#scrim").hidden = false; $("#menu-btn").setAttribute("aria-expanded", "true"); }
 function closeDrawer() { $("#drawer").classList.remove("open"); $("#scrim").hidden = true; $("#menu-btn").setAttribute("aria-expanded", "false"); }
-function renderStatus() {
-  const vix = D.meta.vix, reg = regimeOf(vix), pending = D.promotions.filter((p) => p.needs_confirmation).length;
-  const el = $("#status"); if (!el) return;
-  el.innerHTML = `<span class="chip"><span class="dot good"></span>Kurse bis ${dateDe(D.meta.as_of)}</span>
-    <span class="chip"><span class="dot ${reg === "Stress" ? "bad" : reg === "normal" ? "warn" : "good"}"></span>VIX ${fmt(vix, 1)} · ${reg}</span>
-    ${pending ? `<span class="chip"><span class="dot warn"></span>${pending} Freigaben offen</span>` : ""}`;
-}
-
-/* ---------- Routing ---------- */
-let curView = "cockpit";
-const VIEWS = {
-  cockpit: ["Wochenvorbereitung", viewCockpit, () => {}], heute: ["Tages-Update", viewToday, () => {}], waehrungen: ["Währungen", viewCurrencies, bindCurrencies], paare: ["Paare", viewPairs, bindPairs],
-  kalender: ["Kalender", viewCalendarV2, bindCalendarV2], cot: ["Positionierung", viewCot, bindCot], saisonalitaet: ["Saisonalität", viewSeason, bindSeason],
-  prognosen: ["Prognosen", viewForecasts, bindForecasts], tracker: ["Forecast-Tracker", viewTracker, bindTracker],
-  makro: ["Makro", viewMakro, bindMakro], rechner: ["Rechner", viewCalc, bindCalc], zinsen: ["Zinsen & Notenbanken", viewRates, bindRates], weltkarte: ["Weltkarte", viewMap, bindMap], daten: ["Daten", viewData, () => {}]};
 function route() {
-  clearInterval(ticker);
-  const name = (location.hash || "#cockpit").slice(1);
-  if (name.startsWith("paar-")) {
-    curView = "paare"; $("#top-title").textContent = pairName(name.slice(5)); $("#app").innerHTML = viewPair(name.slice(5));
+  const name = (location.hash || "#start").slice(1);
+  if (name.startsWith("paar-") && D.pairs.includes(name.slice(5))) {
+    cur = "start"; $("#top-title").textContent = pairName(name.slice(5)); $("#app").innerHTML = viewPair(name.slice(5)); bindHorizon();
   } else {
-    curView = VIEWS[name] ? name : "cockpit";
-    const [title, view, bind] = VIEWS[curView];
+    cur = VIEWS[name] ? name : "start";
+    const [title, view, bind] = VIEWS[cur];
     $("#top-title").textContent = title; $("#app").innerHTML = view(); bind();
   }
   document.title = `${$("#top-title").textContent} · WorlᗡDriver`;
-  closeDrawer(); renderDrawer(curView);
+  closeDrawer(); renderDrawer();
 }
-if (!D) { document.getElementById("app").innerHTML = '<div class="empty"><b>Keine Daten eingebettet.</b><span>Die Seite wird mit „python -m forex_nexus build-site“ erzeugt.</span></div>'; }
+if (!D) { $("#app").innerHTML = '<p class="muted">Keine Daten eingebettet. Die Seite wird mit „python -m forex_nexus build-site“ erzeugt.</p>'; }
 else {
-  renderChrome(); renderDrawer("cockpit"); route();
+  $("#foot").innerHTML = `<div>WorlᗡDriver · Version ${esc(D.meta.code_commit)} · erzeugt ${new Date(D.meta.generated_at).toLocaleString("de-DE")}</div>
+    <div>Kursbasis: ${esc(D.meta.price_basis)}. Persönliches Analysewerkzeug, keine Anlageberatung.</div>`;
+  route();
   $("#menu-btn").onclick = openDrawer; $("#scrim").onclick = closeDrawer;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
-  window.addEventListener("hashchange", () => { state.open = null; route(); window.scrollTo(0, 0); });
+  window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
 }
 </script>

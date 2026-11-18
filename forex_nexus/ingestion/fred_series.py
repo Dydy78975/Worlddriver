@@ -1,4 +1,4 @@
-"""Makro- und Rohstoffreihen von FRED laden (alle Reihen der Quelle FRED_COMMODITY in ref.series).
+"""Makro- und Rohstoffreihen laden: FRED (Rohstoffe, Zinsen, Arbeitsmarkt) und einzelne EZB-Reihen.
 
 Point-in-Time: FRED liefert für diese Reihen keine historischen Datenstände. Der Veröffentlichungs-
 zeitpunkt wird deshalb vorsichtig geschätzt:  available_at = Ende der Periode + publication_lag
@@ -8,6 +8,7 @@ zeitpunkt wird deshalb vorsichtig geschätzt:  available_at = Ende der Periode +
 
 from __future__ import annotations
 
+import io
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -16,6 +17,22 @@ import pandas as pd
 from forex_nexus.db import connect
 from forex_nexus.ingestion.fx_daily import FRED_URL, parse_fred_csv
 from forex_nexus.ingestion.http import fetch_text
+
+SOURCES = ("FRED_COMMODITY", "FRED_RATES", "FRED_LABOUR", "ECB_SERIES")
+ECB_SERIES_URL = "https://data-api.ecb.europa.eu/service/data/{key}?format=csvdata"
+
+
+def parse_ecb_series(text: str) -> pd.Series:
+    """EZB-CSV einer einzelnen Reihe -> Series(Periodenbeginn -> Wert). '2026-09' -> 2026-09-01."""
+    df = pd.read_csv(io.StringIO(text), usecols=["TIME_PERIOD", "OBS_VALUE"]).dropna()
+    df["date"] = pd.to_datetime(df["TIME_PERIOD"]).dt.date
+    return df.set_index("date")["OBS_VALUE"].astype(float).sort_index()
+
+
+def fetch_values(source: str, code: str) -> pd.Series:
+    if source == "ECB_SERIES":
+        return parse_ecb_series(fetch_text(ECB_SERIES_URL.format(key=code)))
+    return parse_fred_csv(fetch_text(FRED_URL.format(series=code)), require_positive=False)
 
 
 def period_end(d, frequency: str):
@@ -28,15 +45,15 @@ def period_end(d, frequency: str):
     return d
 
 
-def ingest(conninfo: str, pause: float = 1.0, sources=("FRED_COMMODITY", "FRED_RATES")) -> list[dict]:
+def ingest(conninfo: str, pause: float = 1.0, sources=SOURCES) -> list[dict]:
     results = []
     with connect(conninfo) as conn:
         series = conn.execute(
-            """SELECT s.series_id, s.source_code, s.frequency, extract(epoch FROM s.publication_lag)::int, s.source_id
+            """SELECT s.series_id, s.source_code, s.frequency, extract(epoch FROM s.publication_lag)::int, s.source_id, d.name
                FROM ref.series s JOIN ref.data_source d USING (source_id)
-               WHERE d.name = ANY(%s) ORDER BY s.series_id""", (list(sources),)).fetchall()
-    for series_id, code, freq, lag_seconds, src in series:
-        values = parse_fred_csv(fetch_text(FRED_URL.format(series=code)), require_positive=False)
+               WHERE d.name = ANY(%s) AND s.active ORDER BY s.series_id""", (list(sources),)).fetchall()
+    for series_id, code, freq, lag_seconds, src, source in series:
+        values = fetch_values(source, code)
         lag = timedelta(seconds=lag_seconds or 0)
         rows = [(series_id, d, datetime.combine(period_end(d, freq), datetime.min.time(), timezone.utc)
                  + timedelta(hours=23) + lag, float(v)) for d, v in values.items()]

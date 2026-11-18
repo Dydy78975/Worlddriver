@@ -36,12 +36,12 @@ Ohne Pull Request kommst du so zum Arbeitszweig:
 | `README.md` | Startseite mit Logo und Übersicht | ⭐ ja |
 | `docs/` | alle Erklärungen auf Deutsch (Plan, Architektur, Methoden) | ⭐ ja |
 | `reports/` | automatisch erzeugte Ergebnisse mit Diagrammen | ⭐ ja |
-| `knowledge/relationships.yaml` | Wissensbasis: welche Rohstoffe/Faktoren welche Währung beeinflussen | ⭐ ja |
+| `reports/signals/README.md` | Prüfbericht: welche Signale funktionieren, welche Daten aktuell sind | ⭐ ja |
 | `forex_nexus/` | der Programmcode | nein |
 | `db/migrations/` | Aufbau der Datenbank | nein |
 | `tests/` | automatische Prüfungen | nein |
 
-Empfohlene Lesereihenfolge in `docs/`: 06 (Plan) → 07 (Ergebnisse) → 08 (Prognosen) → 09 (Wirtschaftsbeziehungen).
+Empfohlene Lesereihenfolge in `docs/`: 12 (Signal-Abstimmung) → 10 (Stand) → 06 (Plan).
 
 ## Testergebnisse verstehen
 

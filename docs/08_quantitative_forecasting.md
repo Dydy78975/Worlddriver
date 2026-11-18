@@ -1,5 +1,7 @@
 # 08 – Quantitative Forecasting Engine
 
+> **Stand 18.11.2026:** Die Richtungsmodelle (logistische Regression, LightGBM) und das Renditemodell wurden nach dem Walk-Forward-Test entfernt – sie schlugen die einfachen Referenzen nicht. In Betrieb sind Referenz, Schwankungs-Referenz und die Spannen-Prognose. Richtungssignale prüft jetzt die Signal-Abstimmung: [12_signal_abstimmung.md](12_signal_abstimmung.md).
+
 Stand: 18.11.2026 · Status: Architektur festgelegt, Datenbank umgesetzt (Migration 0003), Modelle folgen
 
 Gilt ausschließlich für die 8 Hauptwährungen **USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD**

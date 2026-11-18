@@ -1,14 +1,12 @@
-"""Gesamtablauf mit künstlichen Kursen: train → promote → forecast → (neue Kurse) → evaluate → Website."""
+"""Gesamtablauf mit künstlichen Kursen: train → promote → forecast → (neue Kurse) → evaluate → Signale → Website."""
 
 import json
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from zoneinfo import ZoneInfo
 
-import numpy as np
 import pandas as pd
 import pytest
 
-from forex_nexus.dependencies import knowledge
 from forex_nexus.ingestion.fx_daily import store_rows
 from forex_nexus.ledger import pipeline
 from forex_nexus.reports import site_export
@@ -39,7 +37,6 @@ def closes_all():
 
 
 def test_full_pipeline(db_url, conn, closes_all, tmp_path, monkeypatch):
-    knowledge.load(db_url)
     cut = closes_all.index[closes_all.index <= pd.Timestamp("2007-12-31").date()][-1]
     first, later = closes_all.loc[:cut], closes_all.loc[closes_all.index > cut]
     _store(db_url, first)
@@ -53,23 +50,21 @@ def test_full_pipeline(db_url, conn, closes_all, tmp_path, monkeypatch):
         assert info["champion_recommendation"] in ("climatology", "volref")    # reiner Zufall: kein Richtungsmodell
         pipeline.promote(db_url, version, h, info["champion_recommendation"], "Test", "Testfreigabe")
     with pytest.raises(ValueError):
-        pipeline.promote(db_url, version, "1D", "logreg", "  ", "ohne Namen")
+        pipeline.promote(db_url, version, "1D", "volref", "  ", "ohne Namen")
 
     r1 = pipeline.forecast(db_url, log=lambda m: None)
-    assert r1["written"] == 28 * 3 * 4
+    assert r1["written"] == 28 * 3 * 2
     assert pipeline.forecast(db_url, log=lambda m: None)["skipped"] == 1      # gleicher Tag: nichts Neues
 
     champions = conn.execute(
         """SELECT count(*), count(*) FILTER (WHERE horizon_code = '1D' AND expected_range_high IS NULL)
            FROM ml.forecast WHERE NOT is_shadow""").fetchone()
     assert champions == (84, 28)                                               # Tagesprognose ohne Spanne
-    drivers = conn.execute("SELECT count(*) FROM ml.forecast_driver").fetchone()[0]
-    assert drivers == 84 * 4
 
     assert pipeline.evaluate_due(db_url, log=lambda m: None) == 0              # noch nichts fällig
     _store(db_url, later)                                                      # die Zeit vergeht …
     n = pipeline.evaluate_due(db_url, log=lambda m: None)
-    assert n == 28 * 3 * 4
+    assert n == 28 * 3 * 2
     assert pipeline.evaluate_due(db_url, log=lambda m: None) == 0
     row = conn.execute("""SELECT min(brier), max(brier), bool_and(realized_price > 0), count(*) FILTER (WHERE in_interval_80)
                           FROM ml.forecast_outcome""").fetchone()
@@ -78,17 +73,17 @@ def test_full_pipeline(db_url, conn, closes_all, tmp_path, monkeypatch):
 
     # Prognose am neuen Tag nutzt den eingefrorenen Trainingsstand (train_end bleibt unverändert)
     before = conn.execute("SELECT model_version_id, train_end FROM ml.model_version WHERE status = 'champion' ORDER BY 1").fetchall()
-    assert pipeline.forecast(db_url, log=lambda m: None)["written"] == 28 * 3 * 4
+    assert pipeline.forecast(db_url, log=lambda m: None)["written"] == 28 * 3 * 2
     after = conn.execute("SELECT model_version_id, train_end FROM ml.model_version WHERE status = 'champion' ORDER BY 1").fetchall()
     assert before == after
 
-    monkeypatch.setattr(site_export, "ANALYSIS_START", pd.Timestamp("2004-01-01").date())
-    out = site_export.build(db_url, tmp_path / "index.html")
+    out = site_export.build(db_url, tmp_path / "index.html", report_dir=tmp_path / "signals")
     html = out.read_text(encoding="utf-8")
     assert site_export.PLACEHOLDER not in html
     payload = html.split("const D = ", 1)[1].split(";\nconst $ =", 1)[0]
     data = json.loads(payload.replace("<\\/", "</"))
-    assert len([f for f in data["forecasts"] if f["horizon"] == "1D"]) == 28
-    assert data["ledger"]["evaluated"] == 336
-    assert set(data["backtest"]) == {"1D", "1W", "1M"}
-    assert len(data["dependencies"]) == 28
+    assert set(data["signals"]["horizons"]) == {"1D", "1W"}
+    assert len(data["signals"]["horizons"]["1W"]["fundamental"]["pairs"]) == 28
+    assert len(data["ranges"]["pairs"]) == 28 and set(data["ranges"]["pairs"]["EURUSD"]) == {"1D", "1W", "1M"}
+    assert data["ranges"]["coverage_live"]
+    assert (tmp_path / "signals" / "README.md").exists()
