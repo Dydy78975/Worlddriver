@@ -43,14 +43,6 @@ def collect(conninfo: str) -> dict:
         prices = {p: [[str(d), _r(v, 6)] for d, v in tail[p].dropna().items()] for p in ALL_PAIRS if p in tail}
 
         strength = currency_strength(load_closes(conn, ["FRED_H10"]).loc[lambda d: d.index >= ANALYSIS_START])
-        st_tail = strength.iloc[-130:]
-        strength_out = {}
-        for c in MAJORS:
-            s = strength[c].dropna()
-            strength_out[c] = {"chg_5d": _r((s.iloc[-1] - s.iloc[-6]) * 100, 3),
-                               "chg_20d": _r((s.iloc[-1] - s.iloc[-21]) * 100, 3),
-                               "chg_60d": _r((s.iloc[-1] - s.iloc[-61]) * 100, 3),
-                               "series": [_r((v - st_tail[c].iloc[0]) * 100, 3) for v in st_tail[c]]}
 
         vix = load_series(conn, "VIXCLS")
         vix_last = float(vix.iloc[-1]) if len(vix) else None
@@ -179,7 +171,7 @@ def collect(conninfo: str) -> dict:
         "meta": {"generated_at": datetime.now(timezone.utc).isoformat(timespec="minutes"), "as_of": str(last),
                  "code_commit": code_commit(), "price_basis": "FRED H.10 Mittagskurse New York (vorläufig)", "calendar_source": "Forex Factory",
                  "vix": _r(vix_last, 2)},
-        "pairs": ALL_PAIRS, "majors": MAJORS, "prices": prices, "strength": strength_out,
+        "pairs": ALL_PAIRS, "majors": MAJORS, "prices": prices,
         "forecasts": forecasts, "ledger": ledger, "backtest": backtest, "promotions": promotions,
         "dependencies": deps, "economies": economies, "fund": fund, "quality": quality, "sources": sources, "series_last": last_obs,
     }

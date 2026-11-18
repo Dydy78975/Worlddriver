@@ -1,6 +1,6 @@
 # Übergabe-Notiz – WorlᗡDriver / FOREX NEXUS AI
 
-Stand: 18.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj (privat)
+Stand: 18.11.2026 · Branch `claude/charming-volta-yvgpff` (enthält alles aus `claude/forex-nexus-ai-platform-6ez50s`) · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj (privat)
 
 ## Ziel
 - Fundamentales Trading-Tool + Prognose-Plattform **nur** für USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
@@ -20,6 +20,9 @@ Stand: 18.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Website: 
 ## Gerade in Arbeit
 - Warten auf Design-Feedback des Nutzers zu Version 7 der Website (Ziel: „so sauber wie die Fotos“).
 
+## Erledigt in dieser Sitzung
+- `site/template.html` aufgeräumt: `viewOverview`, `renderStrength`, `spark`, `cotLine` und zugehöriges CSS entfernt; ungenutzter Export `strength` aus `site_export.py` gestrichen. 96 Tests grün.
+
 ## Offen / bekannte Probleme
 - **Kein dauerhafter Betrieb:** Cloud-DB ist temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`) → echte Live-Bilanz braucht Server oder verwaltete DB.
 - Kurse = FRED-Mittagskurse, nur wöchentlich aktualisiert; Dukascopy (Hoch/Tief, 17:00 NY) blockiert die Cloud-IP → auf eigenem Server laden (`download-dukascopy`).
@@ -28,8 +31,7 @@ Stand: 18.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Website: 
 - Fehlende Treiberdaten: Milchpreise (GDT), Gold, China-Aktivität.
 - A+-Regel-Engine: wartet auf die 6 Kriterien des Nutzers.
 - Richtungsmodelle schlagen die Referenzen nicht; COT/Saison/Konfluenz historisch ≈ Zufall (wird offen angezeigt).
-- Aufräumen: `site/template.html` enthält ungenutzte alte Funktionen (z. B. `viewOverview`, `renderStrength`).
-- Geplante Aufgabe hat keine Connectors; läuft deshalb an diese Sitzung gebunden.
+- Geplante Aufgabe hat keine Connectors; sie ist an die **alte** Sitzung gebunden, nicht an diese.
 
 ## Wichtige Dateien
 - `db/migrations/000X_*.sql` – Schema; nie ändern, nur neue Datei anlegen (Prüfsummenschutz).

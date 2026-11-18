@@ -98,12 +98,6 @@ section.view>*,.grid-2>*,.grid-3>*,.kpis>*{min-width:0}
 .pill.dashed{color:var(--fg-3);border:1px dashed var(--line)}
 
 /* Währungsstärke */
-.strength{display:grid;gap:2px}
-.srow{display:grid;grid-template-columns:44px minmax(0,1fr) 72px 96px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft)}
-.srow:last-child{border-bottom:0}
-.sbar{position:relative;height:10px}
-.sbar .axis{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
-.sbar .fill{position:absolute;top:0;height:10px;border-radius:3px}
 .ccy{font-family:var(--font-display);font-weight:600}
 .seg{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px}
 .seg button{all:unset;cursor:pointer;text-align:center;padding:5px 12px;border-radius:7px;font-size:.86rem;color:var(--fg-2);font-weight:500}
@@ -415,66 +409,6 @@ function renderChrome() {
     <div>WorlᗡDriver · Prognose-Engine FOREX NEXUS AI · Version ${esc(D.meta.code_commit)} · erzeugt ${new Date(D.meta.generated_at).toLocaleString("de-DE")}</div>
     <div>Kursbasis: ${esc(D.meta.price_basis)}. ${esc(D.map.attribution)}.</div>
     <div>Persönliches Analysewerkzeug. Statistische Prognosen sind keine Anlageberatung und keine Handelssignale.</div>`;
-}
-
-/* ---------- Übersicht ---------- */
-function viewOverview() {
-  const hz = ["1D", "1W", "1M"].map((h) => {
-    const b = D.backtest[h], v = horizonVerdict(h), m = (b.models[b.champion] || {});
-    const val = m.validation || {}, hold = m.holdout || {};
-    return `<article class="panel hz">
-      <div class="panel-head"><h3>${HZ[h]} <span class="faint">· ${HZ_LONG[h]}</span></h3><span class="pill ${v.cls}">${v.short}</span></div>
-      <p class="verdict muted">${v.text}</p>
-      <dl class="kv">
-        <dt>Angezeigtes Modell</dt><dd>${esc(m.label || "–")}</dd>
-        <dt>Trefferquote Richtung</dt><dd class="num">${pp(val.hit_rate, 1)}</dd>
-        <dt>80-%-Intervall traf</dt><dd class="num">${pp(val.coverage_80, 1)}</dd>
-        <dt>Hold-out ab 2022 (BSS)</dt><dd class="num">${pct(hold.bss, 2)}</dd>
-      </dl>
-    </article>`;}).join("");
-  const pend = D.promotions.filter((p) => p.needs_confirmation);
-  const explain = D.dependencies.filter((d) => ["erklärend", "vorauslaufend"].includes(d.verdict));
-  return `<section class="view">
-    <div class="lede"><h1>Prognosen für 8 Währungen, ehrlich gemessen</h1>
-      <p>USD, EUR, JPY, GBP, CHF, CAD, AUD und NZD mit ihren 28 Paaren – für den nächsten Tag, die nächste Woche und den nächsten Monat. Jede Prognose wird unveränderlich gespeichert und später gegen die tatsächliche Entwicklung geprüft.</p></div>
-    <div class="grid-3">${hz}</div>
-    <div class="grid-2">
-      <article class="panel">
-        <div class="panel-head"><h2>Währungsstärke</h2>
-          <div class="seg" role="group" aria-label="Zeitraum">
-            ${[["chg_5d", "5 T"], ["chg_20d", "20 T"], ["chg_60d", "60 T"]].map(([k, l]) => `<button type="button" data-sk="${k}" aria-pressed="${(state.sk || "chg_20d") === k}">${l}</button>`).join("")}
-          </div></div>
-        <p class="faint" style="font-size:.8rem;margin-bottom:8px">Veränderung jeder Währung gegen den Korb der anderen sieben, in Prozent.</p>
-        <div class="strength" id="strength"></div>
-      </article>
-      <article class="panel">
-        <div class="panel-head"><h2>Deine Entscheidungen</h2><span class="pill ${pend.length ? "warn" : "good"}">${pend.length ? pend.length + " offen" : "nichts offen"}</span></div>
-        <div style="display:grid;gap:12px">
-          ${pend.length ? `<div class="note"><b>Modelle bestätigen:</b> Zur Inbetriebnahme wurden die Testsieger eingesetzt – ${pend.map((p) => `${HZ[p.horizon]}: ${esc(p.model)}`).join(", ")}. Sie laufen, bis du sie bestätigst oder änderst. <a href="#tracker">Ergebnisse ansehen</a></div>` : ""}
-          <div class="note"><b>${explain.length} Wirtschaftsbeziehungen</b> sind statistisch als gleichzeitiger Zusammenhang belegt und warten auf deine Prüfung. Keine davon hat bisher einen nachweisbaren Vorlauf. <a href="#makro">Ansehen</a></div>
-          <div class="note"><b>Deine 6 A+-Kriterien</b> fehlen noch. Die Regel-Engine ist vorbereitet und bleibt streng getrennt von den Prognosen.</div>
-        </div>
-      </article>
-    </div>
-  </section>`;
-}
-function renderStrength() {
-  const k = state.sk || "chg_20d";
-  const rows = Object.entries(D.strength).map(([c, s]) => [c, s[k], s.series]).sort((a, b) => b[1] - a[1]);
-  const max = Math.max(...rows.map((r) => Math.abs(r[1] || 0)), 0.5);
-  $("#strength").innerHTML = rows.map(([c, v, series]) => {
-    const w = Math.abs(v) / max * 50, left = v >= 0 ? 50 : 50 - w;
-    return `<div class="srow"><span class="ccy">${c}</span>
-      <div class="sbar" role="img" aria-label="${c} ${pct(v / 100, 2)}"><span class="axis"></span><span class="fill" style="left:${left}%;width:${w}%;background:${v >= 0 ? "var(--bull)" : "var(--bear)"}"></span></div>
-      <span class="num" style="text-align:right">${v > 0 ? "+" : ""}${fmt(v, 2)} %</span>${spark(series, 96, 26)}</div>`;}).join("");
-  document.querySelectorAll("[data-sk]").forEach((b) => b.onclick = () => { state.sk = b.dataset.sk; document.querySelectorAll("[data-sk]").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderStrength(); });
-}
-function spark(vals, w, h) {
-  const v = vals.filter((x) => x != null); if (v.length < 2) return "";
-  const mn = Math.min(...v), mx = Math.max(...v), sy = (x) => h - 3 - (x - mn) / ((mx - mn) || 1) * (h - 6);
-  const d = v.map((x, i) => (i ? "L" : "M") + (i / (v.length - 1) * (w - 4) + 2).toFixed(1) + "," + sy(x).toFixed(1)).join("");
-  const end = v[v.length - 1] >= v[0];
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${end ? "var(--bull)" : "var(--bear)"}" stroke-width="1.6"/><circle cx="${w - 2}" cy="${sy(v[v.length - 1])}" r="2.4" fill="${end ? "var(--bull)" : "var(--bear)"}"/></svg>`;
 }
 
 /* ---------- Prognosen ---------- */
@@ -977,15 +911,6 @@ function viewCalendar() {
 function bindCalendar() {
   document.querySelectorAll("[data-imp]").forEach((b) => b.onclick = () => { const k = b.dataset.imp, cur = state.imp || ["High", "Medium"]; state.imp = cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]; route(); });
   document.querySelectorAll("[data-cal]").forEach((b) => b.onclick = () => { state.calCcy = b.dataset.cal; route(); });
-}
-
-function cotLine(hist) {
-  if (!hist || hist.length < 2) return "";
-  const W = 260, H = 54, n = hist.length, x = (i) => i / (n - 1) * W, y = (v) => H - 2 - (v / 100) * (H - 4);
-  const path = (k) => hist.map((r, i) => r[k] == null ? "" : `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join("");
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="COT-Index der letzten 3 Jahre" preserveAspectRatio="none" style="height:54px">
-    <rect x="0" y="${y(100)}" width="${W}" height="${y(80) - y(100)}" fill="color-mix(in srgb,var(--yellow) 12%,transparent)"/><rect x="0" y="${y(20)}" width="${W}" height="${y(0) - y(20)}" fill="color-mix(in srgb,var(--yellow) 12%,transparent)"/>
-    <path d="${path(2)}" fill="none" stroke="var(--weak)" stroke-width="1.3" opacity=".8"/><path d="${path(1)}" fill="none" stroke="var(--strong)" stroke-width="1.8"/></svg>`;
 }
 
 function viewToday() {
