@@ -9,10 +9,10 @@ einfach `index.html` im Browser öffnen oder den Ordner bei einem Hoster hochlad
 | Was | Wo |
 |---|---|
 |  Firmenname „JCStamps“ (bereits eingesetzt) | `index.html`, `mentions-legales.html` (Suchen & Ersetzen) |
-| Telefon `06 00 00 00 00` / `tel:+33600000000` | `index.html`, `mentions-legales.html` |
-| E-Mail `contact@jcstamps.fr` (Vorschlag, existiert noch nicht) | `index.html`, `mentions-legales.html`, `script.js` (`EMAIL_CONTACT`) |
+| Telefon `+352 621 000 000` / `tel:+352621000000` | `index.html`, `mentions-legales.html` |
+| E-Mail `contact@jcstamps.lu` (Vorschlag, existiert noch nicht) | `index.html`, `mentions-legales.html`, `script.js` (`EMAIL_CONTACT`) |
 | Adresse, Öffnungszeiten | `index.html` (Abschnitt Contact) |
-| SIRET, Name, Hoster | Fußzeile in `index.html`, `mentions-legales.html` |
+| Autorisation d’établissement, TVA, RCS, Name, Hoster (Luxemburg) | Fußzeile in `index.html`, `mentions-legales.html` |
 | Fotos der Arbeiten | Abschnitt „Réalisations“ in `index.html` – Anleitung steht als Kommentar im Code |
 
 ## Dateien
@@ -20,4 +20,4 @@ einfach `index.html` im Browser öffnen oder den Ordner bei einem Hoster hochlad
 - `index.html` – die Seite (Services, À propos, Réalisations, Méthode, Contact)
 - `styles.css` – Design, passt sich an Handy/Tablet/PC an
 - `script.js` – Handy-Menü und Kontaktformular (öffnet das E-Mail-Programm mit vorausgefüllter Anfrage)
-- `mentions-legales.html` – Impressum (in Frankreich Pflicht)
+- `mentions-legales.html` – Impressum (in Luxemburg Pflicht, Gesetz vom 14. August 2000 über den elektronischen Geschäftsverkehr)
