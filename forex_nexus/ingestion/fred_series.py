@@ -1,5 +1,5 @@
-"""Makro- und Rohstoffreihen laden: FRED (Rohstoffe, Zinsen, Arbeitsmarkt), einzelne EZB-Reihen und die BIS
-(Verbraucherpreise, offizielle Leitzinsen).
+"""Makro- und Rohstoffreihen laden: FRED (Rohstoffe, Zinsen, Arbeitsmarkt), einzelne EZB-Reihen, die BIS
+(Verbraucherpreise, offizielle Leitzinsen) und kurze Renditen von Notenbanken (ingestion/yields.py).
 
 Point-in-Time: FRED liefert für diese Reihen keine historischen Datenstände. Der Veröffentlichungs-
 zeitpunkt wird deshalb vorsichtig geschätzt:  available_at = Ende der Periode + publication_lag
@@ -19,7 +19,7 @@ from forex_nexus.db import connect
 from forex_nexus.ingestion.fx_daily import FRED_URL, parse_fred_csv
 from forex_nexus.ingestion.http import fetch_text
 
-SOURCES = ("FRED_COMMODITY", "FRED_RATES", "FRED_LABOUR", "ECB_SERIES", "BIS")
+SOURCES = ("FRED_COMMODITY", "FRED_RATES", "FRED_LABOUR", "ECB_SERIES", "BIS", "CB_YIELDS")
 ECB_SERIES_URL = "https://data-api.ecb.europa.eu/service/data/{key}?format=csvdata"
 BIS_URL = "https://stats.bis.org/api/v2/data/dataflow/BIS/{key}?format=csv&startPeriod=1995-01-01"
 
@@ -34,6 +34,9 @@ def parse_ecb_series(text: str) -> pd.Series:
 def fetch_values(source: str, code: str) -> pd.Series:
     if source == "ECB_SERIES":
         return parse_ecb_series(fetch_text(ECB_SERIES_URL.format(key=code)))
+    if source == "CB_YIELDS":
+        from forex_nexus.ingestion import yields
+        return yields.fetch(code)
     if source == "BIS":
         for _ in range(3):                       # die BIS liefert gelegentlich eine leere Antwort
             text = fetch_text(BIS_URL.format(key=code))
@@ -62,7 +65,11 @@ def ingest(conninfo: str, pause: float = 1.0, sources=SOURCES) -> list[dict]:
                FROM ref.series s JOIN ref.data_source d USING (source_id)
                WHERE d.name = ANY(%s) AND s.active ORDER BY s.series_id""", (list(sources),)).fetchall()
     for series_id, code, freq, lag_seconds, src, source in series:
-        values = fetch_values(source, code)
+        try:
+            values = fetch_values(source, code)
+        except Exception as exc:              # eine gestörte Quelle darf die übrigen nicht aufhalten
+            results.append({"series": code, "values": 0, "last": None, "error": f"{type(exc).__name__}: {exc}"[:200]})
+            continue
         lag = timedelta(seconds=lag_seconds or 0)
         rows = [(series_id, d, datetime.combine(period_end(d, freq), datetime.min.time(), timezone.utc)
                  + timedelta(hours=23) + lag, float(v)) for d, v in values.items()]

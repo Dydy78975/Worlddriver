@@ -1,7 +1,7 @@
 <title>WorlᗡDriver</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="WorlᗡDriver – geprüfte Signale und Signal-Abstimmung für die 28 Paare der 8 Hauptwährungen">
+<meta name="description" content="WorlᗡDriver – Modelle je Währung, Kombi-Einschätzung und ehrliche Prüfung für die 8 Hauptwährungen und 28 Paare">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -108,6 +108,7 @@ h2+.ev{border-top:0}
 svg.chart{width:100%;height:auto;display:block}
 .fld{display:grid;gap:4px;font-size:.84rem;color:var(--fg-2);min-width:0}
 .calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+details{border-top:1px solid var(--line-soft);padding:8px 0}details summary{cursor:pointer}
 footer{padding-block:0 32px;font-size:.78rem;color:var(--fg-3);display:grid;gap:4px}
 </style>
 
@@ -136,19 +137,26 @@ const digits = (p) => p.endsWith("JPY") ? 3 : 5;
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const INFO = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 4.6v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const PERIODS = {entdeckung: "Entdeckung", bestaetigung: "Bestätigung", schlusstest: "Schlusstest"};
-const state = {h: "1W", sort: "share", period: "schlusstest"};
-try { Object.assign(state, JSON.parse(localStorage.getItem("wd2") || "{}")); } catch (e) {}
-const save = () => { try { localStorage.setItem("wd2", JSON.stringify({h: state.h, sort: state.sort, period: state.period})); } catch (e) {} };
+const CCY_NAME = {USD: "US-Dollar", EUR: "Euro", JPY: "Yen", GBP: "Pfund", CHF: "Franken", CAD: "Kanadischer Dollar", AUD: "Australischer Dollar", NZD: "Neuseeland-Dollar"};
+const state = {h: "1W", period: "schlusstest"};
+try { Object.assign(state, JSON.parse(localStorage.getItem("wd3") || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem("wd3", JSON.stringify({h: state.h, period: state.period})); } catch (e) {} };
 
 const S = () => D.signals;
 const H = () => S().horizons[state.h] || Object.values(S().horizons)[0];
-const SIG = Object.fromEntries((D ? D.signals.signals : []).map((s) => [s.key, s]));
+const MODEL = Object.fromEntries((D ? D.signals.models : []).map((m) => [m.key, m]));
 const voteCls = (v) => v > 0 ? "long" : v < 0 ? "short" : "";
-const voteTxt = (v) => v > 0 ? "long" : v < 0 ? "short" : "neutral";
-const labelCls = (l) => l.includes("long") ? "long" : l.includes("short") ? "short" : "";
+const voteTxt = (v) => v > 0 ? "stärker" : v < 0 ? "schwächer" : "neutral";
 const lastPrice = (p) => { const r = D.prices[p]; return r && r.length ? r[r.length - 1][1] : null; };
 const rangeOf = (p, h) => ((D.ranges.pairs[p] || {})[h || state.h]) || {};
-
+const RANGE_H = () => state.h === "1M" ? "1M" : state.h;
+/* Einschätzung aus der Kombi-Wahrscheinlichkeit */
+function lean(p, up = "bullish", down = "bearish") {
+  if (p == null) return {txt: "keine Daten", cls: ""};
+  if (p >= 0.6) return {txt: `klar ${up}`, cls: "long"}; if (p >= 0.53) return {txt: `eher ${up}`, cls: "long"};
+  if (p <= 0.4) return {txt: `klar ${down}`, cls: "short"}; if (p <= 0.47) return {txt: `eher ${down}`, cls: "short"};
+  return {txt: "neutral", cls: ""};
+}
 function horizonSwitch() {
   return `<div class="seg" role="group" aria-label="Zeitraum">${Object.entries(S().horizons).map(([h, x]) =>
     `<button type="button" data-h="${h}" aria-pressed="${state.h === h}">${x.label}</button>`).join("")}</div>`;
@@ -156,76 +164,104 @@ function horizonSwitch() {
 function bindHorizon() { document.querySelectorAll("[data-h]").forEach((b) => b.onclick = () => { state.h = b.dataset.h; save(); route(); }); }
 function voteBar(v) {
   const t = Math.max(v.total, 1);
-  return `<div class="votebar" role="img" aria-label="${v.bull} long, ${v.neutral} neutral, ${v.bear} short"><i class="u" style="width:${v.bull / t * 100}%"></i><i class="n" style="width:${v.neutral / t * 100}%"></i><i class="d" style="width:${v.bear / t * 100}%"></i></div>`;
+  return `<div class="votebar" role="img" aria-label="${v.bull} stärker, ${v.neutral} neutral, ${v.bear} schwächer"><i class="u" style="width:${v.bull / t * 100}%"></i><i class="n" style="width:${v.neutral / t * 100}%"></i><i class="d" style="width:${v.bear / t * 100}%"></i></div>`;
 }
-function shareTxt(v) { return v.share_bull == null ? "keine Stimme" : v.share_bull >= 0.5 ? `${pct(v.share_bull, 0)} long` : `${pct(1 - v.share_bull, 0)} short`; }
-function bucketHit(test, label) {
-  const b = (test.buckets || {})[label];
-  return !b || b.hit == null ? "–" : `<b>${pct(b.hit, 1)}</b> <span class="faint">(95-%-Bereich ${fmt(b.ci[0] * 100, 0)}–${fmt(b.ci[1] * 100, 0)} %)</span>`;
-}
+const shareTxt = (v) => v.share_bull == null ? "keine Stimme" : v.share_bull >= 0.5 ? `${pct(v.share_bull, 0)} dafür` : `${pct(1 - v.share_bull, 0)} dagegen`;
+const conf = (tab, i) => (tab || [])[i] || {};
+function hitTxt(r) { return r.hit == null ? "–" : `${pct(r.hit, 1)} <span class="faint">(${fmt(r.ci[0] * 100, 0)}–${fmt(r.ci[1] * 100, 0)} %)</span>`; }
+
 function statusBox() {
-  const rows = Object.values(S().horizons).map((x) => `<li><b>${x.label}:</b> ${x.valid.length} von ${S().rules.tests} Kombinationen bestanden. Die Fundamental-Mehrheit lag seit 2020 in <b>${pct(x.fundamental.test.all.hit, 1)}</b> der Fälle richtig (Zufall = 50 %).</li>`).join("");
-  const any = Object.values(S().horizons).some((x) => x.valid.length);
-  return `<div class="honest">${INFO}<div><b>${any ? "Es gibt geprüfte Signale." : "Noch kein Signal hat die Prüfung bestanden."}</b>
-    ${any ? "" : "Die Abstimmung unten zählt deshalb die Fundamental-Signale in ihrer erwarteten Richtung. Sie beschreibt die Lage – eine belegte Vorhersage ist sie nicht."}
-    <ul style="margin:6px 0;padding-left:18px">${rows}</ul><a href="#pruefung">So wird geprüft</a></div></div>`;
+  const h = H(), cs = Object.entries(h.currencies), ok = cs.filter(([, c]) => c.combo.confirmed).map(([k]) => k);
+  return `<div class="honest">${INFO}<div><b>So belastbar ist die ${h.label}seinschätzung:</b>
+    ${ok.length ? `Bestätigt ist das Kombi-Modell für <b>${ok.join(", ")}</b>.` : "Für keine Währung ist das Kombi-Modell bestätigt."}
+    Einzelmodelle mit bestandener Prüfung: <b>${h.valid.length}</b> von ${S().rules.models}.
+    Eine Trefferquote von 70 % wird in keiner Sicherheitsstufe verlässlich erreicht. <a href="#pruefung">Details</a></div></div>`;
 }
 
 /* ---------- Übersicht ---------- */
 function viewStart() {
-  const h = H(), checked = h.checked.pairs, fund = h.fundamental.pairs;
-  const pairs = [...D.pairs];
-  if (state.sort === "share") pairs.sort((a, b) => Math.abs((fund[b].share_bull ?? .5) - .5) - Math.abs((fund[a].share_bull ?? .5) - .5));
-  const rows = pairs.map((p) => {
-    const f = fund[p], c = checked[p], r = rangeOf(p);
+  const h = H();
+  const ccys = [...D.majors].sort((a, b) => Math.abs((h.currencies[b].combo.p_up ?? .5) - .5) - Math.abs((h.currencies[a].combo.p_up ?? .5) - .5));
+  const crow = (c) => { const C = h.currencies[c], p = C.combo.p_up, l = lean(p), t = conf(C.combo.test, 2);
+    return `<a class="row" href="#ccy-${c}">
+      <span class="c-p"><span class="pair">${c}</span><br><span class="faint small">${esc(CCY_NAME[c])}</span></span>
+      <span class="c-b">${voteBar(C.all)}<span class="meta"><span>${C.all.bull} stärker · ${C.all.neutral} neutral · ${C.all.bear} schwächer</span><span>${C.all.total} Modelle</span></span></span>
+      <span class="c-r rng"><span class="num">${pct(p, 0)}</span> <span class="faint small">stärker</span><br><span class="faint small">${C.combo.confirmed ? "bestätigt" : "unbestätigt"} · Test ${t.hit == null ? "–" : pct(t.hit, 0)}</span></span>
+      <span class="c-l" style="justify-self:end"><span class="pill ${l.cls}">${l.txt}</span></span></a>`; };
+  const pairs = [...D.pairs].sort((a, b) => Math.abs((h.pairs[b].p_up ?? .5) - .5) - Math.abs((h.pairs[a].p_up ?? .5) - .5));
+  const prow = (p) => { const P = h.pairs[p], l = lean(P.p_up, "long", "short"), r = rangeOf(p, RANGE_H());
     const ev = D.events.filter((e) => e.impact === "High" && p.includes(e.currency)).length;
     return `<a class="row" href="#paar-${p}">
       <span class="c-p"><span class="pair">${pairName(p)}</span><br><span class="faint small num">${fmt(r.price ?? lastPrice(p), digits(p))}</span></span>
-      <span class="c-b">${voteBar(f)}<span class="meta"><span>${f.bull} long · ${f.neutral} neutral · ${f.bear} short</span><span>${c.total ? `geprüft: ${shareTxt(c)}` : "geprüft: –"}</span></span></span>
+      <span class="c-b">${voteBar(P.all)}<span class="meta"><span>${P.all.bull} long · ${P.all.neutral} neutral · ${P.all.bear} short</span><span>${shareTxt(P.all)}</span></span></span>
       <span class="c-r rng"><span class="num">${r.pips != null ? `±${r.pips} Pips` : "–"}</span><br><span class="faint small">${ev ? `${ev} rote Termine` : "keine roten Termine"}</span></span>
-      <span class="c-l" style="justify-self:end"><span class="pill ${labelCls(f.label)}">${esc(f.label)}</span></span></a>`; }).join("");
+      <span class="c-l" style="justify-self:end"><span class="pill ${l.cls}">${l.txt}</span></span></a>`; };
   return `<section class="view">
-    <div class="lede"><h1>Wohin zeigen die Signale?</h1>
-      <p>Für jedes Paar zählen wir, wie viele Signale aus Zinsen, Zinserwartung, Inflation, Arbeitsmarkt, Positionierung (COT), Saison, Risikostimmung und Rohstoffen gerade für long oder short stimmen.</p></div>
+    <div class="lede"><h1>Welche Währung wird stärker?</h1>
+      <p>Je Währung stimmen 43–65 Modelle aus Leitzins, Renditen, Inflation, Arbeitsmarkt, Positionierung (COT), Saison, Risikostimmung und ihren eigenen Rohstoffen ab. Das Kombi-Modell gewichtet sie so, wie es aus den Jahren bis 2019 gelernt hat.</p></div>
     ${statusBox()}
-    <div class="toolbar">${horizonSwitch()}
-      <label class="faint small">Sortieren <select id="sort"><option value="share" ${state.sort === "share" ? "selected" : ""}>deutlichste Mehrheit</option><option value="az" ${state.sort === "az" ? "selected" : ""}>A–Z</option></select></label></div>
-    <p class="faint small">Balken: grün long, grau neutral, orange short · Spanne: 80-%-Bereich bis ${state.h === "1D" ? "zum nächsten Handelstag" : "in 5 Handelstagen"} · Signale vom ${dateDe(h.fundamental.date)}</p>
-    <div class="rows">${rows}</div>
+    <div class="toolbar">${horizonSwitch()}<span class="faint small">Daten vom ${dateDe(h.date)}</span></div>
+    <h2>Währungen</h2><div class="rows">${ccys.map(crow).join("")}</div>
+    <h2>Paare</h2><p class="faint small">Paar-Einschätzung = Basiswährung gegen Kurswährung. Spanne: 80-%-Bereich.</p><div class="rows">${pairs.map(prow).join("")}</div>
   </section>`;
 }
-function bindStart() { bindHorizon(); $("#sort").onchange = (e) => { state.sort = e.target.value; save(); route(); }; }
+
+/* ---------- Währung ---------- */
+function confTable(C) {
+  const rows = (C.combo.confirm || []).map((r, i) => { const t = conf(C.combo.test, i);
+    return `<tr><td>${r.min_conf ? `ab ${fmt(50 + r.min_conf * 100, 0)} % sicher` : "alle Fälle"}</td><td class="cell">${hitTxt(r)}</td><td class="cell">${hitTxt(t)}</td><td class="cell">${pct(t.share, 0)}</td></tr>`; }).join("");
+  return `<div class="tbl-wrap"><table><thead><tr><th>Sicherheit</th><th>Bestätigung 2013–19</th><th>Schlusstest ab 2020</th><th>Anteil</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function modelList(keys, votes, h) {
+  const byFam = {};
+  keys.forEach((k) => { const m = MODEL[k]; (byFam[m.family] = byFam[m.family] || []).push(m); });
+  const w = h.currencies[MODEL[keys[0]].currency].combo.weights || {};
+  return Object.entries(byFam).map(([fam, items]) => `<div class="fam">${esc(fam)}</div>${items.map((m) => {
+    const v = votes[m.key] ?? 0, st = h.stats[m.key] || {}, t = st.schlusstest || [], ok = h.valid.includes(m.key);
+    return `<div class="sig"><span><b>${esc(m.label)}</b>${ok ? ' <span class="pill good">geprüft</span>' : ""}<br><span class="muted small">${esc(m.idea)}</span></span>
+      <span class="pill ${voteCls(v)}">${voteTxt(v)}</span>
+      <span class="rec">Seit 2020: ${t[0] == null ? "–" : pct(t[0], 1, true) + " pro Jahr, " + pct(t[2], 0) + " Treffer"} · Gewicht im Kombi-Modell ${fmt(w[m.key] ?? 0, 2)}</span></div>`; }).join("")}`).join("");
+}
+function viewCcy(c) {
+  const h = H(), C = h.currencies[c], l = lean(C.combo.p_up), keys = D.signals.models.filter((m) => m.currency === c).map((m) => m.key);
+  const ev = D.events.filter((e) => e.currency === c && e.impact !== "Low");
+  return `<section class="view">
+    <div class="toolbar"><a href="#start" class="small">← Übersicht</a>${horizonSwitch()}</div>
+    <div class="lede"><h1>${c} · ${esc(CCY_NAME[c])}</h1><p>Stärke gegen den Durchschnitt der anderen 7 Währungen, ${h.label.toLowerCase()}.</p></div>
+    <div class="grid-2">
+      <article class="panel"><div class="panel-head"><h2>Kombi-Modell</h2><span class="pill ${l.cls}">${l.txt}</span></div>
+        <div class="big num">${pct(C.combo.p_up, 0)}</div><p class="muted small">Wahrscheinlichkeit, dass der ${esc(CCY_NAME[c])} ${state.h === "1D" ? "bis morgen" : state.h === "1W" ? "bis Ende nächster Woche" : "bis Ende nächsten Monats"} stärker wird.</p>
+        <p class="small">${C.combo.confirmed ? '<span class="pill good">bestätigt</span> Die Trefferquote 2013–2019 lag nachweislich über 50 %.' : '<span class="pill bad">unbestätigt</span> 2013–2019 nicht nachweislich besser als Zufall.'}</p></article>
+      <article class="panel"><div class="panel-head"><h2>Abstimmung</h2><span class="faint small">${C.all.total} Modelle</span></div>
+        <div class="big num">${shareTxt(C.all)}</div>${voteBar(C.all)}
+        <p class="muted small">${C.all.bull} Modelle sagen stärker, ${C.all.bear} schwächer, ${C.all.neutral} ohne Aussage.</p>
+        <p class="faint small">${C.checked.total ? `Geprüfte Modelle: ${shareTxt(C.checked)}` : "Kein Einzelmodell hat die strenge Prüfung bestanden."}</p></article>
+    </div>
+    <article class="panel"><h2>Aussagekraft des Kombi-Modells</h2>
+      <p class="muted small">Wie oft lag es richtig – insgesamt und nur dann, wenn es sich sicher war. Das Modell für den Schlusstest wurde nur mit Daten bis 2019 trainiert. In Klammern: 95-%-Bereich.</p>${confTable(C)}</article>
+    <article class="panel"><div class="panel-head"><h2>Alle Modelle</h2><span class="faint small">Stand ${dateDe(h.date)}</span></div><div>${modelList(keys, C.all.votes, h)}</div></article>
+    <article class="panel"><h2>Termine diese Woche</h2>${ev.length ? ev.map(evRow).join("") : '<p class="muted">Keine wichtigen Termine.</p>'}</article>
+  </section>`;
+}
 
 /* ---------- Paar ---------- */
 function viewPair(p) {
-  const h = H(), f = h.fundamental.pairs[p], c = h.checked.pairs[p], r = rangeOf(p);
-  const base = p.slice(0, 3), quote = p.slice(3);
-  const valid = new Set(h.valid.filter(([, ccy]) => ccy === base || ccy === quote).map(([k]) => k));
-  const byFam = {};
-  S().signals.forEach((s) => { if (s.key in f.votes || valid.has(s.key)) (byFam[s.family] = byFam[s.family] || []).push(s); });
-  const rec = (k, ccy) => { const x = h.stats[k].ccy[ccy]; return `${ccy} ${x ? pct(x.schlusstest[0], 1, true) : "–"}`; };
-  const list = Object.entries(byFam).map(([fam, items]) => `<div class="fam">${esc(fam)}</div>${items.map((s) => {
-    const v = f.votes[s.key] ?? (c.votes || {})[s.key] ?? 0;
-    return `<div class="sig"><span><b>${esc(s.label)}</b>${valid.has(s.key) ? ' <span class="pill good">geprüft</span>' : ""}<br><span class="muted small">${esc(s.idea)}</span></span>
-      <span class="pill ${voteCls(v)}">${voteTxt(v)}</span>
-      <span class="rec">Ergebnis seit 2020, Rendite pro Jahr nach Kosten: ${rec(s.key, base)} · ${rec(s.key, quote)}</span></div>`; }).join("")}`).join("");
-  const ev = D.events.filter((e) => [base, quote].includes(e.currency) && e.impact !== "Low");
+  const h = H(), P = h.pairs[p], l = lean(P.p_up, "long", "short"), r = rangeOf(p, RANGE_H()), b = p.slice(0, 3), q = p.slice(3);
+  const ev = D.events.filter((e) => [b, q].includes(e.currency) && e.impact !== "Low");
+  const cc = (c) => { const C = h.currencies[c], x = lean(C.combo.p_up); return `<a class="row" href="#ccy-${c}" style="grid-template-columns:86px minmax(0,1fr) auto"><span class="pair">${c}</span><span>${voteBar(C.all)}<span class="meta"><span>${pct(C.combo.p_up, 0)} stärker</span><span>${C.combo.confirmed ? "bestätigt" : "unbestätigt"}</span></span></span><span class="pill ${x.cls}">${x.txt}</span></a>`; };
   return `<section class="view">
     <div class="toolbar"><a href="#start" class="small">← Übersicht</a>${horizonSwitch()}</div>
     <div class="lede"><h1>${pairName(p)}</h1><p class="num">${fmt(r.price ?? lastPrice(p), digits(p))} · Kurs vom ${dateDe(D.meta.as_of)}</p></div>
     <div class="grid-2">
-      <article class="panel"><div class="panel-head"><h2>Abstimmung ${h.label}</h2><span class="pill ${labelCls(f.label)}">${esc(f.label)}</span></div>
-        <div class="big num">${shareTxt(f)}</div>${voteBar(f)}
-        <p class="muted small">${f.bull} von ${f.total} Signalen long, ${f.bear} short, ${f.neutral} ohne Aussage.</p>
-        <p class="small">So oft lag „${esc(f.label)}“ seit 2020 richtig: ${bucketHit(h.fundamental.test, f.label)}</p>
-        <p class="faint small">${c.total ? `Geprüfte Signale: ${shareTxt(c)} (${c.bull} long, ${c.bear} short).` : "Für dieses Paar hat noch kein Signal die Prüfung bestanden – diese Abstimmung ist ungeprüft."}</p></article>
+      <article class="panel"><div class="panel-head"><h2>Einschätzung ${h.label}</h2><span class="pill ${l.cls}">${l.txt}</span></div>
+        <div class="big num">${pct(P.p_up, 0)}</div><p class="muted small">Wahrscheinlichkeit, dass ${pairName(p)} steigt – aus den Kombi-Modellen von ${b} und ${q}.</p>
+        ${voteBar(P.all)}<p class="muted small">${P.all.bull} von ${P.all.total} Modellen sprechen für long, ${P.all.bear} für short.</p></article>
       <article class="panel"><div class="panel-head"><h2>Erwartete Spanne</h2><span class="faint small">80 %</span></div>
         ${r.low != null ? `<div class="big num" style="font-size:1.8rem">±${r.pips} Pips</div>
         <dl class="kv"><dt>Unten</dt><dd class="num">${fmt(r.low, digits(p))}</dd><dt>Oben</dt><dd class="num">${fmt(r.high, digits(p))}</dd><dt>bis</dt><dd>${dateDe(r.target)}</dd>
-        <dt>So oft traf die Spanne im Test</dt><dd class="num">${pct(D.ranges.coverage_backtest[state.h], 0)}</dd></dl>
-        <p class="faint small">Mit 80 % Wahrscheinlichkeit liegt der Kurs dann in diesem Bereich. Diese Vorhersage funktioniert nachweislich – über die Richtung sagt sie nichts.</p>` : '<p class="muted">Noch keine Prognose im Ledger.</p>'}</article>
+        <dt>So oft traf die Spanne im Test</dt><dd class="num">${pct(D.ranges.coverage_backtest[RANGE_H()], 0)}</dd></dl>` : '<p class="muted">Noch keine Prognose im Ledger.</p>'}</article>
     </div>
-    <article class="panel"><div class="panel-head"><h2>Die Signale im Einzelnen</h2><span class="faint small">Stand ${dateDe(h.fundamental.date)}</span></div><div>${list}</div></article>
+    <article class="panel"><h2>Die beiden Währungen</h2><div class="rows">${cc(b)}${cc(q)}</div></article>
     <article class="panel"><h2>Termine diese Woche</h2>${ev.length ? ev.map(evRow).join("") : '<p class="muted">Keine wichtigen Termine für diese Währungen.</p>'}</article>
     <article class="panel"><h2>Kursverlauf (6 Monate)</h2>${priceChart(p)}</article>
   </section>`;
@@ -243,35 +279,27 @@ function priceChart(p) {
 
 /* ---------- Prüfung ---------- */
 function viewCheck() {
-  const h = H(), sig = S().signals, rules = S().rules, t = h.fundamental.test;
-  const valid = new Set(h.valid.map(([k, c]) => k + c));
-  const cell = (x, ok) => { if (!x || x[0] == null) return '<td class="cell faint">–</td>';
-    const strong = Math.min(1, Math.abs(x[1]) / 3);
-    return `<td class="cell" style="background:color-mix(in srgb,var(${x[0] >= 0 ? "--bull" : "--bear"}) ${Math.round(strong * 45)}%,transparent)" title="t-Wert ${fmt(x[1], 1)}">${pct(x[0], 1, true)}${ok ? " ✓" : ""}</td>`; };
-  const rows = sig.map((s) => `<tr><td>${esc(s.label)}<br><span class="faint small">${esc(s.family)}</span></td>${D.majors.map((c) => {
-    const x = h.stats[s.key].ccy[c]; return x ? cell(x[state.period], valid.has(s.key + c)) : '<td class="cell faint">–</td>'; }).join("")}</tr>`).join("");
+  const h = H(), rules = S().rules;
+  const rows = D.majors.map((c) => { const C = h.currencies[c];
+    return `<tr><td><a href="#ccy-${c}">${c}</a></td><td class="cell">${hitTxt(conf(C.combo.confirm, 0))}</td><td class="cell">${hitTxt(conf(C.combo.test, 0))}</td><td class="cell">${hitTxt(conf(C.combo.test, 2))}</td><td>${C.combo.confirmed ? '<span class="pill good">ja</span>' : '<span class="pill bad">nein</span>'}</td></tr>`; }).join("");
   return `<section class="view">
     <div class="lede"><h1>Kann ich dem trauen?</h1>
-      <p>Jedes Signal wurde für jede Währung über 27 Jahre gegen die tatsächliche Kursentwicklung getestet – mit ${pct(rules.cost, 2)} Kosten pro Trade und nur mit Daten, die am jeweiligen Tag schon veröffentlicht waren.</p></div>
+      <p>${rules.models} Modelle wurden über 27 Jahre gegen die tatsächliche Kursentwicklung getestet – mit ${pct(rules.cost, 2)} Kosten pro Trade und nur mit Daten, die am jeweiligen Tag schon veröffentlicht waren.</p></div>
     <div class="toolbar">${horizonSwitch()}</div>
-    <div class="kpis">
-      <div class="panel kpi"><span class="faint small">Geprüfte Kombinationen</span><b class="num">${rules.tests}</b><span class="faint small">${sig.length} Signale × 8 Währungen</span></div>
-      <div class="panel kpi"><span class="faint small">Bestanden</span><b class="num" style="color:var(${h.valid.length ? "--good" : "--warn"})">${h.valid.length}</b><span class="faint small">Entdeckung und Bestätigung</span></div>
-      <div class="panel kpi"><span class="faint small">Fundamental-Mehrheit seit 2020</span><b class="num">${pct(t.all.hit, 1)}</b><span class="faint small">richtig, Zufall = 50 %</span></div></div>
-    <article class="panel"><h2>Die Regeln in drei Schritten</h2>
+    <article class="panel"><h2>Kombi-Modell je Währung</h2>
+      <div class="tbl-wrap"><table><thead><tr><th>Währung</th><th>Bestätigung</th><th>Schlusstest</th><th>Test, ab 60 % sicher</th><th>bestätigt</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="faint small">Trefferquote mit 95-%-Bereich. Enthält der Bereich 50 %, ist das Ergebnis nicht von Zufall zu unterscheiden.</p></article>
+    <article class="panel"><h2>Die Regeln</h2>
       <ol style="margin:0;padding-left:20px;display:grid;gap:6px" class="muted">
-        <li><b>Entdeckung 1999–2012:</b> Hat das Signal nach Kosten Geld verdient – auch nachdem berücksichtigt ist, dass ${rules.tests} Kombinationen gleichzeitig getestet wurden? (Benjamini-Hochberg, ${pct(rules.fdr, 0)}). Sonst ist es vermutlich Zufall.</li>
-        <li><b>Bestätigung 2013–2019:</b> Funktioniert es danach weiter (t-Wert über ${fmt(rules.confirm_t, 0)})?</li>
-        <li><b>Schlusstest ab 2020:</b> Wird für keine Entscheidung genutzt. Er zeigt ehrlich, was danach passiert ist.</li></ol>
-      <p class="small">Nur Signale, die Schritt 1 und 2 bestehen, kommen in die <b>geprüfte Abstimmung</b>. Die <b>Fundamental-Abstimmung</b> zählt dagegen alle ${sig.filter((s) => s.fundamental).length} Fundamental-Signale in ihrer erwarteten Richtung, ohne Prüfung.</p></article>
-    <article class="panel"><div class="panel-head"><h2>Fundamental-Mehrheit seit ${dateDe(t.from)}</h2><span class="faint small">vor Kosten</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>Stufe</th><th>Fälle</th><th>Richtig</th><th>95-%-Bereich</th></tr></thead><tbody>
-      ${Object.entries(t.buckets).map(([k, b]) => `<tr><td>${esc(k)}</td><td class="cell">${nf(0).format(b.n)}</td><td class="cell">${pct(b.hit, 1)}</td><td class="cell">${b.ci ? pct(b.ci[0], 0) + "–" + pct(b.ci[1], 0) : "–"}</td></tr>`).join("")}</tbody></table></div>
-      <p class="faint small">Enthält der 95-%-Bereich die 50 %, ist die Stufe nicht von Zufall zu unterscheiden.</p></article>
-    <article class="panel"><div class="panel-head"><h2>Alle Signale je Währung</h2>
-      <div class="seg" role="group" aria-label="Prüfzeitraum">${Object.entries(PERIODS).map(([k, l]) => `<button type="button" data-per="${k}" aria-pressed="${state.period === k}">${l}</button>`).join("")}</div></div>
-      <p class="faint small">Rendite pro Jahr nach Kosten, wenn man dem Signal bei allen 7 Paaren der Währung gefolgt wäre. Kräftige Farbe = statistisch deutlicher. ✓ = bestanden.</p>
-      <div class="tbl-wrap"><table><thead><tr><th>Signal</th>${D.majors.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></article>
+        <li><b>Entdeckung 1999–2012:</b> Jedes Einzelmodell muss nach Kosten Geld verdient haben – auch nach Korrektur dafür, dass ${rules.models} Modelle gleichzeitig getestet wurden.</li>
+        <li><b>Bestätigung 2013–2019:</b> Es muss danach weiter funktionieren. Das Kombi-Modell lernt bis 2012 und muss hier mit 95 % Sicherheit über 50 % treffen.</li>
+        <li><b>Schlusstest ab 2020:</b> Wird für keine Entscheidung genutzt und zeigt ehrlich, was danach passiert ist.</li></ol></article>
+    <article class="panel"><div class="panel-head"><h2>Alle Einzelmodelle</h2>
+      <div class="seg" role="group" aria-label="Prüfzeitraum">${Object.entries(PERIODS).map(([k, lb]) => `<button type="button" data-per="${k}" aria-pressed="${state.period === k}">${lb}</button>`).join("")}</div></div>
+      <p class="faint small">Rendite pro Jahr nach Kosten und Trefferquote. Kräftige Farbe = statistisch deutlicher. ✓ = bestanden.</p>
+      ${D.majors.map((c) => `<details><summary><b>${c}</b> · ${D.signals.models.filter((m) => m.currency === c).length} Modelle</summary><div class="tbl-wrap"><table><tbody>${D.signals.models.filter((m) => m.currency === c).map((m) => {
+        const x = (h.stats[m.key] || {})[state.period] || [], ok = h.valid.includes(m.key), s = Math.min(1, Math.abs(x[1] || 0) / 3);
+        return `<tr><td>${esc(m.label)}<br><span class="faint small">${esc(m.family)}</span></td><td class="cell" style="background:color-mix(in srgb,var(${(x[0] || 0) >= 0 ? "--bull" : "--bear"}) ${Math.round(s * 45)}%,transparent)">${x[0] == null ? "–" : pct(x[0], 1, true)}${ok ? " ✓" : ""}</td><td class="cell">${x[2] == null ? "–" : pct(x[2], 0)}</td></tr>`; }).join("")}</tbody></table></div></details>`).join("")}</article>
   </section>`;
 }
 function bindCheck() { bindHorizon(); document.querySelectorAll("[data-per]").forEach((b) => b.onclick = () => { state.period = b.dataset.per; save(); route(); }); }
@@ -282,7 +310,7 @@ function viewCalendar() {
   const days = [...new Set(ev.map((e) => e.day))];
   return `<section class="view">
     <div class="lede"><h1>Termine KW ${D.meta.week.kw}</h1><p>Wirtschaftsdaten und Notenbank-Termine der 8 Währungen, deutsche Zeit. Quelle: ${esc(D.meta.calendar_source)}.</p></div>
-    <div class="seg" role="group" aria-label="Wichtigkeit">${[["High", "hoch"], ["Medium", "mittel"], ["Low", "gering"]].map(([k, l]) => `<button type="button" data-imp="${k}" aria-pressed="${imp.includes(k)}"><span class="imp ${k}"></span>${l}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="Wichtigkeit">${[["High", "hoch"], ["Medium", "mittel"], ["Low", "gering"]].map(([k, lb]) => `<button type="button" data-imp="${k}" aria-pressed="${imp.includes(k)}"><span class="imp ${k}"></span>${lb}</button>`).join("")}</div>
     ${days.map((d) => `<article class="panel"><h2>${new Date(d + "T12:00:00").toLocaleDateString("de-DE", {weekday: "long", day: "numeric", month: "long"})}</h2>${ev.filter((e) => e.day === d).map(evRow).join("")}</article>`).join("") || '<p class="muted">Keine Termine.</p>'}
   </section>`;
 }
@@ -324,25 +352,26 @@ function bindCalc() {
 
 /* ---------- Daten ---------- */
 function viewData() {
-  const a = S().audit, stale = a.filter((x) => !x.fresh);
+  const a = S().audit, stale = a.filter((x) => !x.fresh), unused = a.filter((x) => !x.models);
   return `<section class="view">
-    <div class="lede"><h1>Datenstand</h1><p>Jede Datenreihe mit ihrem letzten Wert und den Signalen, die sie speist. Veraltete Werte fließen in kein Signal ein.</p></div>
-    ${stale.length ? `<div class="honest">${INFO}<span><b>${stale.length} Reihen sind veraltet</b> und deshalb abgeschaltet: ${stale.map((x) => esc(x.description)).join(", ")}.</span></div>` : ""}
-    <article class="panel"><div class="tbl-wrap"><table><thead><tr><th>Reihe</th><th>Währung</th><th>letzter Wert</th><th>Status</th><th>speist</th></tr></thead><tbody>
-      ${a.map((x) => `<tr><td>${esc(x.description || x.code)}</td><td>${x.currency || "–"}</td><td class="cell">${dateDe(x.last)}</td><td><span class="pill ${x.fresh ? "good" : "bad"}">${x.fresh ? "aktuell" : "veraltet"}</span></td><td class="faint small" style="text-align:left">${x.used_by.map((k) => esc((SIG[k] || {}).label || k)).join(", ")}</td></tr>`).join("")}</tbody></table></div></article>
+    <div class="lede"><h1>Datenstand</h1><p>Jede Datenreihe mit ihrem letzten Wert und der Zahl der Modelle, die sie speist. Veraltete Werte fließen in kein Modell ein.</p></div>
+    ${stale.length || unused.length ? `<div class="honest">${INFO}<span>${stale.length ? `<b>${stale.length} Reihen veraltet:</b> ${stale.map((x) => esc(x.description)).join(", ")}. ` : ""}${unused.length ? `<b>${unused.length} Reihen ohne Modell.</b>` : ""}</span></div>` : `<div class="honest">${INFO}<span><b>Alle ${a.length} Reihen sind aktuell und speisen Modelle.</b></span></div>`}
+    <article class="panel"><div class="tbl-wrap"><table><thead><tr><th>Reihe</th><th>Währung</th><th>letzter Wert</th><th>Status</th><th>Modelle</th></tr></thead><tbody>
+      ${a.map((x) => `<tr><td>${esc(x.description || x.code)}</td><td>${x.currency || "–"}</td><td class="cell">${dateDe(x.last)}</td><td><span class="pill ${x.fresh ? "good" : "bad"}">${x.fresh ? "aktuell" : "veraltet"}</span></td><td class="cell">${x.models}</td></tr>`).join("")}</tbody></table></div></article>
     <article class="panel"><h2>Letzte Abrufe</h2><dl class="kv">${D.runs.map((r) => `<dt>${esc(r.source)}</dt><dd class="num small">${r.last_run ? new Date(r.last_run).toLocaleString("de-DE") : "–"}</dd>`).join("")}</dl></article>
     <article class="panel"><h2>Offene Qualitätsbefunde</h2>${D.quality.length ? `<dl class="kv">${D.quality.map((q) => `<dt>${esc(q.check)} (${esc(q.severity)})</dt><dd class="num">${q.count}</dd>`).join("")}</dl>` : '<p class="muted">Keine.</p>'}</article>
   </section>`;
 }
 
 /* ---------- Menü und Routing ---------- */
-const NAV = [["start", "Übersicht"], ["pruefung", "Signal-Prüfung"], ["kalender", "Kalender"], ["rechner", "Rechner"], ["daten", "Datenstand"]];
-const VIEWS = {start: ["Übersicht", viewStart, bindStart], pruefung: ["Signal-Prüfung", viewCheck, bindCheck],
+const NAV = [["start", "Übersicht"], ["pruefung", "Prüfung"], ["kalender", "Kalender"], ["rechner", "Rechner"], ["daten", "Datenstand"]];
+const VIEWS = {start: ["Übersicht", viewStart, bindHorizon], pruefung: ["Prüfung", viewCheck, bindCheck],
   kalender: ["Kalender", viewCalendar, bindCalendar], rechner: ["Rechner", viewCalc, bindCalc], daten: ["Datenstand", viewData, () => {}]};
 let cur = "start";
 function renderDrawer() {
   $("#drawer").innerHTML = `<div class="toolbar"><a class="brand" href="#start">Worl<i class="m">D</i><i>D</i>river</a><button class="iconbtn" type="button" id="close-btn" aria-label="Menü schließen"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-    <nav aria-label="Bereiche">${NAV.map(([id, l]) => `<a href="#${id}" ${cur === id ? 'aria-current="page"' : ""}>${l}</a>`).join("")}</nav>
+    <nav aria-label="Bereiche">${NAV.map(([id, lb]) => `<a href="#${id}" ${cur === id ? 'aria-current="page"' : ""}>${lb}</a>`).join("")}
+      ${D.majors.map((c) => `<a href="#ccy-${c}" ${cur === "ccy-" + c ? 'aria-current="page"' : ""}>${c} · ${esc(CCY_NAME[c])}</a>`).join("")}</nav>
     <p class="faint small">Kurse bis ${dateDe(D.meta.as_of)} · KW ${D.meta.week.kw}</p>`;
   $("#close-btn").onclick = closeDrawer;
 }
@@ -352,6 +381,8 @@ function route() {
   const name = (location.hash || "#start").slice(1);
   if (name.startsWith("paar-") && D.pairs.includes(name.slice(5))) {
     cur = "start"; $("#top-title").textContent = pairName(name.slice(5)); $("#app").innerHTML = viewPair(name.slice(5)); bindHorizon();
+  } else if (name.startsWith("ccy-") && D.majors.includes(name.slice(4))) {
+    cur = name; $("#top-title").textContent = name.slice(4); $("#app").innerHTML = viewCcy(name.slice(4)); bindHorizon();
   } else {
     cur = VIEWS[name] ? name : "start";
     const [title, view, bind] = VIEWS[cur];

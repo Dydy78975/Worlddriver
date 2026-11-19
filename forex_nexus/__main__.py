@@ -82,7 +82,11 @@ def main(argv: list[str]) -> int:
         from forex_nexus.reports.site_export import build
         for r in ingest_all(url):
             print(f"{r['source']}: {r['inserted']} neue Kurse")
-        print(f"Makro/Rohstoffe/Arbeitsmarkt: {len(ingest_series(url))} Reihen aktualisiert")
+        res = ingest_series(url)
+        print(f"Makro/Rohstoffe/Arbeitsmarkt/Renditen: {sum(1 for r in res if 'error' not in r)} Reihen aktualisiert")
+        for r in res:
+            if "error" in r:
+                print(f"  ACHTUNG {r['series']}: {r['error']}")
         from forex_nexus.ingestion import calendar as cal, cot
         print(f"COT: {cot.ingest(url)}")
         print(f"Kalender: {cal.ingest(url)}")
@@ -111,7 +115,7 @@ def main(argv: list[str]) -> int:
     if cmd == "ingest-fred-series":
         from forex_nexus.ingestion.fred_series import ingest
         for r in ingest(url):
-            print(f"{r['series']}: {r['values']} Werte, letzter {r['last']}")
+            print(f"{r['series']}: " + (f"FEHLER {r['error']}" if "error" in r else f"{r['values']} Werte, letzter {r['last']}"))
         return 0
     if cmd == "ingest-dukascopy":
         from forex_nexus.ingestion import dukascopy

@@ -1,133 +1,140 @@
-"""Prüfung der Einzelsignale und Abstimmung je Paar.
+"""Prüfung der Modelle je Währung, Abstimmung und Kombi-Modell.
 
 Regeln (festgelegt vor dem Blick auf den Schlusstest, nicht nachträglich anpassen):
   1. Drei Zeiträume: Entdeckung 1999–2012, Bestätigung 2013–2019, Schlusstest ab 2020.
-  2. Ergebnis = Kursänderung in Signalrichtung bis zum Horizont, abzüglich 0,03 % Kosten bei jedem neuen
-     oder gedrehten Signal.
-  3. Geprüft wird jede Kombination Signal × Währung: Ergebnis je Entscheidungstag = Mittel über die
-     7 Paare dieser Währung. „Gültig“ für eine Währung ist ein Signal, wenn es
-       a) in der Entdeckung nach Benjamini-Hochberg-Korrektur (10 %) über ALLE Kombinationen des Horizonts
-          signifikant positiv ist, und
-       b) in der Bestätigung für dieselbe Währung positiv bleibt (t-Wert > 1).
-     Ein gültiges Signal stimmt bei allen 7 Paaren dieser Währung mit (bei einem Paar höchstens einmal).
-  4. Der Schlusstest ab 2020 wird für keine Entscheidung genutzt. Er zeigt ehrlich, wie gut die gültigen
-     Signale und die Abstimmung danach tatsächlich waren.
+  2. Gemessen wird die Stärke der Währung gegen den Durchschnitt der anderen 7 bis zum Horizont
+     (Tag: nächster Handelstag; Woche/Monat: Periodenende bis Periodenende), nach 0,03 % Kosten je neuem Signal.
+  3. Einzelmodelle: „gültig“, wenn a) in der Entdeckung nach Benjamini-Hochberg (10 %) über ALLE Modelle des
+     Horizonts signifikant positiv und b) in der Bestätigung positiv (t-Wert > 1).
+  4. Kombi-Modell je Währung: logistische Regression über alle Modelle der Währung (Gewichte gelernt).
+     Bestätigung: Training bis 2012, Prüfung 2013–2019. Schlusstest: Training bis 2019 (eingefroren),
+     Prüfung ab 2020 – dieses eingefrorene Modell liefert auch die aktuelle Einschätzung.
+     Berichtet wird die Trefferquote insgesamt und je Sicherheitsstufe (wie weit die Wahrscheinlichkeit
+     von 50 % entfernt ist), jeweils mit 95-%-Bereich. „Bestätigt“ ist ein Kombi-Modell, wenn die untere
+     Grenze des 95-%-Bereichs seiner Trefferquote in der Bestätigung (alle Fälle) über 50 % liegt.
+  5. Der Schlusstest wird für keine Entscheidung genutzt.
 """
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
+from sklearn.linear_model import LogisticRegression
 
 from forex_nexus.fx.crosses import ALL_PAIRS, MAJORS
 from forex_nexus.signals.data import Inputs
-from forex_nexus.signals.library import FUNDAMENTAL_VOTE, SIGNALS
+from forex_nexus.signals.library import MODELS
 
 PERIODS = {"entdeckung": (1999, 2012), "bestaetigung": (2013, 2019), "schlusstest": (2020, 2100)}
-HORIZONS = {"1D": "Tag", "1W": "Woche"}
+HORIZONS = {"1D": "Tag", "1W": "Woche", "1M": "Monat"}
 COST = 0.0003
 FDR = 0.10
 CONFIRM_T = 1.0
-PERIODS_PER_YEAR = {"1D": 252, "1W": 52}
+PERIODS_PER_YEAR = {"1D": 252, "1W": 52, "1M": 12}
+COMBO_C = 0.05                   # starke Regularisierung: viele schwache, ähnliche Signale
+CONFIDENCE = (0.0, 0.05, 0.10, 0.15, 0.20)     # Abstand der Wahrscheinlichkeit von 50 %
 VOTE_BUCKETS = [("klar long", 0.70, 1.01), ("eher long", 0.55, 0.70), ("unentschieden", 0.45, 0.55),
                 ("eher short", 0.30, 0.45), ("klar short", -0.01, 0.30)]
 
 
-def grid(closes: pd.DataFrame, horizon: str) -> tuple[pd.DatetimeIndex, pd.DataFrame]:
-    """Entscheidungstage und Kursänderung bis zum Horizont (Log). Woche = letzter Handelstag der Woche
-    bis zum letzten Handelstag der Folgewoche."""
-    lp = np.log(closes)
+def grid(strength: pd.DataFrame, horizon: str) -> tuple[pd.DatetimeIndex, pd.DataFrame]:
+    """Entscheidungstage und Änderung der Währungsstärke bis zum Horizont (Woche/Monat: letzter Handelstag
+    der Periode bis zum letzten Handelstag der Folgeperiode)."""
     if horizon == "1D":
-        return closes.index, lp.shift(-1) - lp
-    wk = closes.index.to_period("W-FRI")
-    last = pd.Series(wk, index=closes.index) != pd.Series(wk, index=closes.index).shift(-1)
-    days = closes.index[last.values]
-    w = lp.loc[days]
+        return strength.index, strength.shift(-1) - strength
+    wk = strength.index.to_period("W-FRI" if horizon == "1W" else "M")
+    last = pd.Series(wk, index=strength.index) != pd.Series(wk, index=strength.index).shift(-1)
+    days = strength.index[last.values]
+    w = strength.loc[days]
     return days, w.shift(-1) - w
 
 
-def evaluate(sig: pd.DataFrame, fwd: pd.DataFrame, days: pd.DatetimeIndex) -> tuple[pd.Series, pd.DataFrame, pd.DataFrame]:
-    """Liefert (Ergebnis je Entscheidungstag, Signal, Nettoergebnis je Paar)."""
+def evaluate(sig: pd.Series, fwd: pd.Series, days: pd.DatetimeIndex) -> tuple[pd.Series, pd.Series]:
+    """Nettoergebnis je Entscheidungstag mit Signal (Kosten bei jedem neuen oder gedrehten Signal)."""
     s = sig.reindex(days).fillna(0)
     r = fwd.reindex(days)
     s = s.where(r.notna(), 0)
     new = (s != s.shift(1)) & (s != 0)
     net = (s * r.fillna(0) - COST * new).where(s != 0)
-    return net.mean(axis=1).dropna(), s, net
+    return net.dropna(), s
 
 
-def stats(daily: pd.Series, s: pd.DataFrame, net: pd.DataFrame, horizon: str, years: tuple[int, int]) -> dict:
-    m = (daily.index.year >= years[0]) & (daily.index.year <= years[1])
-    d = daily[m]
+def _in(index, years):
+    return (index.year >= years[0]) & (index.year <= years[1])
+
+
+def stats(net: pd.Series, horizon: str, years: tuple[int, int]) -> dict:
+    d = net[_in(net.index, years)]
     n = len(d)
     if n < 20:
-        return {"n": n, "mean": None, "t": None, "annual": None, "hit": None, "trades": 0, "years_pos": None}
+        return {"n": n, "mean": None, "t": None, "annual": None, "hit": None}
     sd = d.std(ddof=1)
-    t = float(d.mean() / sd * np.sqrt(n)) if sd > 0 else 0.0
-    sel = s.index.year >= years[0]
-    sel &= s.index.year <= years[1]
-    nn = net[sel].stack()
-    yearly = d.groupby(d.index.year).mean()
-    return {"n": n, "mean": float(d.mean()), "t": t, "annual": float(d.mean() * PERIODS_PER_YEAR[horizon]),
-            "hit": float((nn > 0).mean()) if len(nn) else None, "trades": int(len(nn)),
-            "years_pos": float((yearly > 0).mean()), "yearly": {int(y): float(v) for y, v in yearly.items()}}
+    return {"n": n, "mean": float(d.mean()), "t": float(d.mean() / sd * np.sqrt(n)) if sd > 0 else 0.0,
+            "annual": float(d.mean() * PERIODS_PER_YEAR[horizon]), "hit": float((d > 0).mean())}
 
 
 def benjamini_hochberg(p: dict, q: float = FDR) -> set:
     items = sorted((v, k) for k, v in p.items() if v is not None)
-    m = len(items)
     passed = 0
     for i, (pv, _) in enumerate(items, start=1):
-        if pv <= q * i / m:
+        if pv <= q * i / len(items):
             passed = i
     return {k for _, k in items[:passed]}
 
 
-def run(inputs: Inputs) -> dict:
-    sigs = {s.key: s.rule(inputs).reindex(columns=ALL_PAIRS).fillna(0).astype(int) for s in SIGNALS}
-    out = {"rules": {"periods": PERIODS, "cost": COST, "fdr": FDR, "confirm_t": CONFIRM_T,
-                     "tests_per_horizon": len(sigs) * len(MAJORS)}, "horizons": {}}
-    for h in HORIZONS:
-        days, fwd = grid(inputs.closes, h)
-        res, pvals = {}, {}
-        for key, sig in sigs.items():
-            panel, s, net = evaluate(sig, fwd, days)
-            per_ccy = {}
-            for c in MAJORS:
-                cols = [p for p in ALL_PAIRS if c in (p[:3], p[3:])]
-                st = {name: stats(net[cols].mean(axis=1).dropna(), s[cols], net[cols], h, yrs) for name, yrs in PERIODS.items()}
-                per_ccy[c] = st
-                t = st["entdeckung"]["t"]
-                pvals[(key, c)] = None if t is None else float(1 - norm.cdf(t))
-            res[key] = {"panel": {name: stats(panel, s, net, h, yrs) for name, yrs in PERIODS.items()}, "currencies": per_ccy}
-        disc = benjamini_hochberg(pvals)
-        valid = {u for u in disc if (res[u[0]]["currencies"][u[1]]["bestaetigung"]["t"] or 0) > CONFIRM_T}
-        members = {p: sorted({k for k, c in valid if c in (p[:3], p[3:])}) for p in ALL_PAIRS}
-        for k, v in res.items():
-            for c, st in v["currencies"].items():
-                st["entdeckt"], st["gueltig"] = (k, c) in disc, (k, c) in valid
-        last = inputs.closes.index[-1]
-        vote = votes(sigs, members)
-        fund_members = {p: FUNDAMENTAL_VOTE for p in ALL_PAIRS}
-        fund = votes(sigs, fund_members)
-        out["horizons"][h] = {"signals": res, "valid": sorted(valid), "members": members,
-                              "checked": {"test": vote_backtest(vote, fwd, days, h), "current": current_vote(vote, sigs, last)},
-                              "fundamental": {"test": vote_backtest(fund, fwd, days, h), "current": current_vote(fund, sigs, last)}}
+def wilson(p: float, n: int, z: float = 1.96):
+    if not n:
+        return None
+    den = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / den
+    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return [float(c - h), float(c + h)]
+
+
+def hit_table(prob: pd.Series, y: pd.Series) -> list[dict]:
+    """Trefferquote je Sicherheitsstufe: nur Fälle, in denen |p − 50 %| mindestens die Stufe erreicht."""
+    out = []
+    for c in CONFIDENCE:
+        m = (prob - 0.5).abs() >= c
+        if c == 0:
+            m &= prob != 0.5
+        hits = (np.sign(prob[m] - 0.5) == np.sign(y[m]))
+        n = int(m.sum())
+        out.append({"min_conf": c, "n": n, "share": float(n / len(prob)) if len(prob) else None,
+                    "hit": float(hits.mean()) if n else None, "ci": wilson(float(hits.mean()), n) if n else None})
     return out
 
 
-def votes(sigs: dict, members: dict) -> dict:
-    """Je Paar: Anzahl long- und short-Stimmen der für dieses Paar gültigen Signale an jedem Tag."""
-    bull, bear = {}, {}
-    members = {p: list(members[p]) for p in ALL_PAIRS}
-    for p in ALL_PAIRS:
-        keys = members[p]
-        if not keys:
-            continue
-        m = pd.concat([sigs[k][p] for k in keys], axis=1)
-        bull[p], bear[p] = (m > 0).sum(axis=1), (m < 0).sum(axis=1)
-    return {"bull": pd.DataFrame(bull), "bear": pd.DataFrame(bear), "members": members}
+def _fit(X: pd.DataFrame, y: pd.Series):
+    clf = LogisticRegression(C=COMBO_C, max_iter=2000)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        clf.fit(X.values, (y > 0).astype(int).values)
+    return clf
+
+
+def combo(X: pd.DataFrame, y: pd.Series) -> dict:
+    """Kombi-Modell einer Währung: Bestätigung (Training ≤ 2012) und Schlusstest (Training ≤ 2019)."""
+    ok = y.notna() & (y != 0)
+    X, y = X[ok], y[ok]
+    out = {"weights": {}, "confirm": [], "test": [], "model": None, "confirmed": False}
+    tr1, te1 = _in(X.index, (1999, 2012)), _in(X.index, PERIODS["bestaetigung"])
+    tr2, te2 = _in(X.index, (1999, 2019)), _in(X.index, PERIODS["schlusstest"])
+    if tr1.sum() < 100 or te1.sum() < 50:
+        return out
+    m1 = _fit(X[tr1], y[tr1])
+    out["confirm"] = hit_table(pd.Series(m1.predict_proba(X[te1].values)[:, 1], index=X[te1].index), y[te1])
+    m2 = _fit(X[tr2], y[tr2])
+    if te2.sum():
+        out["test"] = hit_table(pd.Series(m2.predict_proba(X[te2].values)[:, 1], index=X[te2].index), y[te2])
+    out["weights"] = dict(zip(X.columns, m2.coef_[0].round(4)))
+    ci = out["confirm"][0]["ci"]
+    out["confirmed"] = bool(ci and ci[0] > 0.5)
+    out["model"] = m2
+    return out
 
 
 def label(share: float | None) -> str:
@@ -136,62 +143,64 @@ def label(share: float | None) -> str:
     return next(name for name, lo, hi in VOTE_BUCKETS if lo <= share < hi)
 
 
-def vote_backtest(vote: dict, fwd: pd.DataFrame, days: pd.DatetimeIndex, horizon: str) -> dict:
-    """Wie gut war die Abstimmung im Schlusstest (ab 2020)? Je Stufe: Anzahl, Trefferquote, Ø Ergebnis."""
-    if vote["bull"].empty:
-        return {"n": 0, "from": None, "buckets": {}, "all": _hit_summary(pd.DataFrame()), "horizon": horizon,
-                "before_costs": True}
-    start = pd.Timestamp(f"{PERIODS['schlusstest'][0]}-01-01")
-    d = days[days >= start]
-    bull, bear = vote["bull"].reindex(d).fillna(0), vote["bear"].reindex(d).fillna(0)
-    r = fwd.reindex(d)[bull.columns]
-    tot = bull + bear
-    share = (bull / tot.replace(0, np.nan))
-    direction = np.sign(bull - bear)
-    rows = []
-    for p in bull.columns:
-        for day in d:
-            sh, rr, di = share.at[day, p], r.at[day, p], direction.at[day, p]
-            if np.isnan(sh) or np.isnan(rr):
-                continue
-            rows.append((day, label(sh), di, rr * di if di else 0.0, (np.sign(rr) == di) if di and rr else None))
-    df = pd.DataFrame(rows, columns=["day", "label", "dir", "ret", "hit"])
-    out = {}
-    for name, _, _ in VOTE_BUCKETS:
-        g = df[df["label"] == name]
-        out[name] = _hit_summary(g[g["dir"] != 0])
-        out[name]["n"] = int(len(g))
-    return {"n": int(len(df)), "from": str(d[0].date()) if len(d) else None, "buckets": out,
-            "all": _hit_summary(df[df["dir"] != 0]), "horizon": horizon, "before_costs": True}
+def tally(votes: dict) -> dict:
+    bull = sum(1 for v in votes.values() if v > 0)
+    bear = sum(1 for v in votes.values() if v < 0)
+    share = bull / (bull + bear) if bull + bear else None
+    return {"bull": bull, "bear": bear, "neutral": len(votes) - bull - bear, "total": len(votes),
+            "share_bull": share, "label": label(share), "votes": votes}
 
 
-def _hit_summary(g: pd.DataFrame) -> dict:
-    """Trefferquote mit 95-%-Intervall. Paare desselben Tages hängen zusammen, deshalb zählt für das
-    Intervall jeder Entscheidungstag nur einmal (vorsichtig)."""
-    if g.empty:
-        return {"hit": None, "avg_return": None, "ci": None, "days": 0}
-    hit = float(g["hit"].astype(float).mean())
-    days = int(g["day"].nunique())
-    return {"hit": hit, "avg_return": float(g["ret"].mean()), "days": days, "ci": wilson(hit, days)}
+def vote_test(S: pd.DataFrame, y: pd.Series) -> list[dict]:
+    """Abstimmung (Anteil long unter allen Stimmen) im Schlusstest: Trefferquote je Stufe."""
+    t = _in(S.index, PERIODS["schlusstest"]) & y.notna() & (y != 0)
+    bull, bear = (S[t] > 0).sum(axis=1), (S[t] < 0).sum(axis=1)
+    share = bull / (bull + bear).replace(0, np.nan)
+    out = []
+    for name, lo, hi in VOTE_BUCKETS:
+        m = (share >= lo) & (share < hi) & (bull != bear)
+        hits = np.sign(bull[m] - bear[m]) == np.sign(y[t][m])
+        n = int(m.sum())
+        out.append({"label": name, "n": n, "hit": float(hits.mean()) if n else None,
+                    "ci": wilson(float(hits.mean()), n) if n else None})
+    return out
 
 
-def wilson(p: float, n: int, z: float = 1.96):
-    if n == 0:
-        return None
-    den = 1 + z * z / n
-    c = (p + z * z / (2 * n)) / den
-    h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
-    return [float(c - h), float(c + h)]
-
-
-def current_vote(vote: dict, sigs: dict, day: pd.Timestamp) -> dict:
-    out = {}
-    for p in ALL_PAIRS:
-        keys = vote["members"][p]
-        detail = [{"signal": k, "vote": int(sigs[k].at[day, p])} for k in keys]
-        bull = sum(1 for x in detail if x["vote"] > 0)
-        bear = sum(1 for x in detail if x["vote"] < 0)
-        share = bull / (bull + bear) if bull + bear else None
-        out[p] = {"bull": bull, "bear": bear, "neutral": len(keys) - bull - bear, "total": len(keys),
-                  "share_bull": share, "label": label(share), "signals": detail}
-    return {"date": str(day.date()), "pairs": out}
+def run(inputs: Inputs) -> dict:
+    sig = {m.key: m.rule(inputs).reindex(inputs.closes.index).fillna(0).astype(int) for m in MODELS}
+    out = {"rules": {"periods": PERIODS, "cost": COST, "fdr": FDR, "confirm_t": CONFIRM_T, "combo_c": COMBO_C,
+                     "models": len(MODELS)}, "horizons": {}}
+    last = inputs.closes.index[-1]
+    for h in HORIZONS:
+        days, fwd = grid(inputs.strength, h)
+        res, pvals = {}, {}
+        for m in MODELS:
+            net, _ = evaluate(sig[m.key], fwd[m.currency], days)
+            res[m.key] = {p: stats(net, h, yrs) for p, yrs in PERIODS.items()}
+            t = res[m.key]["entdeckung"]["t"]
+            pvals[m.key] = None if t is None else float(1 - norm.cdf(t))
+        disc = benjamini_hochberg(pvals)
+        valid = sorted(k for k in disc if (res[k]["bestaetigung"]["t"] or 0) > CONFIRM_T)
+        for k, v in res.items():
+            v["entdeckt"], v["gueltig"] = k in disc, k in valid
+        cur, p_up = {}, {}
+        for c in MAJORS:
+            keys = [m.key for m in MODELS if m.currency == c]
+            S = pd.DataFrame({k: sig[k] for k in keys})
+            X, y = S.reindex(days), fwd[c].reindex(days)
+            cb = combo(X, y)
+            p_up[c] = float(cb["model"].predict_proba(S.loc[[last]].values)[:, 1][0]) if cb["model"] else None
+            cur[c] = {"all": tally({k: int(S.at[last, k]) for k in keys}),
+                      "checked": tally({k: int(S.at[last, k]) for k in keys if k in valid}),
+                      "vote_test": vote_test(X, y),
+                      "combo": {"p_up": p_up[c], "confirm": cb["confirm"], "test": cb["test"], "weights": cb["weights"],
+                                "confirmed": cb["confirmed"]}}
+        pairs = {}
+        for p in ALL_PAIRS:
+            b, q = p[:3], p[3:]
+            votes = {**cur[b]["all"]["votes"], **{k: -v for k, v in cur[q]["all"]["votes"].items()}}
+            pb, pq = p_up[b], p_up[q]
+            pairs[p] = {"all": tally(votes),
+                        "p_up": None if pb is None or pq is None else float(pb * (1 - pq) / (pb * (1 - pq) + pq * (1 - pb)))}
+        out["horizons"][h] = {"models": res, "valid": valid, "currencies": cur, "pairs": pairs, "date": str(last.date())}
+    return out

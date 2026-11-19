@@ -82,8 +82,10 @@ def test_full_pipeline(db_url, conn, closes_all, tmp_path, monkeypatch):
     assert site_export.PLACEHOLDER not in html
     payload = html.split("const D = ", 1)[1].split(";\nconst $ =", 1)[0]
     data = json.loads(payload.replace("<\\/", "</"))
-    assert set(data["signals"]["horizons"]) == {"1D", "1W"}
-    assert len(data["signals"]["horizons"]["1W"]["fundamental"]["pairs"]) == 28
+    assert set(data["signals"]["horizons"]) == {"1D", "1W", "1M"}
+    week = data["signals"]["horizons"]["1W"]
+    assert len(week["pairs"]) == 28 and set(week["currencies"]) == {"EUR", "GBP", "AUD", "NZD", "USD", "CAD", "CHF", "JPY"}
+    assert week["currencies"]["NZD"]["all"]["total"] >= 40
     assert len(data["ranges"]["pairs"]) == 28 and set(data["ranges"]["pairs"]["EURUSD"]) == {"1D", "1W", "1M"}
     assert data["ranges"]["coverage_live"]
     assert (tmp_path / "signals" / "README.md").exists()

@@ -23,8 +23,9 @@ START = "1999-01-04"
 # Veraltet, wenn seit der Veröffentlichung des letzten Werts mehr als Periodenlänge + 45 Tage vergangen sind
 # (dann ist der nächste Wert überfällig, z. B. weil die Quelle eingestellt wurde).
 MAX_DAYS_SINCE_RELEASE = {"D": 21, "W": 21, "M": 76, "Q": 137}   # D: BIS liefert Tageswerte wöchentlich
-COMMODITY_DRIVERS = {"CAD": ["DCOILWTICO"], "AUD": ["PIORECRUSDM", "PCOPPUSDM", "PCOALAUUSDM"],
-                     "NZD": ["PBEEFUSDM", "PLOGSKUSDM"]}
+# Zeitfenster für Treiber-Änderungen: Tagesreihen in Tagen, Monatsreihen in Monaten
+WINDOWS_DAILY = ((7, "1 Woche"), (30, "1 Monat"), (91, "3 Monate"))
+WINDOWS_MONTHLY = ((1, "1 Monat"), (3, "3 Monate"), (6, "6 Monate"))
 
 
 @dataclass
@@ -34,7 +35,8 @@ class Inputs:
     macro: dict                     # Name -> DataFrame (Handelstage x Währung)
     cot: dict                       # Name -> DataFrame (Handelstage x Währung)
     vix: pd.Series                  # VIX des Vortags je Handelstag
-    commodity: dict                 # Monate -> DataFrame (Handelstage x Währung), Log-Änderung
+    strength: pd.DataFrame          # Handelstage x Währung: Log-Stärke gegen den Korb der anderen 7
+    drivers: dict                   # (Reihe, Fenster) -> Series je Handelstag: Änderung (Log, Rendite: Punkte)
 
 
 def decision_times(dates) -> pd.DatetimeIndex:
@@ -83,10 +85,10 @@ def as_of(values: pd.Series, avail: pd.Series, when: pd.DatetimeIndex, freq: str
     return pd.Series(m["value"].values, index=when)
 
 
-def change(s: pd.Series, months: int) -> pd.Series:
-    """Veränderung gegenüber dem Stand vor `months` Monaten (Periodenbasis)."""
+def change(s: pd.Series, months: int = 0, days: int = 0) -> pd.Series:
+    """Veränderung gegenüber dem Stand vor `months` Monaten bzw. `days` Tagen (Periodenbasis)."""
     s = s.dropna().sort_index()
-    past = s.reindex(s.index - pd.DateOffset(months=months), method="ffill")
+    past = s.reindex(s.index - pd.DateOffset(months=months, days=days), method="ffill")
     return pd.Series(s.values - past.values, index=s.index)
 
 
@@ -115,33 +117,63 @@ def _yoy(v: pd.Series, freq: str) -> pd.Series:
     return pd.Series((v.values / past.values - 1) * 100, index=v.index)
 
 
+def currency_strength(closes: pd.DataFrame) -> pd.DataFrame:
+    """Log-Stärke jeder Währung gegen den Durchschnitt der anderen 7 (aus den Dollar-Paaren)."""
+    lu = {"USD": pd.Series(0.0, index=closes.index)}
+    for c in MAJORS:
+        if c != "USD":
+            lu[c] = np.log(closes[c + "USD"]) if c + "USD" in closes else -np.log(closes["USD" + c])
+    lu = pd.DataFrame(lu)[MAJORS]
+    return pd.DataFrame({c: lu[c] - lu.drop(columns=c).mean(axis=1) for c in MAJORS})
+
+
 def load_inputs(conn) -> Inputs:
     closes = load_closes(conn)
     when = decision_times(closes.index)
     sr, y10 = _per_currency(conn, "short_rate"), _per_currency(conn, "yield_10y")
     cpi, un = _per_currency(conn, "cpi_index"), _per_currency(conn, "unemployment")
-    macro = {
-        "rate": _factor(sr, when, lambda v, f: v),
-        "rate_chg_3m": _factor(sr, when, lambda v, f: change(v, 3)),
-        "rate_chg_6m": _factor(sr, when, lambda v, f: change(v, 6)),
-        "rate_chg_12m": _factor(sr, when, lambda v, f: change(v, 12)),
-        "y10": _factor(y10, when, lambda v, f: v),
-        "y10_chg_1m": _factor(y10, when, lambda v, f: change(v, 1)),
-        "y10_chg_3m": _factor(y10, when, lambda v, f: change(v, 3)),
-        "infl": _factor(cpi, when, _yoy),
-        "infl_chg_3m": _factor(cpi, when, lambda v, f: change(_yoy(v, f), 3)),
-        "unemp": _factor(un, when, lambda v, f: v),
-        "unemp_chg_3m": _factor(un, when, lambda v, f: change(v, 3)),
-        "unemp_chg_6m": _factor(un, when, lambda v, f: change(v, 6)),
-        "unemp_chg_12m": _factor(un, when, lambda v, f: change(v, 12)),
-    }
+    y2 = _per_currency(conn, "yield_2y")
+    lvl = lambda v, f: v                                        # noqa: E731
+    macro = {"rate": _factor(sr, when, lvl), "y10": _factor(y10, when, lvl), "infl": _factor(cpi, when, _yoy),
+             "unemp": _factor(un, when, lvl)}
+    for m in (3, 6, 12):
+        macro[f"rate_chg_{m}m"] = _factor(sr, when, lambda v, f, m=m: change(v, m))
+        macro[f"infl_chg_{m}m"] = _factor(cpi, when, lambda v, f, m=m: change(_yoy(v, f), m))
+        macro[f"unemp_chg_{m}m"] = _factor(un, when, lambda v, f, m=m: change(v, m))
+    for m in (1, 3, 6):
+        macro[f"y10_chg_{m}m"] = _factor(y10, when, lambda v, f, m=m: change(v, m))
+        macro[f"y2_chg_{m}m"] = _factor(y2, when, lambda v, f, m=m: change(v, m))
+    macro["y2_vs_rate"] = _factor(y2, when, lvl) - macro["rate"]
     macro["curve"] = macro["y10"] - macro["rate"]
     macro["real_rate"] = macro["rate"] - macro["infl"]
+    for m in (3, 6):                                             # Handelstage ≈ 21 je Monat
+        macro[f"curve_chg_{m}m"] = macro["curve"] - macro["curve"].shift(21 * m)
+        macro[f"real_rate_chg_{m}m"] = macro["real_rate"] - macro["real_rate"].shift(21 * m)
 
     cot = _cot(conn, when)
     vix_df, _ = load_periods(conn, "VIXCLS")
     vix = as_of(vix_df["value"].astype(float), vix_df["avail"], when, "D") if not vix_df.empty else pd.Series(np.nan, index=when)
-    return Inputs(closes, when, macro, cot, vix, _commodities(conn, when))
+    return Inputs(closes, when, macro, cot, vix, currency_strength(closes), _drivers(conn, when, closes.index))
+
+
+def _drivers(conn, when, dates) -> dict:
+    """Änderung jeder Treiberreihe über 5 Zeitfenster, zum Entscheidungszeitpunkt bekannt.
+    Preise als Log-Änderung, Renditen (Kategorie yield_*) als Änderung in Prozentpunkten."""
+    from forex_nexus.signals.library import DRIVERS
+    codes = sorted({code for lst in DRIVERS.values() for code, *_ in lst})
+    rows = conn.execute("SELECT source_code, category FROM ref.series WHERE source_code = ANY(%s)", (codes,)).fetchall()
+    out = {}
+    for code, cat in rows:
+        df, freq = load_periods(conn, code)
+        if df.empty:
+            continue
+        v = df["value"].astype(float)
+        v = v if cat.startswith("yield") else np.log(v.where(v > 0))
+        windows = WINDOWS_DAILY if freq == "D" else WINDOWS_MONTHLY
+        for n, _ in windows:
+            ch = change(v, days=n) if freq == "D" else change(v, months=n)
+            out[(code, n)] = as_of(ch, df["avail"], when, freq).set_axis(dates)
+    return out
 
 
 COT_WINDOW = 156            # Wochen (3 Jahre) für den COT-Index
@@ -184,21 +216,3 @@ def _cot(conn, when) -> dict:
             frame[ccy] = as_of(g[col].astype(float), g["available_at"], when, "W")
         out[col] = pd.DataFrame(frame, index=when).reindex(columns=MAJORS)
     return out
-
-
-def _commodities(conn, when) -> dict:
-    """Log-Änderung der Rohstoffpreise, die eine Währung treiben (Mittel über ihre Rohstoffe)."""
-    out = {1: {}, 3: {}}
-    for ccy, codes in COMMODITY_DRIVERS.items():
-        parts = {1: [], 3: []}
-        for code in codes:
-            df, freq = load_periods(conn, code)
-            if df.empty:
-                continue
-            v = np.log(df["value"].astype(float).where(lambda x: x > 0))
-            for m in (1, 3):
-                parts[m].append(as_of(change(v, m), df["avail"], when, freq))
-        for m in (1, 3):
-            if parts[m]:
-                out[m][ccy] = pd.concat(parts[m], axis=1).mean(axis=1)
-    return {m: pd.DataFrame(d, index=when).reindex(columns=MAJORS) for m, d in out.items()}
