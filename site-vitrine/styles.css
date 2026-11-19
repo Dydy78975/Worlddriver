@@ -65,7 +65,7 @@ h3 { font-size: 1.25rem; font-weight: 700; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .logo__mark {
   width: 36px; height: 36px; border-radius: 9px; background: var(--accent); color: var(--ink);
-  display: grid; place-items: center; font-family: var(--font-head); font-weight: 800; font-size: 1.2rem;
+  display: grid; place-items: center; font-family: var(--font-head); font-weight: 800; font-size: 1rem; letter-spacing: -.04em;
   transform: rotate(-6deg);
 }
 .logo__text { font-family: var(--font-head); font-weight: 500; font-size: 1.1rem; }

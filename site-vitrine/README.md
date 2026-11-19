@@ -1,4 +1,4 @@
-# Site vitrine – Covering, flocage textile, vitrophanie
+# JCStamps – Site vitrine : covering, flocage textile, vitrophanie
 
 Statische Website (HTML/CSS/JS), auf Französisch. Kein Server und keine Installation nötig:
 einfach `index.html` im Browser öffnen oder den Ordner bei einem Hoster hochladen
@@ -8,9 +8,9 @@ einfach `index.html` im Browser öffnen oder den Ordner bei einem Hoster hochlad
 
 | Was | Wo |
 |---|---|
-| Firmenname „Marquage & Covering“ | `index.html`, `mentions-legales.html` (Suchen & Ersetzen) |
+|  Firmenname „JCStamps“ (bereits eingesetzt) | `index.html`, `mentions-legales.html` (Suchen & Ersetzen) |
 | Telefon `06 00 00 00 00` / `tel:+33600000000` | `index.html`, `mentions-legales.html` |
-| E-Mail `contact@exemple.fr` | `index.html`, `mentions-legales.html`, `script.js` (`EMAIL_CONTACT`) |
+| E-Mail `contact@jcstamps.fr` (Vorschlag, existiert noch nicht) | `index.html`, `mentions-legales.html`, `script.js` (`EMAIL_CONTACT`) |
 | Adresse, Öffnungszeiten | `index.html` (Abschnitt Contact) |
 | SIRET, Name, Hoster | Fußzeile in `index.html`, `mentions-legales.html` |
 | Fotos der Arbeiten | Abschnitt „Réalisations“ in `index.html` – Anleitung steht als Kommentar im Code |

@@ -1,5 +1,5 @@
 // Adresse e-mail qui reçoit les demandes du formulaire (à modifier)
-const EMAIL_CONTACT = "contact@exemple.fr";
+const EMAIL_CONTACT = "contact@jcstamps.fr";
 
 // Menu mobile
 const toggle = document.querySelector(".nav-toggle");
