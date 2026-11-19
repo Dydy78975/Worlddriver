@@ -10,28 +10,26 @@ Stand: 18.11.2026 · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj 
   Nutzen vor Design; leicht verständlich.
 - Nutzer: Deutsch, keine Programmierkenntnisse, iPhone/iPad.
 
-## Fertig
-- Signal-Modul `forex_nexus/signals/`: 43 Signale (`library.py`), Daten point-in-time (`data.py`),
-  Prüfung Entdeckung 1999–2012 (BH 10 %) → Bestätigung 2013–2019 (t > 1) → Schlusstest ab 2020 je
-  Signal × Währung, Tag + Woche, 0,03 % Kosten (`validate.py`), Bericht + Datenstand (`report.py`).
-  Befehl `python -m forex_nexus signals`, Bericht `reports/signals/README.md`.
-- **Ergebnis: 0 von 344 Kombinationen bestehen (Tag und Woche).** Fundamental-Abstimmung (25 Signale,
-  ungeprüft) traf seit 2020 in 50,8 % (Tag) / 50,9 % (Woche). Wird offen so angezeigt. Details:
-  `docs/12_signal_abstimmung.md` (inkl. offengelegter Design-Iterationen).
-- Neu: Arbeitslosenquoten aller 8 Währungsräume (Migration 0007; Eurozone von der EZB, Quelle `ECB_SERIES`).
-- Entfernt (mit Beleg in docs/12): logreg, LightGBM, Ridge-Rendite, Einflussfaktoren, Konfluenz, Saison-Screener,
-  Dependency-Engine + Wissensbasis, 11 Website-Ansichten, 7 ungenutzte Datenreihen (Migration 0008: `ref.series.active`).
-- Engine: nur noch `climatology` + `volref` + Spannen (80-%-Intervall trifft 80 %). 168 Prognosen je Lauf.
-- Website (`site/template.html`, eine Datei): Übersicht (Abstimmung je Paar), Paar-Seite (Signale einzeln mit
-  Schlusstest-Ergebnis, Spanne, Termine, Kurs), Signal-Prüfung, Kalender, Rechner, Datenstand. Mobil geprüft.
-- 78 Tests grün. Migration 0009 legt VIX- und Rohstoffreihen an (früher durch die gelöschte Wissensbasis).
-
-## Gerade in Arbeit / nächster Schritt
-- BIS angebunden (Migration 0010): Verbraucherpreise GB/JP/CH/CA/AU/NZ und offizielle Leitzinsen der 6 Notenbanken.
-  Alle Datenreihen aktuell; Prüfung weiterhin 0 von 344 (Tag/Woche).
-- Nächste Kandidaten für Signalkraft: 2-J.-Renditen, Konsens-Überraschungen (Ist vs. Erwartung), Dukascopy Hoch/Tief.
+## Fertig (Stand 19.11.2026)
+- **Modelle je Währung** (`forex_nexus/signals/`): 410 Modelle, 43–65 je Währung, aus Leitzins, Renditen 10 J. und 2 J.,
+  Zinserwartung, Inflation, Arbeitsmarkt, COT, Saison, Risikostimmung, Kursverlauf und eigenen Treibern
+  (NZD Milch/Fleisch/Wolle/Holz, AUD Erze/Kohle/LNG/Agrar, CAD Öl/Gas/Holz/Metalle, Importeure Energie negativ,
+  sichere Häfen VIX). Gemessen an der Währungsstärke gegen die anderen 7; Tag, Woche, Monat.
+- **Kombi-Modell je Währung** (logistische Regression): Bestätigung (Training ≤ 2012, Prüfung 2013–2019),
+  Schlusstest (Training ≤ 2019, eingefroren, Prüfung ab 2020), Trefferquote je Sicherheitsstufe mit 95-%-Bereich.
+- **Ergebnis:** 0 Einzelmodelle bestehen; Kombi bestätigt nur CHF/Woche (57 % / 54 %). 70 % werden nicht verlässlich
+  erreicht. Details: `docs/12_signal_abstimmung.md`, `reports/signals/README.md`.
+- Datenquellen: FRED, EZB, BIS (Inflation, Leitzinsen), CFTC, Forex Factory, neu 2-J.-Renditen von EZB, Bank of Canada,
+  RBA, Finanzministerium Japan, Bank of England (5 J.; drosselt stark, braucht Pausen). Alle Reihen aktuell, jede
+  speist Modelle. Netzwerk-Umgebung „worlddriver“ um die Notenbank-Hosts erweitert.
+- Website (Artifact, Version 9): Übersicht Währungen + Paare, Seite je Währung (Kombi, Aussagekraft, alle Modelle),
+  Paar, Prüfung, Kalender, Rechner, Datenstand. Unbestätigte Einschätzungen grau markiert.
+- Spannen-Prognose (Ledger) unverändert; Modelle vom Nutzer bestätigt. 83 Tests grün.
+- Bug-Prüfung alle 30 Min. per CronCreate (geht bei Neustart des Workers verloren → neu anlegen).
 
 ## Offen / bekannte Probleme
+- Bank of England 5-J.-Rendite: Erstabruf scheiterte an deren Drosselung; erneut versuchen (`ingest-fred-series`).
+- CHF und NZD ohne 2-J.-Rendite (SNB-Reihen enden 07/2025, RBNZ sperrt Abrufe); Global Dairy Trade ohne freie Schnittstelle.
 - **Kein dauerhafter Betrieb:** Cloud-DB temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`; Neuaufbau:
   initdb + `migrate` + `ingest-fx` + `ingest-fred-series` + `ingest-cot` + `ingest-calendar` + `train` +
   `promote` + `forecast` + `build-site`).
