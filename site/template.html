@@ -149,7 +149,10 @@ const voteCls = (v) => v > 0 ? "long" : v < 0 ? "short" : "";
 const voteTxt = (v) => v > 0 ? "stärker" : v < 0 ? "schwächer" : "neutral";
 const lastPrice = (p) => { const r = D.prices[p]; return r && r.length ? r[r.length - 1][1] : null; };
 const rangeOf = (p, h) => ((D.ranges.pairs[p] || {})[h || state.h]) || {};
-const RANGE_H = () => state.h === "1M" ? "1M" : state.h;
+const RANGE_H = () => state.h;
+const HZ_NOUN = {"1D": "Tages", "1W": "Wochen", "1M": "Monats"};
+/* Unbestätigte Kombi-Modelle: Richtung zeigen, aber grau und gekennzeichnet */
+function leanC(C) { const l = lean(C.combo.p_up); return C.combo.confirmed || !l.cls ? l : {txt: l.txt + " · unbestätigt", cls: ""}; }
 /* Einschätzung aus der Kombi-Wahrscheinlichkeit */
 function lean(p, up = "bullish", down = "bearish") {
   if (p == null) return {txt: "keine Daten", cls: ""};
@@ -172,7 +175,7 @@ function hitTxt(r) { return r.hit == null ? "–" : `${pct(r.hit, 1)} <span clas
 
 function statusBox() {
   const h = H(), cs = Object.entries(h.currencies), ok = cs.filter(([, c]) => c.combo.confirmed).map(([k]) => k);
-  return `<div class="honest">${INFO}<div><b>So belastbar ist die ${h.label}seinschätzung:</b>
+  return `<div class="honest">${INFO}<div><b>So belastbar ist die ${HZ_NOUN[state.h]}einschätzung:</b>
     ${ok.length ? `Bestätigt ist das Kombi-Modell für <b>${ok.join(", ")}</b>.` : "Für keine Währung ist das Kombi-Modell bestätigt."}
     Einzelmodelle mit bestandener Prüfung: <b>${h.valid.length}</b> von ${S().rules.models}.
     Eine Trefferquote von 70 % wird in keiner Sicherheitsstufe verlässlich erreicht. <a href="#pruefung">Details</a></div></div>`;
@@ -182,14 +185,15 @@ function statusBox() {
 function viewStart() {
   const h = H();
   const ccys = [...D.majors].sort((a, b) => Math.abs((h.currencies[b].combo.p_up ?? .5) - .5) - Math.abs((h.currencies[a].combo.p_up ?? .5) - .5));
-  const crow = (c) => { const C = h.currencies[c], p = C.combo.p_up, l = lean(p), t = conf(C.combo.test, 2);
+  const crow = (c) => { const C = h.currencies[c], p = C.combo.p_up, l = leanC(C), t = conf(C.combo.test, 2);
     return `<a class="row" href="#ccy-${c}">
       <span class="c-p"><span class="pair">${c}</span><br><span class="faint small">${esc(CCY_NAME[c])}</span></span>
       <span class="c-b">${voteBar(C.all)}<span class="meta"><span>${C.all.bull} stärker · ${C.all.neutral} neutral · ${C.all.bear} schwächer</span><span>${C.all.total} Modelle</span></span></span>
       <span class="c-r rng"><span class="num">${pct(p, 0)}</span> <span class="faint small">stärker</span><br><span class="faint small">${C.combo.confirmed ? "bestätigt" : "unbestätigt"} · Test ${t.hit == null ? "–" : pct(t.hit, 0)}</span></span>
       <span class="c-l" style="justify-self:end"><span class="pill ${l.cls}">${l.txt}</span></span></a>`; };
   const pairs = [...D.pairs].sort((a, b) => Math.abs((h.pairs[b].p_up ?? .5) - .5) - Math.abs((h.pairs[a].p_up ?? .5) - .5));
-  const prow = (p) => { const P = h.pairs[p], l = lean(P.p_up, "long", "short"), r = rangeOf(p, RANGE_H());
+  const prow = (p) => { const P = h.pairs[p], ok = h.currencies[p.slice(0, 3)].combo.confirmed || h.currencies[p.slice(3)].combo.confirmed;
+    const l0 = lean(P.p_up, "long", "short"), l = ok || !l0.cls ? l0 : {txt: l0.txt + " · unbestätigt", cls: ""}, r = rangeOf(p, RANGE_H());
     const ev = D.events.filter((e) => e.impact === "High" && p.includes(e.currency)).length;
     return `<a class="row" href="#paar-${p}">
       <span class="c-p"><span class="pair">${pairName(p)}</span><br><span class="faint small num">${fmt(r.price ?? lastPrice(p), digits(p))}</span></span>
@@ -223,11 +227,11 @@ function modelList(keys, votes, h) {
       <span class="rec">Seit 2020: ${t[0] == null ? "–" : pct(t[0], 1, true) + " pro Jahr, " + pct(t[2], 0) + " Treffer"} · Gewicht im Kombi-Modell ${fmt(w[m.key] ?? 0, 2)}</span></div>`; }).join("")}`).join("");
 }
 function viewCcy(c) {
-  const h = H(), C = h.currencies[c], l = lean(C.combo.p_up), keys = D.signals.models.filter((m) => m.currency === c).map((m) => m.key);
+  const h = H(), C = h.currencies[c], l = leanC(C), keys = D.signals.models.filter((m) => m.currency === c).map((m) => m.key);
   const ev = D.events.filter((e) => e.currency === c && e.impact !== "Low");
   return `<section class="view">
     <div class="toolbar"><a href="#start" class="small">← Übersicht</a>${horizonSwitch()}</div>
-    <div class="lede"><h1>${c} · ${esc(CCY_NAME[c])}</h1><p>Stärke gegen den Durchschnitt der anderen 7 Währungen, ${h.label.toLowerCase()}.</p></div>
+    <div class="lede"><h1>${c} · ${esc(CCY_NAME[c])}</h1><p>Stärke gegen den Durchschnitt der anderen 7 Währungen · ${HZ_NOUN[state.h]}sicht</p></div>
     <div class="grid-2">
       <article class="panel"><div class="panel-head"><h2>Kombi-Modell</h2><span class="pill ${l.cls}">${l.txt}</span></div>
         <div class="big num">${pct(C.combo.p_up, 0)}</div><p class="muted small">Wahrscheinlichkeit, dass der ${esc(CCY_NAME[c])} ${state.h === "1D" ? "bis morgen" : state.h === "1W" ? "bis Ende nächster Woche" : "bis Ende nächsten Monats"} stärker wird.</p>
@@ -246,9 +250,10 @@ function viewCcy(c) {
 
 /* ---------- Paar ---------- */
 function viewPair(p) {
-  const h = H(), P = h.pairs[p], l = lean(P.p_up, "long", "short"), r = rangeOf(p, RANGE_H()), b = p.slice(0, 3), q = p.slice(3);
+  const h = H(), P = h.pairs[p], ok = h.currencies[p.slice(0, 3)].combo.confirmed || h.currencies[p.slice(3)].combo.confirmed;
+  const l0 = lean(P.p_up, "long", "short"), l = ok || !l0.cls ? l0 : {txt: l0.txt + " · unbestätigt", cls: ""}, r = rangeOf(p, RANGE_H()), b = p.slice(0, 3), q = p.slice(3);
   const ev = D.events.filter((e) => [b, q].includes(e.currency) && e.impact !== "Low");
-  const cc = (c) => { const C = h.currencies[c], x = lean(C.combo.p_up); return `<a class="row" href="#ccy-${c}" style="grid-template-columns:86px minmax(0,1fr) auto"><span class="pair">${c}</span><span>${voteBar(C.all)}<span class="meta"><span>${pct(C.combo.p_up, 0)} stärker</span><span>${C.combo.confirmed ? "bestätigt" : "unbestätigt"}</span></span></span><span class="pill ${x.cls}">${x.txt}</span></a>`; };
+  const cc = (c) => { const C = h.currencies[c], x = leanC(C); return `<a class="row" href="#ccy-${c}" style="grid-template-columns:86px minmax(0,1fr) auto"><span class="pair">${c}</span><span>${voteBar(C.all)}<span class="meta"><span>${pct(C.combo.p_up, 0)} stärker</span><span>${C.combo.confirmed ? "bestätigt" : "unbestätigt"}</span></span></span><span class="pill ${x.cls}">${x.txt}</span></a>`; };
   return `<section class="view">
     <div class="toolbar"><a href="#start" class="small">← Übersicht</a>${horizonSwitch()}</div>
     <div class="lede"><h1>${pairName(p)}</h1><p class="num">${fmt(r.price ?? lastPrice(p), digits(p))} · Kurs vom ${dateDe(D.meta.as_of)}</p></div>
