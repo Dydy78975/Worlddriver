@@ -1,0 +1,587 @@
+<title>WorlᗡDriver Krypto</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopfzeile mit Reitern (Telefon) bzw. feste Seitenleiste (ab 1000 px); Inhalt als ruhige Karten-Spalten.
+   Dunkel zuerst: tiefes Schiefer-Blau, Bernstein als einzige Akzentfarbe; Grün/Rot nur für Kursrichtung. */
+:root{
+  --bg:#0d1117; --panel:#141a22; --panel2:#19212b; --line:#242d39; --fg:#e7eaef; --muted:#8a95a5; --faint:#5b6676;
+  --accent:#e9a23b; --accent-soft:rgba(233,162,59,.14); --up:#37b37e; --up-soft:rgba(55,179,126,.14);
+  --down:#e5544b; --down-soft:rgba(229,84,75,.14); --mid:#d98a2b; --blue:#6aa7f8; --violet:#a98bf0;
+  --f-display:"Inter Tight",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:12px; color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f4f5f7; --panel:#ffffff; --panel2:#f7f8fa; --line:#e1e5eb; --fg:#151a21; --muted:#5b6574; --faint:#8b94a2;
+  --accent:#b8740f; --accent-soft:rgba(184,116,15,.12); --up:#1c8b58; --up-soft:rgba(28,139,88,.11);
+  --down:#c63a31; --down-soft:rgba(198,58,49,.10); --mid:#c46f12; --blue:#2f6fd0; --violet:#7356c9; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f4f5f7; --panel:#ffffff; --panel2:#f7f8fa; --line:#e1e5eb; --fg:#151a21; --muted:#5b6574; --faint:#8b94a2;
+  --accent:#b8740f; --accent-soft:rgba(184,116,15,.12); --up:#1c8b58; --up-soft:rgba(28,139,88,.11);
+  --down:#c63a31; --down-soft:rgba(198,58,49,.10); --mid:#c46f12; --blue:#2f6fd0; --violet:#7356c9; color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:inherit}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:1.65rem;font-weight:700} h2{font-size:1.15rem;font-weight:600} h3{font-size:.98rem;font-weight:600}
+p{margin:0} .muted{color:var(--muted)} .faint{color:var(--faint)} .mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+
+/* Kopf + Navigation */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;padding-block:12px 6px}
+.logo{font-family:var(--f-display);font-weight:700;font-size:1.15rem;letter-spacing:-.02em}
+.logo .d{display:inline-block;transform:scaleX(-1)}
+.tag{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);
+  padding:2px 8px;border-radius:99px}
+.stamp{margin-left:auto;font-size:.75rem;color:var(--muted);text-align:right}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;text-decoration:none;color:var(--muted);padding:6px 11px;border-radius:8px;font-weight:500;font-size:.88rem}
+nav.tabs a:hover{color:var(--fg);background:var(--panel2)}
+nav.tabs a.on{color:var(--fg);background:var(--panel)}
+nav.tabs a.on::after{content:"";display:block;height:2px;background:var(--accent);border-radius:2px;margin-top:3px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,tr[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px;
+  max-width:1180px;margin:0 auto;display:grid;gap:16px}
+@media (min-width:1000px){
+  header.top{position:fixed;left:0;top:0;bottom:0;width:220px;border-bottom:0;border-right:1px solid var(--line);
+    padding:calc(env(safe-area-inset-top,0px) + 16px) 12px 16px max(12px,env(safe-area-inset-left,0px))}
+  .brand{flex-wrap:wrap;padding:4px 8px 18px}
+  .stamp{margin-left:0;text-align:left;width:100%}
+  nav.tabs{flex-direction:column;overflow:visible}
+  nav.tabs a{padding:8px 10px}
+  nav.tabs a.on::after{display:none}
+  nav.tabs a.on{box-shadow:inset 3px 0 0 var(--accent)}
+  main{margin-left:220px;padding-left:32px;padding-right:max(32px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+  .wrap{max-width:1180px}
+}
+
+/* Bausteine */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card>h2,.card>h3{margin-bottom:10px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.kpi{display:grid;gap:4px}
+.kpi .v{font-family:var(--f-display);font-size:1.55rem;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kpi .s{font-size:.82rem;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.chip.ok{color:var(--up);background:var(--up-soft)} .chip.no{color:var(--down);background:var(--down-soft)}
+.chip.part{color:var(--accent);background:var(--accent-soft)} .chip.neu{color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
+.lead{font-size:1.05rem;line-height:1.55;max-width:70ch}
+.note{font-size:.82rem;color:var(--muted);max-width:75ch}
+.hero{display:grid;gap:10px;padding-block:4px 6px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{font:inherit;font-size:.84rem;font-weight:500;color:var(--muted);background:var(--panel);border:1px solid var(--line);
+  padding:5px 12px;border-radius:99px;cursor:pointer}
+.pills button.on{color:var(--fg);border-color:var(--accent);background:var(--accent-soft)}
+.tbl{overflow-x:auto;margin-inline:-4px}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th{font-weight:500;color:var(--muted);text-align:right;font-size:.74rem;letter-spacing:.04em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--panel2)}
+td.name{font-family:var(--f-body)} td.name b{font-weight:600} td.name span{color:var(--muted);font-size:.8rem;margin-left:6px}
+@media (max-width:640px){.hide-s{display:none}}
+.verdicts{display:grid;gap:0}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:start}
+.verdict:last-child{border-bottom:0}
+.verdict .chip{grid-row:span 2;margin-top:2px;justify-self:start;min-width:92px;justify-content:center}
+.verdict b{font-weight:600}
+.verdict p{color:var(--muted);font-size:.85rem}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;
+  font:12px/1.4 var(--f-mono);white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.18);z-index:2}
+.axis{fill:var(--faint);font:10.5px var(--f-mono)}
+.gridline{stroke:var(--line);stroke-width:1}
+.range{display:grid;gap:12px}
+.rrow{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center}
+.rbar{position:relative;height:30px}
+.rbar .track{position:absolute;inset:13px 0;background:var(--panel2);border-radius:3px}
+.rbar .band{position:absolute;top:8px;height:14px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:4px}
+.rbar .now{position:absolute;top:4px;width:2px;height:22px;background:var(--fg);border-radius:1px}
+.rlab{display:flex;justify-content:space-between;font:12px var(--f-mono);color:var(--muted)}
+.rlab b{color:var(--fg);font-weight:500}
+.stat{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.stat:last-child{border-bottom:0}
+.stat span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.heat td{font-size:.76rem;padding:6px 5px;text-align:center;border-bottom:1px solid var(--bg)}
+.heat th{text-align:center;padding:4px 5px}
+.heat td:first-child{text-align:left;color:var(--muted)}
+.day{display:grid;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.day:last-child{border-bottom:0}
+.ev{display:grid;grid-template-columns:52px 20px 1fr auto;gap:8px;align-items:center;font-size:.88rem}
+.ev.past{opacity:.5}
+.ev .t{font-family:var(--f-mono);color:var(--muted)}
+.ev .f{font:12px var(--f-mono);color:var(--muted);text-align:right}
+.folder{width:18px;height:14px;display:block}
+.form{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+label{display:grid;gap:5px;font-size:.8rem;color:var(--muted);font-weight:500}
+input,select{font:15px var(--f-mono);color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+.result{display:grid;gap:4px;padding:14px;border-radius:10px;background:var(--accent-soft)}
+.result .big{font-family:var(--f-display);font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:44px 1fr 64px 52px;gap:8px;align-items:center;font-size:.82rem}
+.bar .b{position:relative;height:14px}
+.bar .b::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.bar .b i{position:absolute;top:2px;height:10px;border-radius:2px}
+.bar span{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.gauge{display:grid;justify-items:center;gap:2px}
+.loading{padding:40px 0;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.page{animation:fade .25s ease-out}}
+@keyframes fade{from{opacity:.4;transform:translateY(3px)}to{opacity:1;transform:none}}
+</style>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">Worl<span class="d">D</span>Driver</span><span class="tag">Krypto</span>
+    <span class="stamp" id="stamp"></span>
+  </div>
+  <nav class="tabs" id="nav">
+    <a href="#start">Überblick</a>
+    <a href="#coin-btc">Coins</a>
+    <a href="#stimmung">Stimmung</a>
+    <a href="#cot">COT</a>
+    <a href="#saison">Saisonalität</a>
+    <a href="#kalender">Kalender</a>
+    <a href="#pruefung">Prüfstand</a>
+    <a href="#rechner">Rechner</a>
+  </nav>
+</header>
+<main id="app"><p class="loading">Daten werden geladen …</p></main>
+
+<script>
+"use strict";
+let D = null;
+const $ = (s, el = document) => el.querySelector(s);
+const nf = (d) => new Intl.NumberFormat("de-DE", {minimumFractionDigits: d, maximumFractionDigits: d});
+const N = {0: nf(0), 1: nf(1), 2: nf(2), 4: nf(4)};
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+function price(v) { if (v == null) return "–"; return (v >= 1000 ? N[0] : v >= 1 ? N[2] : N[4]).format(v) + " $"; }
+function pct(v, d = 1, sign = true) { if (v == null) return "–"; const s = N[d].format(v * 100) + " %"; return sign && v > 0 ? "+" + s : s; }
+function pctc(v, d = 1) { if (v == null) return '<span class="faint">–</span>'; return `<span class="${v > 0 ? "up" : v < 0 ? "down" : ""}">${pct(v, d)}</span>`; }
+function usd(v) { if (v == null) return "–"; if (v >= 1e9) return N[1].format(v / 1e9) + " Mrd. $"; if (v >= 1e6) return N[0].format(v / 1e6) + " Mio. $"; return N[0].format(v) + " $"; }
+const MONTHS = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+const MONTHS_L = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const WD = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+const WDS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+function dDate(s) { const [y, m, d] = s.slice(0, 10).split("-"); return `${+d}. ${MONTHS[+m - 1]} ${y}`; }
+const coin = (sym) => D.coins.find((c) => c.sym === sym);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- Diagramme (SVG, gleiche Skala für Linien, Achsen und Beschriftung) ---------- */
+function niceTicks(lo, hi, n = 4) {
+  const span = hi - lo || Math.abs(hi) || 1, step0 = span / n, mag = 10 ** Math.floor(Math.log10(step0));
+  const step = [1, 2, 2.5, 5, 10].map((k) => k * mag).find((s) => s >= step0);
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+function logTicks(lo, hi) {
+  const out = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++)
+    for (const k of [1, 2, 5]) { const v = k * 10 ** e; if (v >= lo && v <= hi) out.push(v); }
+  return out.length >= 2 ? out : niceTicks(lo, hi);
+}
+/* series: [{name, color, values[], dash}], dates: [ISO], opts: {h, log, fmt, zones:[{from,to,color}], yMin,yMax} */
+function lineChart(el, dates, series, opts = {}) {
+  const W = Math.max(280, Math.round(el.clientWidth || 760)), H = Math.round((opts.h || 260) * (W < 520 ? 0.82 : 1)), L = 8, R = W < 520 ? 52 : 62, T = 10, B = 24;
+  const all = series.flatMap((s) => s.values.filter((v) => v != null && isFinite(v)));
+  let lo = opts.yMin ?? Math.min(...all), hi = opts.yMax ?? Math.max(...all);
+  if (opts.log) { lo = Math.max(lo, 1e-9); }
+  else if (opts.yMin == null) { const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad; }
+  const ty = opts.log ? (v) => Math.log(v) : (v) => v;
+  const y = (v) => T + (H - T - B) * (1 - (ty(v) - ty(lo)) / (ty(hi) - ty(lo) || 1));
+  const n = dates.length, x = (i) => L + (W - L - R) * (n > 1 ? i / (n - 1) : 0.5);
+  const fmt = opts.fmt || ((v) => N[0].format(v));
+  const ticks = opts.ticks || (opts.log ? logTicks(lo, hi) : niceTicks(lo, hi));
+  let g = "";
+  for (const z of opts.zones || []) g += `<rect x="${L}" width="${W - L - R}" y="${y(z.to)}" height="${y(z.from) - y(z.to)}" fill="${z.color}"/>`;
+  for (const t of ticks) g += `<line class="gridline" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="axis" x="${W - R + 8}" y="${y(t) + 3.5}">${fmt(t)}</text>`;
+  // x-Beschriftung: Monats- oder Jahresanfänge, höchstens ~7
+  const span = (new Date(dates[n - 1]) - new Date(dates[0])) / 864e5;
+  const byYear = span > 900, marks = [];
+  for (let i = 1; i < n; i++) { const a = dates[i - 1], b = dates[i]; if (byYear ? a.slice(0, 4) !== b.slice(0, 4) : a.slice(5, 7) !== b.slice(5, 7)) marks.push(i); }
+  const every = Math.max(1, Math.ceil(marks.length / Math.max(3, Math.floor(W / 95))));
+  marks.filter((_, k) => k % every === 0).forEach((i) => {
+    const lab = byYear ? dates[i].slice(0, 4) : MONTHS[+dates[i].slice(5, 7) - 1] + (dates[i].slice(5, 7) === "01" ? " " + dates[i].slice(2, 4) : "");
+    g += `<line class="gridline" x1="${x(i)}" x2="${x(i)}" y1="${H - B}" y2="${H - B + 4}"/><text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${lab}</text>`;
+  });
+  for (const s of series) {
+    let d = "", pen = false;
+    s.values.forEach((v, i) => { if (v == null || !isFinite(v)) { pen = false; return; } d += (pen ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1); pen = true; });
+    if (s.area) {
+      const first = s.values.findIndex((v) => v != null);
+      g += `<path d="${d}L${x(n - 1)},${H - B}L${x(first)},${H - B}Z" fill="${s.color}" opacity=".10"/>`;
+    }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 1.8}" ${s.dash ? 'stroke-dasharray="5 4"' : ""} stroke-linejoin="round"/>`;
+    const li = s.values.length - 1;
+    if (s.dot !== false && s.values[li] != null) g += `<circle cx="${x(li)}" cy="${y(s.values[li])}" r="3.2" fill="${s.color}"/>`;
+  }
+  el.innerHTML = `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label || "Diagramm")}">${g}<line class="hair" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="${css("--muted")}" stroke-dasharray="3 3" visibility="hidden"/></svg><div class="tip" hidden></div></div>`;
+  const svg = $("svg", el), tip = $(".tip", el), hair = $(".hair", el);
+  const move = (ev) => {
+    const r = svg.getBoundingClientRect(), px = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) * W / r.width;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - L) / (W - L - R) * (n - 1))));
+    hair.setAttribute("x1", x(i)); hair.setAttribute("x2", x(i)); hair.setAttribute("visibility", "visible");
+    tip.hidden = false;
+    tip.innerHTML = `<div class="faint">${dDate(dates[i])}</div>` + series.map((s) => s.values[i] == null ? "" : `<div><span style="color:${s.color}">●</span> ${esc(s.name)}: ${(opts.tipFmt || fmt)(s.values[i])}</div>`).join("");
+    const left = x(i) / W * r.width;
+    tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px"; tip.style.top = "-8px";
+  };
+  const out = () => { tip.hidden = true; hair.setAttribute("visibility", "hidden"); };
+  svg.addEventListener("pointermove", move); svg.addEventListener("pointerleave", out);
+}
+function spark(values, w = 90, h = 26) {
+  const v = values.filter((x) => x != null), lo = Math.min(...v), hi = Math.max(...v);
+  const x = (i) => i * w / (v.length - 1), y = (a) => 2 + (h - 4) * (1 - (a - lo) / (hi - lo || 1));
+  const col = v[v.length - 1] >= v[0] ? css("--up") : css("--down");
+  const d = v.map((a, i) => (i ? "L" : "M") + x(i).toFixed(1) + "," + y(a).toFixed(1)).join("");
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d}L${w},${h}L0,${h}Z" fill="${col}" opacity=".12"/><path d="${d}" fill="none" stroke="${col}" stroke-width="1.5"/><circle cx="${x(v.length - 1)}" cy="${y(v[v.length - 1])}" r="2" fill="${col}"/></svg>`;
+}
+function folder(impact) {
+  const c = impact === "High" ? css("--down") : impact === "Medium" ? css("--mid") : css("--faint");
+  return `<svg class="folder" viewBox="0 0 18 14" aria-label="${impact === "High" ? "hohe" : "mittlere"} Wichtigkeit"><path d="M1 3a1 1 0 0 1 1-1h5l1.5 1.5H16a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" fill="${c}"/></svg>`;
+}
+
+/* ---------- gemeinsame Auswertungen ---------- */
+function verdicts() {
+  const cov = D.coins.map((c) => c.ranges["1W"].coverage).filter((v) => v != null);
+  const covAvg = cov.reduce((a, b) => a + b, 0) / cov.length;
+  const R = D.robust, F = D.fng.study, C = D.cot.test, S = D.season;
+  const cotP = Math.min(...Object.values(C).flatMap((c) => [c.high.p, c.low.p]));
+  const monthHits = Object.values(S.BTC.months).map((m) => m.hit);
+  return [
+    {chip: "ok", t: "Hält", title: "Schwankungsspanne", text: `Die 80-%-Wochenspanne hat seit 2018 im Schnitt ${pct(covAvg, 1, false)} der Fälle getroffen (Ziel 80 %). Gut geeignet für Stopps und Positionsgröße.`},
+    {chip: "part", t: "Teilweise", title: "Trendregeln (200-Tage-Linie, Momentum)", text: `Kleinerer größter Verlust in ${R.smaller_dd} von ${R.tests} Varianten, besseres Rendite-Risiko nur in ${R.better_sharpe} von ${R.tests}. Schützt vor Crashs, mehr Gewinn ist nicht sicher.`},
+    {chip: "no", t: "Kein Vorteil", title: "Fear & Greed", text: `Nach extremer Angst stieg Bitcoin in den 30 Tagen danach in ${pct(F.fear.hit, 0, false)} der ${F.fear.n} Fälle, an allen Tagen in ${pct(F.all.hit, 0, false)}. Kein messbarer Unterschied.`},
+    {chip: "no", t: "Kein Vorteil", title: "COT (CME-Futures)", text: `Extreme Positionen der Spekulanten zeigen keine verlässliche Richtung (kleinster p-Wert ${N[2].format(cotP)}, bei 20–30 Fällen).`},
+    {chip: "no", t: "Kein Vorteil", title: "Saisonalität", text: `Nur ${S.BTC.years[1] - S.BTC.years[0]} Jahre Daten: Monats-Trefferquoten zwischen ${pct(Math.min(...monthHits), 0, false)} und ${pct(Math.max(...monthHits), 0, false)} sind mit Zufall vereinbar.`},
+  ];
+}
+function nextHigh() {
+  const now = new Date();
+  return (D.calendar.events || []).find((e) => e.impact === "High" && new Date(e.at) > now) || null;
+}
+function countdown(at) {
+  const ms = new Date(at) - new Date(); if (ms <= 0) return "jetzt";
+  const h = Math.floor(ms / 36e5), d = Math.floor(h / 24);
+  return d >= 1 ? `in ${d} T ${h % 24} Std` : `in ${h} Std ${Math.floor(ms % 36e5 / 6e4)} Min`;
+}
+
+/* ---------- Seiten ---------- */
+function pageStart() {
+  const btc = coin("BTC"), above = D.coins.filter((c) => c.trend.signal_now?.sma200).length, nc = D.coins.length;
+  const mom = D.coins.filter((c) => c.trend.signal_now?.mom30).length;
+  const fv = D.fng.value, nh = nextHigh();
+  const trendTxt = above === 0 ? `Alle ${nc} Coins liegen unter ihrer 200-Tage-Linie – der Markt ist klar im Abwärtstrend.`
+    : above === nc ? `Alle ${nc} Coins liegen über ihrer 200-Tage-Linie – der Markt ist im Aufwärtstrend.`
+    : `${above} von ${nc} Coins liegen über ihrer 200-Tage-Linie – gemischtes Bild.`;
+  const moodTxt = fv < 25 ? "Die Stimmung ist extrem ängstlich." : fv > 75 ? "Die Stimmung ist extrem gierig." : `Die Stimmung ist ${D.fng.label.toLowerCase()}.`;
+  const rows = D.coins.map((c) => {
+    const s = c.trend.signal_now || {};
+    return `<tr class="click" tabindex="0" data-go="coin-${c.sym.toLowerCase()}">
+      <td class="name"><b>${c.sym}</b><span>${esc(c.name)}</span></td><td>${price(c.price)}</td>
+      <td>${pctc(c.chg_1d)}</td><td>${pctc(c.chg_7d)}</td><td>${pctc(c.chg_30d)}</td><td class="hide-s">${pctc(c.chg_365d, 0)}</td>
+      <td class="hide-s">${pctc(c.from_high_1y, 0)}</td>
+      <td>${s.sma200 ? '<span class="chip ok">Aufwärts</span>' : '<span class="chip no">Abwärts</span>'}</td>
+      <td class="hide-s">${spark(c.history.slice(-90).map((h) => h[1]))}</td></tr>`;
+  }).join("");
+  return `<section class="hero"><span class="eyebrow">Tagesschluss ${dDate(D.as_of)} · UTC</span>
+    <h1>Bitcoin ${price(btc.price)} <span class="${btc.chg_30d < 0 ? "down" : "up"}" style="font-size:.7em">${pct(btc.chg_30d)} in 30 Tagen</span></h1>
+    <p class="lead">${trendTxt} ${moodTxt} Die Trendregel hält in so einer Phase Cash – das hat in der Vergangenheit vor allem große Verluste begrenzt.</p></section>
+  <div class="grid g4">
+    <div class="card kpi"><span class="eyebrow">Bitcoin heute</span><span class="v">${price(btc.price)}</span><span class="s">${pctc(btc.chg_1d, 2)} zum Vortag</span></div>
+    <div class="card kpi"><span class="eyebrow">Fear & Greed</span><span class="v">${fv}</span><span class="s">${esc(D.fng.label)} · 0 = Panik, 100 = Euphorie</span></div>
+    <div class="card kpi"><span class="eyebrow">Über 200-Tage-Linie</span><span class="v">${above} / ${nc}</span><span class="s">Momentum 30 Tage positiv: ${mom} / ${nc}</span></div>
+    <div class="card kpi"><span class="eyebrow">Nächster roter Ordner (USD)</span><span class="v" style="font-size:1.05rem;line-height:1.3">${nh ? esc(nh.title) : "Keiner mehr diese Woche"}</span><span class="s">${nh ? `${WD[(new Date(nh.day).getDay() + 6) % 7]}, ${nh.time} Uhr · ${countdown(nh.at)}` : '<a href="#kalender">Zum Kalender</a>'}</span></div>
+  </div>
+  <div class="card"><h2>Die 8 großen Coins</h2>
+    <div class="tbl"><table><thead><tr><th>Coin</th><th>Kurs</th><th>1 Tag</th><th>7 Tage</th><th>30 Tage</th><th class="hide-s">1 Jahr</th><th class="hide-s">vom Jahreshoch</th><th>Trend</th><th class="hide-s">90 Tage</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="note" style="margin-top:8px">Trend = Schlusskurs über (Aufwärts) oder unter (Abwärts) dem Durchschnitt der letzten 200 Tage. Antippen für Details.</p></div>
+  <div class="card"><h2>Was hält der Prüfung stand?</h2><p class="note" style="margin-bottom:6px">Jede Regel wurde mit den Daten seit 2018 so getestet, als hätte man sie damals live benutzt.</p>
+    <div class="verdicts">${verdicts().map((v) => `<div class="verdict"><span class="chip ${v.chip}">${v.t}</span><b>${v.title}</b><p>${v.text}</p></div>`).join("")}</div>
+    <p class="note" style="margin-top:8px"><a href="#pruefung">Alle Zahlen im Prüfstand</a></p></div>`;
+}
+
+function pageCoin(sym) {
+  const c = coin(sym) || coin("BTC"), s = c.trend.signal_now || {}, t = c.trend;
+  const pills = D.coins.map((x) => `<button type="button" data-go="coin-${x.sym.toLowerCase()}" class="${x.sym === c.sym ? "on" : ""}">${x.sym}</button>`).join("");
+  const rng = ["1T", "1W", "1M"].map((k) => {
+    const r = c.ranges[k], lo = c.price * (1 + r.low), hi = c.price * (1 + r.high);
+    const scale = Math.max(Math.abs(c.ranges["1M"].low), c.ranges["1M"].high) * 1.08;
+    const pos = (v) => 50 + v / scale * 50;
+    return `<div class="rrow"><span class="eyebrow">${{"1T": "Morgen", "1W": "7 Tage", "1M": "30 Tage"}[k]}</span><div>
+      <div class="rbar"><div class="track"></div><div class="band" style="left:${pos(r.low)}%;width:${pos(r.high) - pos(r.low)}%"></div><div class="now" style="left:50%"></div></div>
+      <div class="rlab"><span><b>${price(lo)}</b> ${pct(r.low)}</span><span><b>${price(hi)}</b> ${pct(r.high)}</span></div>
+      <div class="note">Historisch getroffen: ${r.coverage == null ? "–" : pct(r.coverage, 1, false)} (Ziel 80 %, ${r.n} Prüfungen)</div></div></div>`;
+  }).join("");
+  const row = (k, lab) => t[k] ? `<tr><td class="name">${lab}</td><td>${pctc(t[k].cagr)}</td><td class="down">${pct(t[k].max_dd, 0)}</td><td>${N[2].format(t[k].sharpe)}</td><td>${t[k].trades ?? "–"}</td><td>${t[k].time_in_market == null ? "100 %" : pct(t[k].time_in_market, 0, false)}</td></tr>` : "";
+  const rb = D.robust.coins[c.sym];
+  const robust = rb ? `<div class="tbl"><table><thead><tr><th>Länge (Tage)</th>${D.robust.grid.sma.map((n) => `<th>${n}</th>`).join("")}</tr></thead><tbody>
+    <tr><td class="name">Durchschnittslinie</td>${D.robust.grid.sma.map((n) => `<td class="${rb.sma[n].sharpe > rb.hold.sharpe ? "up" : "down"}">${N[2].format(rb.sma[n].sharpe)}</td>`).join("")}</tr></tbody></table></div>
+    <div class="tbl"><table><thead><tr><th>Länge (Tage)</th>${D.robust.grid.mom.map((n) => `<th>${n}</th>`).join("")}</tr></thead><tbody>
+    <tr><td class="name">Momentum</td>${D.robust.grid.mom.map((n) => `<td class="${rb.mom[n].sharpe > rb.hold.sharpe ? "up" : "down"}">${N[2].format(rb.mom[n].sharpe)}</td>`).join("")}</tr></tbody></table></div>
+    <p class="note">Rendite-Risiko-Kennzahl (Sharpe) je Variante; Halten: ${N[2].format(rb.hold.sharpe)}. Grün = besser als Halten. Erste Hälfte (${dDate(rb.halves["1"].from)} – ${dDate(rb.halves["1"].to)}): Halten ${N[2].format(rb.halves["1"].hold)}, 200-Tage ${N[2].format(rb.halves["1"].sma200)}, Momentum ${N[2].format(rb.halves["1"].mom30)}. Zweite Hälfte: Halten ${N[2].format(rb.halves["2"].hold)}, 200-Tage ${N[2].format(rb.halves["2"].sma200)}, Momentum ${N[2].format(rb.halves["2"].mom30)}.</p>` : '<p class="note">Zu wenig Daten für die Gegenprobe.</p>';
+  const html = `<div class="pills" role="tablist" aria-label="Coin wählen">${pills}</div>
+  <section class="hero"><span class="eyebrow">${esc(c.name)} · Daten seit ${dDate(c.since)}</span>
+    <h1>${c.sym} ${price(c.price)}</h1>
+    <p class="muted">1 Tag ${pctc(c.chg_1d)} · 7 Tage ${pctc(c.chg_7d)} · 30 Tage ${pctc(c.chg_30d)} · 1 Jahr ${pctc(c.chg_365d, 0)} · ${pctc(c.from_high_1y, 0)} vom Jahreshoch${c.vs_btc_30d == null ? "" : ` · gegenüber Bitcoin (30 T) ${pctc(c.vs_btc_30d)}`}</p></section>
+  <div class="card"><h2>Kurs der letzten 12 Monate</h2>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Schlusskurs</span><span><i style="background:var(--blue)"></i>200-Tage-Linie</span></div><div id="ch-price"></div></div>
+  <div class="grid g2">
+    <div class="card"><h2>Wie weit kann es gehen?</h2><p class="note" style="margin-bottom:12px">Mit 80 % Wahrscheinlichkeit liegt der Kurs am Ende des Zeitraums in diesem Band – gerechnet aus der aktuellen Schwankung. Richtung sagt es nicht voraus.</p><div class="range">${rng}</div></div>
+    <div class="card"><h2>Trend-Signal heute</h2>
+      <div class="stat"><span>Schlusskurs gegenüber 200-Tage-Linie</span><span>${s.sma200 ? '<span class="chip ok">darüber</span>' : '<span class="chip no">darunter</span>'} ${pct(s.dist_sma200)}</span></div>
+      <div class="stat"><span>200-Tage-Linie</span><span>${price(s.sma200_level)}</span></div>
+      <div class="stat"><span>Veränderung der letzten 30 Tage</span><span>${pctc(s.mom30_value)}</span></div>
+      <div class="stat"><span>Regel A (200-Tage-Linie) sagt</span><span>${s.sma200 ? "investiert sein" : "Cash halten"}</span></div>
+      <div class="stat"><span>Regel B (30-Tage-Momentum) sagt</span><span>${s.mom30 ? "investiert sein" : "Cash halten"}</span></div>
+      <p class="note" style="margin-top:10px">Regeln werden am Tagesende geprüft und erst am nächsten Tag umgesetzt.</p></div>
+  </div>
+  <div class="card"><h2>Was hätten die Regeln gebracht?</h2>
+    <div class="legend"><span><i style="background:var(--muted)"></i>Kaufen und halten</span><span><i style="background:var(--accent)"></i>Regel A: 200-Tage-Linie</span><span><i style="background:var(--violet)"></i>Regel B: 30-Tage-Momentum</span></div>
+    <div id="ch-eq"></div>
+    <div class="tbl" style="margin-top:8px"><table><thead><tr><th>Strategie</th><th>pro Jahr</th><th>größter Verlust</th><th>Sharpe</th><th>Wechsel</th><th>investiert</th></tr></thead><tbody>
+      ${row("hold", "Kaufen und halten")}${row("sma200", "Regel A: 200-Tage-Linie")}${row("mom30", "Regel B: Momentum 30 T")}</tbody></table></div>
+    <p class="note" style="margin-top:8px">Startkapital 1, logarithmische Skala. Mit 0,1 % Gebühr je Wechsel, ohne Steuern. Achtung: Wir betrachten nur Coins, die es heute noch gibt – Coins, die verschwunden sind, fehlen. Das lässt alle Ergebnisse besser aussehen, als sie damals gewesen wären.</p></div>
+  <div class="card"><h2>Gegenprobe: andere Längen und Zeiträume</h2>${robust}</div>
+  <p class="note">Keine Anlageberatung. Alle Angaben ohne Gewähr.</p>`;
+  return {html, after() {
+    lineChart($("#ch-price"), c.history.map((h) => h[0]), [
+      {name: "Kurs", color: css("--accent"), values: c.history.map((h) => h[1]), area: true},
+      {name: "200-Tage-Linie", color: css("--blue"), values: c.sma200, w: 1.5, dot: false}],
+      {fmt: (v) => price(v).replace(" $", ""), tipFmt: price, label: `${c.sym} Kurs und 200-Tage-Linie`});
+    const cv = c.curves; if (!cv.hold.v.length) { $("#ch-eq").innerHTML = '<p class="note">Zu wenig Daten.</p>'; return; }
+    const start = new Date(cv.hold.start), dates = cv.hold.v.map((_, i) => new Date(start.getTime() + i * 7 * 864e5).toISOString().slice(0, 10));
+    lineChart($("#ch-eq"), dates, [
+      {name: "Halten", color: css("--muted"), values: cv.hold.v, w: 1.5},
+      {name: "Regel A", color: css("--accent"), values: cv.sma200.v},
+      {name: "Regel B", color: css("--violet"), values: cv.mom30.v}],
+      {log: true, fmt: (v) => N[v < 1 ? 1 : 0].format(v) + "×", tipFmt: (v) => N[2].format(v) + "×", label: "Vermögensentwicklung"});
+  }};
+}
+
+function gauge(v) {
+  const cx = 120, cy = 112, r = 92, seg = [[0, 25, "--down"], [25, 45, "--mid"], [45, 55, "--faint"], [55, 75, "--up"], [75, 100, "--up"]];
+  const pt = (val, rr) => { const a = Math.PI * (1 - val / 100); return [cx + rr * Math.cos(a), cy - rr * Math.sin(a)]; };
+  let g = "";
+  seg.forEach(([a, b, col], i) => { const [x1, y1] = pt(a + 0.6, r), [x2, y2] = pt(b - 0.6, r);
+    g += `<path d="M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}" fill="none" stroke="${css(col)}" stroke-width="14" opacity="${i === 4 ? 1 : i === 3 ? .6 : i === 0 ? 1 : .8}"/>`; });
+  const [nx, ny] = pt(v, r - 24);
+  g += `<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${css("--fg")}" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="${css("--fg")}"/>`;
+  g += `<text class="axis" x="${cx - r}" y="${cy + 18}" text-anchor="middle">0</text><text class="axis" x="${cx + r}" y="${cy + 18}" text-anchor="middle">100</text>`;
+  return `<svg viewBox="0 0 240 130" style="width:min(100%,280px)" role="img" aria-label="Fear-and-Greed-Index ${v}">${g}</svg>`;
+}
+function pageMood() {
+  const F = D.fng, S = F.study;
+  const r = (k, lab) => `<tr><td class="name">${lab}</td><td>${S[k].n}</td><td>${pctc(S[k].mean)}</td><td>${S[k].median == null ? "–" : pctc(S[k].median)}</td><td>${pct(S[k].hit, 0, false)}</td><td>${S[k].ci ? pct(S[k].ci[0], 0, false) + " – " + pct(S[k].ci[1], 0, false) : "–"}</td><td>${S[k].p == null ? "–" : N[2].format(S[k].p)}</td></tr>`;
+  return {html: `<section class="hero"><span class="eyebrow">Stimmung · Stand ${dDate(F.date)}</span><h1>Fear & Greed: ${F.value} – ${esc(F.label)}</h1>
+    <p class="lead">Der Index fasst Schwankung, Handelsvolumen, soziale Medien und Bitcoin-Dominanz zu einer Zahl von 0 bis 100 zusammen. Er beschreibt die Stimmung von heute – eine Vorhersage ist er nicht, wie die Prüfung unten zeigt.</p></section>
+  <div class="grid g2">
+    <div class="card gauge">${gauge(F.value)}<span class="kpi"><span class="v">${F.value}</span></span><span class="muted">${esc(F.label)}</span></div>
+    <div class="card"><h2>Die Skala</h2>
+      <div class="stat"><span><span class="chip no">0–24</span> Extreme Angst</span><span>Panikverkäufe</span></div>
+      <div class="stat"><span><span class="chip part">25–44</span> Angst</span><span>Vorsicht</span></div>
+      <div class="stat"><span><span class="chip neu">45–55</span> Neutral</span><span>ausgeglichen</span></div>
+      <div class="stat"><span><span class="chip ok">56–75</span> Gier</span><span>Optimismus</span></div>
+      <div class="stat"><span><span class="chip ok">76–100</span> Extreme Gier</span><span>Euphorie</span></div></div>
+  </div>
+  <div class="card"><h2>Verlauf der letzten 12 Monate</h2><div id="ch-fng"></div></div>
+  <div class="card"><h2>Hat „Kaufen bei Angst“ funktioniert?</h2>
+    <p class="note" style="margin-bottom:8px">Bitcoin-Veränderung in den ${S.days} Tagen nach einem Tag mit Index unter ${D.rules.fng_low} bzw. über ${D.rules.fng_high}. Fälle zählen nur, wenn sie ${S.days} Tage auseinanderliegen, damit derselbe Crash nicht mehrfach zählt. Daten seit ${dDate(F.since)}.</p>
+    <div class="tbl"><table><thead><tr><th>Situation</th><th>Fälle</th><th>Ø</th><th>Median</th><th>im Plus</th><th>95-%-Bereich</th><th>p-Wert</th></tr></thead><tbody>
+      ${r("fear", "Nach extremer Angst")}${r("greed", "Nach extremer Gier")}<tr><td class="name">Alle Tage (Vergleich)</td><td>${S.all.n}</td><td>${pctc(S.all.mean)}</td><td>–</td><td>${pct(S.all.hit, 0, false)}</td><td>–</td><td>–</td></tr></tbody></table></div>
+    <p class="note" style="margin-top:8px"><span class="chip no">Kein Vorteil</span> Nach extremer Angst lag Bitcoin nicht häufiger im Plus als an einem beliebigen Tag. Der p-Wert misst, wie leicht so ein Ergebnis durch Zufall entsteht; erst unter 0,05 wäre es auffällig.</p></div>`,
+  after() {
+    lineChart($("#ch-fng"), F.history.map((h) => h[0]), [{name: "Index", color: css("--accent"), values: F.history.map((h) => h[1])}],
+      {yMin: 0, yMax: 100, ticks: [0, 25, 50, 75, 100], h: 220, label: "Fear-and-Greed-Verlauf",
+       zones: [{from: 0, to: 25, color: css("--down-soft")}, {from: 75, to: 100, color: css("--up-soft")}]});
+  }};
+}
+
+function pageCot() {
+  const V = D.cot.view, T = D.cot.test, name = {BTC: "Bitcoin-Future (CME)", ETH: "Ether-Future (CME)"};
+  const bar = (lab, v, col) => `<div class="bar" style="grid-template-columns:110px 1fr 40px"><span style="text-align:left;font-family:var(--f-body);color:var(--muted)">${lab}</span>
+    <div class="b" style="background:var(--panel2);border-radius:3px"><i style="left:0;width:${v ?? 0}%;background:${col}"></i></div><span>${v == null ? "–" : N[0].format(v)}</span></div>`;
+  const cards = Object.keys(V).map((c) => {
+    const v = V[c], t = T[c];
+    const tr = (k, lab) => `<tr><td class="name">${lab}</td><td>${t[k].n}</td><td>${pctc(t[k].mean)}</td><td>${t[k].hit == null ? "–" : pct(t[k].hit, 0, false)}</td><td>${t[k].p == null ? "–" : N[2].format(t[k].p)}</td></tr>`;
+    return `<div class="card"><h2>${name[c] || c}</h2><p class="note" style="margin-bottom:10px">Bericht vom ${dDate(v.report_date)} (Stand Dienstag, veröffentlicht Freitag). Index 0–100 = Position im Vergleich zu den letzten 3 Jahren.</p>
+      <div class="bars">${bar("Spekulanten", v.spec_idx, css("--accent"))}${bar("Commercials", v.comm_idx, css("--blue"))}${bar("Kleinanleger", v.small_idx, css("--violet"))}</div>
+      <div class="stat" style="margin-top:10px"><span>Netto Spekulanten / Commercials / Kleinanleger</span><span>${N[0].format(v.spec_net)} / ${N[0].format(v.comm_net)} / ${N[0].format(v.small_net)}</span></div>
+      <div class="stat"><span>Offene Kontrakte</span><span>${N[0].format(v.open_interest)}</span></div>
+      <div class="legend" style="margin-top:12px"><span><i style="background:var(--accent)"></i>Spekulanten</span><span><i style="background:var(--blue)"></i>Commercials</span><span><i style="background:var(--violet)"></i>Kleinanleger</span></div>
+      <div id="ch-cot-${c}"></div>
+      <h3 style="margin-top:12px">Prüfung: Kurs ${t.weeks} Wochen nach extremer Spekulanten-Position</h3>
+      <div class="tbl"><table><thead><tr><th>Situation</th><th>Fälle</th><th>Ø</th><th>im Plus</th><th>p-Wert</th></tr></thead><tbody>
+        ${tr("high", "Index über 80")}${tr("low", "Index unter 20")}<tr><td class="name">Alle Wochen</td><td>${t.all.n}</td><td>${pctc(t.all.mean)}</td><td>${pct(t.all.hit, 0, false)}</td><td>–</td></tr></tbody></table></div></div>`;
+  }).join("");
+  return {html: `<section class="hero"><span class="eyebrow">Commitments of Traders · CFTC</span><h1>Wer ist wie positioniert?</h1>
+    <p class="lead">Jede Woche meldet die US-Aufsicht, wie große Spekulanten, Commercials und Kleinanleger in den Bitcoin- und Ether-Futures der CME positioniert sind. Für andere Coins gibt es keinen solchen Bericht.</p>
+    <p class="note">Wichtig bei Krypto: Viele Fonds verkaufen Futures, während sie gleichzeitig Bitcoin oder Bitcoin-ETFs halten, um den Preisunterschied zu verdienen (Basis-Handel). Eine Netto-Verkaufsposition der Spekulanten ist deshalb keine reine Wette auf fallende Kurse.</p></section>
+    <div class="grid g2">${cards}</div>
+    <div class="card"><span class="chip no">Kein Vorteil</span> <span class="note">Extreme Positionen haben die Richtung der folgenden 4 Wochen nicht verlässlich angezeigt. Bei 10–30 Fällen sind auch die scheinbar guten Werte mit Zufall vereinbar (p-Wert über 0,05).</span></div>`,
+  after() {
+    for (const c of Object.keys(V)) {
+      const w = V[c].weekly;
+      lineChart($(`#ch-cot-${c}`), w.map((x) => x[0]), [
+        {name: "Spekulanten", color: css("--accent"), values: w.map((x) => x[2])},
+        {name: "Commercials", color: css("--blue"), values: w.map((x) => x[1]), w: 1.4},
+        {name: "Kleinanleger", color: css("--violet"), values: w.map((x) => x[3]), w: 1.4}],
+        {h: 200, fmt: (v) => N[0].format(v), label: `COT ${c} Nettopositionen`});
+    }
+  }};
+}
+
+let seasonCoin = "BTC";
+function pageSeason() {
+  const S = D.season[seasonCoin], years = [];
+  for (let y = S.years[0]; y <= S.years[1]; y++) years.push(y);
+  const cur = new Date().getMonth() + 1;
+  const cell = (v) => {
+    if (v == null) return '<td class="faint">·</td>';
+    const a = Math.min(1, Math.abs(v) / 0.4), col = v >= 0 ? "55,179,126" : "229,84,75";
+    return `<td style="background:rgba(${col},${(0.12 + a * 0.6).toFixed(2)})">${N[0].format(v * 100)}</td>`;
+  };
+  const heat = `<div class="tbl"><table class="heat"><thead><tr><th>Jahr</th>${MONTHS.map((m, i) => `<th style="${i + 1 === cur ? "color:var(--accent)" : ""}">${m}</th>`).join("")}</tr></thead><tbody>
+    ${years.map((y) => `<tr><td>${y}</td>${MONTHS.map((_, i) => cell(S.months[i + 1].years[y])).join("")}</tr>`).join("")}
+    <tr><td><b>Ø</b></td>${MONTHS.map((_, i) => `<td><b>${N[0].format(S.months[i + 1].mean * 100)}</b></td>`).join("")}</tr>
+    <tr><td>im Plus</td>${MONTHS.map((_, i) => `<td>${S.months[i + 1].n ? Math.round(S.months[i + 1].hit * S.months[i + 1].n) + "/" + S.months[i + 1].n : "–"}</td>`).join("")}</tr></tbody></table></div>`;
+  const wmax = Math.max(...Object.values(S.weekdays).map((w) => Math.abs(w.mean)));
+  const wd = Object.entries(S.weekdays).map(([i, w]) => {
+    const half = Math.abs(w.mean) / wmax * 50;
+    return `<div class="bar"><span style="text-align:left;font-family:var(--f-body)">${WDS[i]}</span><div class="b"><i style="${w.mean >= 0 ? `left:50%` : `left:${50 - half}%`};width:${half}%;background:${w.mean >= 0 ? css("--up") : css("--down")}"></i></div><span>${pct(w.mean, 2)}</span><span class="muted">${pct(w.hit, 0, false)}</span></div>`;
+  }).join("");
+  const m = S.months[cur], sig = S.weekday_p_adj < 0.05;
+  return {html: `<div class="pills">${["BTC", "ETH"].map((x) => `<button type="button" data-season="${x}" class="${x === seasonCoin ? "on" : ""}">${x === "BTC" ? "Bitcoin" : "Ether"}</button>`).join("")}</div>
+    <section class="hero"><span class="eyebrow">Saisonalität · ${S.years[0]}–${S.years[1]}</span><h1>${MONTHS_L[cur - 1]} bei ${seasonCoin === "BTC" ? "Bitcoin" : "Ether"}: Ø ${pct(m.mean)}</h1>
+    <p class="lead">Im ${MONTHS_L[cur - 1]} lag ${seasonCoin === "BTC" ? "Bitcoin" : "Ether"} in ${Math.round(m.hit * m.n)} von ${m.n} Jahren im Plus. Bei so wenigen Jahren reicht ein einziges Crash- oder Rekordjahr, um den Durchschnitt zu drehen – nimm diese Zahlen als Rückblick, nicht als Prognose.</p></section>
+    <div class="card"><h2>Monatsrenditen in %</h2>${heat}<p class="note" style="margin-top:8px">Jede Zelle ist die Veränderung von Monatsende zu Monatsende. Der laufende Monat ist noch nicht enthalten.</p></div>
+    <div class="grid g2">
+      <div class="card"><h2>Wochentage</h2><div class="legend"><span>Ø Tagesveränderung</span><span>Anteil Tage im Plus</span></div><div class="bars">${wd}</div>
+        <p class="note" style="margin-top:10px">Bester Tag: ${WD[S.weekday_best]}, ${pct(S.weekdays[S.weekday_best].hit, 0, false)} der Tage im Plus (p-Wert nach Korrektur für 7 Tage: ${N[2].format(S.weekday_p_adj)}).</p></div>
+      <div class="card"><h2>Was heißt das?</h2>
+        <div class="verdict"><span class="chip no">Kein Vorteil</span><b>Monate</b><p>Mit ${S.years[1] - S.years[0]} Jahren ist kein Monat statistisch auffällig. Die Unterschiede passen zum Zufall.</p></div>
+        <div class="verdict"><span class="chip ${sig ? "part" : "no"}">${sig ? "Auffällig, klein" : "Kein Vorteil"}</span><b>Wochentage</b><p>${sig ? `Der ${WD[S.weekday_best]} schließt etwas öfter im Plus. Der Unterschied liegt bei wenigen Prozentpunkten und die durchschnittliche Veränderung ist nicht größer als an anderen Tagen – nach Gebühren bleibt praktisch nichts übrig.` : "Kein Wochentag unterscheidet sich verlässlich von den anderen."}</p></div></div>
+    </div>`, after() {}};
+}
+
+function pageCalendar() {
+  const C = D.calendar, now = new Date();
+  if (!C.ok || !C.events.length) return `<section class="hero"><h1>Kalender</h1><p class="lead">Der Wochenkalender konnte beim letzten Aufbau nicht geladen werden.</p></section>`;
+  const byDay = {};
+  for (const e of C.events) (byDay[e.day] ||= []).push(e);
+  const nh = nextHigh();
+  const days = Object.keys(byDay).sort().map((d) => {
+    const dt = new Date(d + "T12:00:00");
+    return `<div class="day"><h3>${WD[(dt.getDay() + 6) % 7]}, ${dDate(d)}</h3>${byDay[d].map((e) => `<div class="ev ${new Date(e.at) < now ? "past" : ""}">
+      <span class="t">${e.time}</span>${folder(e.impact)}<span>${esc(e.title)}</span>
+      <span class="f">${e.actual ? `Ist ${esc(e.actual)}` : e.forecast ? `Prog. ${esc(e.forecast)}` : ""}${e.previous ? ` · vorher ${esc(e.previous)}` : ""}</span></div>`).join("")}</div>`;
+  }).join("");
+  return `<section class="hero"><span class="eyebrow">US-Termine dieser Woche · deutsche Zeit</span><h1>${nh ? `Nächster roter Ordner: ${esc(nh.title)}` : "Keine roten Ordner mehr diese Woche"}</h1>
+    <p class="lead">${nh ? `${WD[(new Date(nh.day + "T12:00:00").getDay() + 6) % 7]} um ${nh.time} Uhr – ${countdown(nh.at)}. ` : ""}Krypto wird in US-Dollar gehandelt und hängt an den Zinserwartungen. Deshalb zeigen wir die wichtigen US-Termine: Notenbank, Inflation, Arbeitsmarkt, Konsum.</p></section>
+    <div class="card"><div class="legend"><span>${folder("High")} hohe Wichtigkeit</span><span>${folder("Medium")} mittlere Wichtigkeit</span></div>${days}
+    <p class="note" style="margin-top:8px">Quelle: Forex-Factory-Wochenkalender, Stand des letzten Aufbaus. Ob Bitcoin an diesen Tagen messbar stärker schwankt, ist noch nicht geprüft – dafür fehlt uns eine lange Termin-Historie.</p></div>`;
+}
+
+function pagePruef() {
+  const R = D.robust, coins = Object.keys(R.coins);
+  const head = `<tr><th>Coin</th><th>Halten</th>${R.grid.sma.map((n) => `<th>Linie ${n}</th>`).join("")}${R.grid.mom.map((n) => `<th>Mom. ${n}</th>`).join("")}</tr>`;
+  const body = coins.map((c) => { const r = R.coins[c];
+    const cell = (x) => `<td class="${x.sharpe > r.hold.sharpe ? "up" : "down"}">${N[2].format(x.sharpe)}</td>`;
+    return `<tr><td class="name"><b>${c}</b></td><td>${N[2].format(r.hold.sharpe)}</td>${R.grid.sma.map((n) => cell(r.sma[n])).join("")}${R.grid.mom.map((n) => cell(r.mom[n])).join("")}</tr>`; }).join("");
+  const dd = coins.map((c) => { const r = R.coins[c];
+    const cell = (x) => `<td class="${x.max_dd > r.hold.max_dd ? "up" : "down"}">${N[0].format(x.max_dd * 100)}</td>`;
+    return `<tr><td class="name"><b>${c}</b></td><td>${N[0].format(r.hold.max_dd * 100)}</td>${R.grid.sma.map((n) => cell(r.sma[n])).join("")}${R.grid.mom.map((n) => cell(r.mom[n])).join("")}</tr>`; }).join("");
+  const halves = coins.map((c) => { const h = R.coins[c].halves;
+    return `<tr><td class="name"><b>${c}</b></td>${["1", "2"].map((k) => `<td>${N[2].format(h[k].hold)}</td><td class="${h[k].sma200 > h[k].hold ? "up" : "down"}">${N[2].format(h[k].sma200)}</td><td class="${h[k].mom30 > h[k].hold ? "up" : "down"}">${N[2].format(h[k].mom30)}</td>`).join("")}</tr>`; }).join("");
+  const cov = D.coins.map((c) => `<tr><td class="name"><b>${c.sym}</b></td>${["1T", "1W", "1M"].map((k) => `<td>${c.ranges[k].coverage == null ? "–" : pct(c.ranges[k].coverage, 1, false)}</td><td class="faint">${c.ranges[k].n}</td>`).join("")}</tr>`).join("");
+  return `<section class="hero"><span class="eyebrow">Prüfstand</span><h1>Was hält, was nicht</h1>
+    <p class="lead">Hier stehen alle Prüfungen mit ihren Zahlen. Jede Regel wurde vorher festgelegt und nicht nachträglich angepasst, damit sie besser aussieht.</p></section>
+    <div class="card"><div class="verdicts">${verdicts().map((v) => `<div class="verdict"><span class="chip ${v.chip}">${v.t}</span><b>${v.title}</b><p>${v.text}</p></div>`).join("")}</div></div>
+    <div class="card"><h2>Schwankungsspanne: Trefferquote (Ziel 80 %)</h2><div class="tbl"><table><thead><tr><th>Coin</th><th>Morgen</th><th>n</th><th>7 Tage</th><th>n</th><th>30 Tage</th><th>n</th></tr></thead><tbody>${cov}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Für jeden Prüftag wurde die Spanne nur aus Daten davor berechnet und dann mit dem tatsächlichen Kurs verglichen.</p></div>
+    <div class="card"><h2>Trendregeln: Rendite-Risiko (Sharpe)</h2><div class="tbl"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Grün = besser als Halten. ${R.better_sharpe} von ${R.tests} Varianten sind besser. Linie = Schlusskurs über dem Durchschnitt der letzten n Tage; Mom. = Veränderung der letzten n Tage positiv.</p></div>
+    <div class="card"><h2>Trendregeln: größter Verlust in %</h2><div class="tbl"><table><thead>${head}</thead><tbody>${dd}</tbody></table></div>
+      <p class="note" style="margin-top:8px">Grün = kleinerer Verlust als Halten. ${R.smaller_dd} von ${R.tests} Varianten verlieren im schlimmsten Fall weniger.</p></div>
+    <div class="card"><h2>Erste gegen zweite Hälfte der Daten (Sharpe)</h2><div class="tbl"><table><thead><tr><th>Coin</th><th>Halten 1</th><th>Linie 1</th><th>Mom. 1</th><th>Halten 2</th><th>Linie 2</th><th>Mom. 2</th></tr></thead><tbody>${halves}</tbody></table></div>
+      <p class="note" style="margin-top:8px">In der jüngeren Hälfte wirken die Regeln deutlich schwächer. Ein Vorteil, der nachlässt, ist ein Warnzeichen.</p></div>
+    <div class="card"><h2>Grenzen</h2><div class="verdicts">
+      <div class="verdict"><span class="chip neu">Auswahl</span><b>Nur heutige Coins</b><p>Coins, die verschwunden sind, fehlen in allen Tests. Das lässt jede Strategie besser aussehen.</p></div>
+      <div class="verdict"><span class="chip neu">Kosten</span><b>0,1 % je Wechsel</b><p>Keine Steuern, keine Kursabweichung bei großen Aufträgen, keine Finanzierungskosten.</p></div>
+      <div class="verdict"><span class="chip neu">Zukunft</span><b>Vergangenheit ist kein Versprechen</b><p>Die Tests zeigen, was früher funktioniert hat. Ob es weiter funktioniert, wissen wir nicht.</p></div></div></div>`;
+}
+
+function pageCalc() {
+  const opts = D.coins.map((c) => `<option value="${c.sym}">${c.sym} – ${esc(c.name)}</option>`).join("");
+  return {html: `<section class="hero"><span class="eyebrow">Rechner</span><h1>Wie viel darf ich kaufen?</h1>
+    <p class="lead">Du legst fest, wie viel du höchstens verlieren willst. Der Rechner sagt dir, wie groß die Position sein darf. Den Stopp schlagen wir aus der 7-Tage-Spanne vor.</p></section>
+    <div class="card"><form class="form" id="calc" onsubmit="return false">
+      <label for="c-acc">Kontogröße ($)<input id="c-acc" inputmode="decimal" value="10000"></label>
+      <label for="c-risk">Risiko je Trade (%)<input id="c-risk" inputmode="decimal" value="1"></label>
+      <label for="c-coin">Coin<select id="c-coin">${opts}</select></label>
+      <label for="c-entry">Einstieg ($)<input id="c-entry" inputmode="decimal"></label>
+      <label for="c-stop">Stopp ($)<input id="c-stop" inputmode="decimal"></label>
+    </form>
+    <div id="c-out" style="margin-top:14px"></div></div>
+    <p class="note">Beispielwerte – trage deine eigenen ein. Gebühren von 0,1 % beim Kauf und beim Verkauf sind eingerechnet.</p>`,
+  after() {
+    const num = (id) => parseFloat(String($(id).value).replace(/\./g, "").replace(",", "."));
+    const setCoin = () => { const c = coin($("#c-coin").value); $("#c-entry").value = N[c.price >= 1 ? 2 : 4].format(c.price);
+      $("#c-stop").value = N[c.price >= 1 ? 2 : 4].format(c.price * (1 + c.ranges["1W"].low)); calc(); };
+    const calc = () => {
+      const acc = num("#c-acc"), risk = num("#c-risk") / 100, e = num("#c-entry"), s = num("#c-stop"), fee = D.rules.fee;
+      if (![acc, risk, e, s].every(isFinite) || acc <= 0 || e <= 0 || s <= 0 || s === e) { $("#c-out").innerHTML = '<p class="note">Bitte gültige Zahlen eintragen; Stopp und Einstieg müssen sich unterscheiden.</p>'; return; }
+      const perUnit = Math.abs(e - s) + (e + s) * fee, units = acc * risk / perUnit, value = units * e, share = value / acc;
+      $("#c-out").innerHTML = `<div class="result"><span class="eyebrow">Positionsgröße</span><span class="big">${N[units >= 100 ? 0 : 4].format(units)} ${$("#c-coin").value}</span>
+        <span class="muted">Wert ${usd(value)} · ${pct(share, 0, false)} des Kontos · Abstand zum Stopp ${pct(Math.abs(s - e) / e, 1, false)} · Verlust bei Stopp ${usd(acc * risk)}</span>
+        ${s > e ? '<span class="down">Stopp liegt über dem Einstieg – das ist eine Verkaufsposition (short).</span>' : ""}
+        ${share > 1 ? '<span class="down">Die Position ist größer als dein Konto – das ginge nur mit Hebel. Lieber Risiko senken oder Stopp weiter weg setzen.</span>' : ""}</div>`;
+    };
+    $("#c-coin").addEventListener("change", setCoin);
+    for (const id of ["#c-acc", "#c-risk", "#c-entry", "#c-stop"]) $(id).addEventListener("input", calc);
+    setCoin();
+  }};
+}
+
+/* ---------- Routing ---------- */
+function render() {
+  const h = (location.hash || "#start").slice(1);
+  let page;
+  if (h.startsWith("coin-")) page = pageCoin(h.slice(5).toUpperCase());
+  else page = ({start: pageStart, stimmung: pageMood, cot: pageCot, saison: pageSeason, kalender: pageCalendar, pruefung: pagePruef, rechner: pageCalc}[h] || pageStart)();
+  const html = typeof page === "string" ? page : page.html;
+  $("#app").innerHTML = `<div class="page" style="display:grid;gap:16px;min-width:0">${html}</div>`;
+  if (page.after) page.after();
+  const key = h.startsWith("coin-") ? "coin-btc" : h;
+  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + (key || "start")));
+}
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-go]"); if (t) { location.hash = t.dataset.go; return; }
+  const s = e.target.closest("[data-season]"); if (s) { seasonCoin = s.dataset.season; render(); }
+});
+document.addEventListener("keydown", (e) => { const t = e.target.closest("tr[data-go]"); if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); location.hash = t.dataset.go; } });
+let lastW = innerWidth;
+window.addEventListener("resize", () => { if (D && Math.abs(innerWidth - lastW) > 40) { lastW = innerWidth; render(); } });
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => D && render());
+new MutationObserver(() => D && render()).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+
+fetch("data.json").then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
+  D = d;
+  $("#stamp").textContent = `Aktualisiert ${new Date(d.generated).toLocaleString("de-DE", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"})}`;
+  render();
+}).catch((e) => { $("#app").innerHTML = `<p class="loading">Die Daten konnten nicht geladen werden (${esc(e.message)}). Bitte Seite neu laden.</p>`; });
+</script>

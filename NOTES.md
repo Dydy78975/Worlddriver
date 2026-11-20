@@ -1,6 +1,6 @@
 # Übergabe-Notiz – WorlᗡDriver / FOREX NEXUS AI
 
-Stand: 18.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj (privat)
+Stand: 20.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Forex-Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj · Krypto-Website: https://claude.ai/artifact/7RnuArdUCSafvvU8t11fSJ (beide privat)
 
 ## Ziel
 - Fundamentales Trading-Tool + Prognose-Plattform **nur** für USD, EUR, JPY, GBP, CHF, CAD, AUD, NZD und ihre 28 Paare.
@@ -16,6 +16,11 @@ Stand: 18.11.2026 · Branch `claude/forex-nexus-ai-platform-6ez50s` · Website: 
 - Fundamentals: COT-Index (Commercials/Spekulanten/Kleinanleger), Saisonalität + Jahresverlauf + Screener (Binomialtest, Bonferroni), Konfluenz je Paar, Wochenaussage, Marktstimmung, Zinsen & Carry; alle Signale historisch geprüft.
 - Website (eine HTML-Datei): Cockpit, Heute, Währungen, Paare (Matrix + Checkliste), Paar-Seite (Woche/Tage), Kalender (Countdown), COT, Saisonalität, Prognosen, Tracker, Zinsen, Makro, Rechner, Weltkarte, Daten. iPad: feste Seitenleiste.
 - 96 Tests grün (lokal + GitHub Actions). Täglicher Check: geplante Aufgabe `trig_017cgKCoLFTF76c2subGa5aC`, 5:36 Europe/Berlin, läuft in dieser Sitzung.
+
+## Krypto (neu, 20.11.2026)
+- Wunsch des Nutzers: wenn Forex wenig hergibt, Krypto-Website. `forex_nexus/crypto/` (data, analysis, site), Vorlage `site/crypto_template.html`, Befehl `crypto-site [--offline]`, Doku `docs/12_krypto.md`, Tests `tests/test_crypto.py`.
+- Ergebnis: Schwankungsspanne hält; Trendregeln begrenzen vor allem Verluste; Fear & Greed, COT, Saisonalität ohne Vorteil.
+- Netz: `data-api.binance.vision`, `api.alternative.me` freigegeben.
 
 ## Gerade in Arbeit
 - Warten auf Design-Feedback des Nutzers zu Version 7 der Website (Ziel: „so sauber wie die Fotos“).

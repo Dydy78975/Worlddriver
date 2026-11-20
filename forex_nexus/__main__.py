@@ -1,4 +1,4 @@
-"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily | ingest-cot | ingest-calendar"""
+"""Kommandozeile:  python -m forex_nexus migrate | status | ingest-fx | check-fx | report-fx [Ordner] | load-knowledge | download-dukascopy [Startjahr] | ingest-dukascopy | ingest-fred-series | train | promote <Version> <Horizont> <Modell> <Name> <Begründung> | forecast | evaluate | validate-dependencies | build-site | daily | ingest-cot | ingest-calendar | crypto-site [--offline]"""
 
 import sys
 
@@ -9,7 +9,7 @@ from forex_nexus.db.migrate import migrate
 
 def main(argv: list[str]) -> int:
     cmd = argv[1] if len(argv) > 1 else "status"
-    url = database_url() if cmd != "download-dukascopy" else None
+    url = database_url() if cmd not in ("download-dukascopy", "crypto-site") else None
     if cmd == "migrate":
         applied = migrate(url)
         print("Eingespielt:", ", ".join(applied) if applied else "nichts – Datenbank ist aktuell")
@@ -95,6 +95,10 @@ def main(argv: list[str]) -> int:
         forecast(url)
         evaluate_due(url)
         print(f"Website: {build(url)}")
+        return 0
+    if cmd == "crypto-site":
+        from forex_nexus.crypto.site import build as build_crypto
+        print(f"Krypto-Website geschrieben: {build_crypto(refresh='--offline' not in argv)}")
         return 0
     if cmd == "build-site":
         from forex_nexus.reports.site_export import build
