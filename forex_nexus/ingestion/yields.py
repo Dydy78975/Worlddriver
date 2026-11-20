@@ -21,7 +21,7 @@ import urllib.error
 
 from forex_nexus.ingestion.http import fetch_bytes, fetch_text
 
-UA = "worlddriver-research/1.0 (python urllib)"
+UA = "worlddriver-research/1.0"     # ehrliche Kennung; Zusätze wie „python“ blockt die Bank of England
 ECB = "https://data-api.ecb.europa.eu/service/data/YC/B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y?format=csvdata&startPeriod=2004-01-01"
 BOC = "https://www.bankofcanada.ca/valet/observations/BD.CDN.2YR.DQ.YLD/csv?start_date=1995-01-01"
 RBA_NOW = "https://www.rba.gov.au/statistics/tables/csv/f2-data.csv"
