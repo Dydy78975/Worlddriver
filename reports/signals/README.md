@@ -157,9 +157,9 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Rendite 10-jährige japanische Staatsanleihe | JPY | 2026-10-01 | ja | 56 |
 | Rendite 10-jährige neuseeländische Staatsanleihe | NZD | 2026-10-01 | ja | 56 |
 | Rendite 10-jährige US-Staatsanleihe | USD | 2026-11-16 | ja | 56 |
-| Rendite 2 J. Australien (RBA) | AUD | 2026-11-11 | ja | 24 |
-| Rendite 2 J. Kanada (Bank of Canada) | CAD | 2026-11-17 | ja | 24 |
-| Rendite 2 J. Euroraum (EZB-Zinsstrukturkurve) | EUR | 2026-11-17 | ja | 24 |
+| Rendite 2 J. Australien (RBA) | AUD | 2026-11-18 | ja | 24 |
+| Rendite 2 J. Kanada (Bank of Canada) | CAD | 2026-11-19 | ja | 24 |
+| Rendite 2 J. Euroraum (EZB-Zinsstrukturkurve) | EUR | 2026-11-19 | ja | 24 |
 | Rendite 5 J. Großbritannien (Bank of England; kürzeste verfügbare Reihe) | GBP | – | **nein** | 24 |
-| Rendite 2 J. Japan (Finanzministerium) | JPY | 2026-11-18 | ja | 24 |
+| Rendite 2 J. Japan (Finanzministerium) | JPY | 2026-11-19 | ja | 24 |
 | Rendite 2-jährige US-Staatsanleihe | USD | 2026-11-16 | ja | 39 |
