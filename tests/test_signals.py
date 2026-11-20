@@ -131,8 +131,8 @@ def test_yield_parsers():
 
 
 def test_boe_waits_and_retries_when_blocked(monkeypatch):
-    answers = iter(["<!DOCTYPE html>", "DATE,IUDSNPY\n02 Jan 1995,8.1\n", "DATE,IUDSNPY\n02 Jan 2015,1.1\n"])
+    answers = iter(["<!DOCTYPE html>", "DATE,IUDSNPY\n02 Jan 1995,8.1\n02 Jan 2015,1.1\n"])
     monkeypatch.setattr(yields, "fetch_text", lambda url, user_agent=None: next(answers))
     waits = []
     s = yields.fetch("BOE_5Y", sleep=waits.append)
-    assert list(s.values) == [8.1, 1.1] and waits == [yields.BOE_PAUSE, yields.BOE_PAUSE]
+    assert list(s.values) == [8.1, 1.1] and waits == [yields.BOE_PAUSE]

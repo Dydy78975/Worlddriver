@@ -30,8 +30,7 @@ MOF_ALL = "https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/his
 MOF_NOW = "https://www.mof.go.jp/english/policy/jgbs/reference/interest_rate/jgbcme.csv"
 BOE = ("https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom={start}"
        "&Dateto={end}&SeriesCodes=IUDSNPY&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N")
-BOE_CHUNKS = (("01/Jan/1995", "31/Dec/2014"), ("01/Jan/2015", "now"))
-BOE_PAUSE = 120            # die Bank of England liefert bei schnellen Folgeanfragen eine HTML-Seite statt Daten
+BOE_PAUSE = 300            # die Bank of England sperrt Folgeanfragen einige Minuten (HTML-Seite statt Daten)
 
 
 def _series(dates, values) -> pd.Series:
@@ -86,22 +85,17 @@ def fetch(code: str, sleep=time.sleep) -> pd.Series:
         now = parse_mof(fetch_bytes(MOF_NOW).decode("utf-8", "replace"))
         s = pd.concat([hist, now])
         return s[~pd.Index(s.index).duplicated(keep="last")].sort_index()
-    if code == "BOE_5Y":
-        parts = []
-        for i, (start, end) in enumerate(BOE_CHUNKS):
-            for attempt in range(3):
-                if i or attempt:
-                    sleep(BOE_PAUSE)
-                try:
-                    text = fetch_text(BOE.format(start=start, end=end), user_agent=UA)
-                except urllib.error.HTTPError as exc:      # 403 = vorübergehende Sperre -> warten
-                    if exc.code != 403:
-                        raise
-                    continue
-                if text.startswith("DATE"):
-                    parts.append(parse_boe(text))
-                    break
-            else:
-                raise RuntimeError(f"Bank of England lieferte keine Daten für {start}–{end}")
-        return pd.concat(parts)
+    if code == "BOE_5Y":                     # eine einzige Anfrage: Folgeanfragen sperrt die BoE für Minuten
+        for attempt in range(3):
+            if attempt:
+                sleep(BOE_PAUSE)
+            try:
+                text = fetch_text(BOE.format(start="01/Jan/1995", end="now"), user_agent=UA)
+            except urllib.error.HTTPError as exc:          # 403 = vorübergehende Sperre -> warten
+                if exc.code != 403:
+                    raise
+                continue
+            if text.startswith("DATE"):
+                return parse_boe(text)
+        raise RuntimeError("Bank of England lieferte keine Daten")
     raise ValueError(code)
