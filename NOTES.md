@@ -28,7 +28,7 @@ Stand: 18.11.2026 · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj 
 - Bug-Prüfung alle 30 Min. per CronCreate (geht bei Neustart des Workers verloren → neu anlegen).
 
 ## Offen / bekannte Probleme
-- Bank of England 5-J.-Rendite: Erstabruf scheiterte an deren Drosselung; erneut versuchen (`ingest-fred-series`).
+- Bank of England 5-J.-Rendite läuft (eine Anfrage; Kennung ohne „python“, sonst Sperre).
 - CHF und NZD ohne 2-J.-Rendite (SNB-Reihen enden 07/2025, RBNZ sperrt Abrufe); Global Dairy Trade ohne freie Schnittstelle.
 - **Kein dauerhafter Betrieb:** Cloud-DB temporär (`/var/tmp/fnxw`, Port 5495, DB `fnx_check`; Neuaufbau:
   initdb + `migrate` + `ingest-fx` + `ingest-fred-series` + `ingest-cot` + `ingest-calendar` + `train` +

@@ -10,29 +10,29 @@ Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 P
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 49,4 % / 50,3 % (19 %) | 51,6 % / 57,7 % (11 %) | nein | 50 % |
-| GBP | 49,8 % / 56,6 % (8 %) | 51,3 % / 45,9 % (6 %) | nein | 47 % |
-| AUD | 49,4 % / 49,1 % (28 %) | 51,5 % / 49,3 % (13 %) | nein | 53 % |
+| EUR | 49,2 % / 51,7 % (23 %) | 51,7 % / 52,8 % (10 %) | nein | 51 % |
+| GBP | 49,4 % / 56,8 % (8 %) | 50,3 % / 45,3 % (8 %) | nein | 47 % |
+| AUD | 49,9 % / 49,6 % (24 %) | 51,3 % / 50,7 % (16 %) | nein | 52 % |
 | NZD | 50,2 % / 49,6 % (39 %) | 50,9 % / 53,5 % (11 %) | nein | 60 % |
-| USD | 50,5 % / 51,3 % (9 %) | 50,5 % / 52,6 % (7 %) | nein | 46 % |
-| CAD | 50,8 % / 49,7 % (19 %) | 51,3 % / 52,9 % (14 %) | nein | 40 % |
+| USD | 48,7 % / 52,4 % (14 %) | 50,6 % / 54,4 % (4 %) | nein | 45 % |
+| CAD | 50,5 % / 49,3 % (19 %) | 51,5 % / 51,8 % (15 %) | nein | 44 % |
 | CHF | 48,2 % / 48,8 % (25 %) | 50,8 % / 45,9 % (6 %) | nein | 47 % |
-| JPY | 49,0 % / 51,3 % (13 %) | 51,6 % / 57,9 % (13 %) | nein | 35 % |
+| JPY | 48,3 % / 51,5 % (14 %) | 51,5 % / 56,4 % (12 %) | nein | 38 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
 | Modell | Währung | Entdeckung 1999–2012 | Bestätigung 2013–2019 | Schlusstest ab 2020 | gültig |
 |---|---|---|---|---|---|
+| Rendite 2 J. 3 M. | USD | +6,2 % (t 2,6) | +0,9 % (t 0,3) | +0,9 % (t 0,3) | nein |
 | Rendite 10 J. | EUR | +4,9 % (t 2,2) | -0,5 % (t -0,2) | -1,0 % (t -0,6) | nein |
 | Arbeitslosigkeit 6 M. | EUR | +4,1 % (t 2,1) | +0,8 % (t 0,3) | +1,3 % (t 0,7) | nein |
+| Rendite 2 J. 6 M. | EUR | +4,5 % (t 2,0) | -5,0 % (t -2,1) | +2,4 % (t 1,2) | nein |
 | US-Rendite 2 J. 1 Monat | JPY | +7,5 % (t 2,0) | -12,3 % (t -2,9) | +0,1 % (t 0,0) | nein |
 | Gegen Kleinanleger | AUD | +13,9 % (t 2,0) | +1,5 % (t 0,3) | +2,1 % (t 0,5) | nein |
 | Inflationsanstieg 12 M. | USD | +4,3 % (t 1,9) | -2,4 % (t -0,9) | +3,3 % (t 1,2) | nein |
-| Rendite 2 J. 6 M. | EUR | +4,1 % (t 1,8) | -2,9 % (t -1,3) | +3,3 % (t 1,7) | nein |
+| Rendite 2 J. 6 M. | USD | +4,2 % (t 1,8) | +1,5 % (t 0,6) | -1,1 % (t -0,4) | nein |
 | Kreditaufschlag 1 Monat | JPY | +7,3 % (t 1,8) | -7,4 % (t -1,9) | +1,3 % (t 0,3) | nein |
 | Arbeitslosigkeit 6 M. | CAD | +4,5 % (t 1,8) | -0,5 % (t -0,2) | +2,2 % (t 1,0) | nein |
-| Rendite 2 J. 3 M. | USD | +4,1 % (t 1,8) | +0,9 % (t 0,4) | +1,4 % (t 0,4) | nein |
-| Zinskurve 6 M. | NZD | +5,4 % (t 1,7) | +3,4 % (t 1,0) | +1,6 % (t 0,6) | nein |
 
 ## Woche (1W)
 
@@ -42,29 +42,29 @@ Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 P
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 50,1 % / 48,9 % (52 %) | 48,9 % / 50,3 % (46 %) | nein | 41 % |
-| GBP | 51,0 % / 50,3 % (50 %) | 52,8 % / 51,7 % (25 %) | nein | 53 % |
-| AUD | 51,8 % / 51,6 % (51 %) | 51,4 % / 51,7 % (41 %) | nein | 33 % |
+| EUR | 51,5 % / 46,6 % (52 %) | 49,4 % / 48,5 % (47 %) | nein | 42 % |
+| GBP | 49,9 % / 52,0 % (48 %) | 54,2 % / 49,5 % (25 %) | nein | 45 % |
+| AUD | 51,5 % / 51,9 % (51 %) | 51,1 % / 54,1 % (41 %) | nein | 34 % |
 | NZD | 47,1 % / 52,5 % (44 %) | 50,6 % / 50,6 % (48 %) | nein | 55 % |
-| USD | 51,2 % / 48,9 % (36 %) | 48,3 % / 51,0 % (29 %) | nein | 67 % |
-| CAD | 51,8 % / 52,6 % (48 %) | 48,9 % / 46,3 % (41 %) | nein | 30 % |
+| USD | 50,4 % / 49,7 % (40 %) | 50,3 % / 49,5 % (29 %) | nein | 67 % |
+| CAD | 50,7 % / 51,4 % (50 %) | 50,8 % / 49,7 % (41 %) | nein | 38 % |
 | CHF | 58,4 % / 61,0 % (32 %) | 56,4 % / 59,4 % (47 %) | ja | 42 % |
-| JPY | 48,2 % / 49,0 % (42 %) | 53,1 % / 55,9 % (41 %) | nein | 35 % |
+| JPY | 47,1 % / 49,0 % (39 %) | 53,4 % / 56,1 % (41 %) | nein | 36 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
 | Modell | Währung | Entdeckung 1999–2012 | Bestätigung 2013–2019 | Schlusstest ab 2020 | gültig |
 |---|---|---|---|---|---|
-| Rendite 2 J. 3 M. | USD | +5,5 % (t 2,4) | -0,7 % (t -0,3) | +1,0 % (t 0,3) | nein |
+| Rendite 2 J. 3 M. | USD | +6,6 % (t 2,9) | +0,6 % (t 0,2) | +0,9 % (t 0,3) | nein |
 | Arbeitslosigkeit 6 M. | EUR | +4,6 % (t 2,3) | +0,9 % (t 0,4) | +1,2 % (t 0,7) | nein |
+| Rendite 2 J. über Leitzins | USD | +5,1 % (t 2,2) | +1,0 % (t 0,3) | -2,5 % (t -0,8) | nein |
+| Rendite 2 J. 6 M. | USD | +4,6 % (t 2,1) | +0,6 % (t 0,2) | -1,9 % (t -0,6) | nein |
 | Trend 1 Monat | USD | +4,3 % (t 2,0) | -1,5 % (t -0,6) | +0,4 % (t 0,2) | nein |
 | Rendite 10 J. | EUR | +4,7 % (t 2,0) | -0,5 % (t -0,3) | -1,0 % (t -0,6) | nein |
 | Inflation | NZD | +6,1 % (t 2,0) | +1,2 % (t 0,3) | -1,5 % (t -0,5) | nein |
 | US-Rendite 2 J. 1 Monat | JPY | +7,6 % (t 2,0) | -10,7 % (t -2,6) | +1,0 % (t 0,3) | nein |
 | Kreditaufschlag 1 Monat | JPY | +7,6 % (t 1,8) | -8,7 % (t -2,1) | +1,0 % (t 0,3) | nein |
 | Inflationsanstieg 12 M. | USD | +4,0 % (t 1,8) | -2,6 % (t -1,0) | +2,8 % (t 1,0) | nein |
-| US-Rendite 2 J. 1 Woche | USD | +4,9 % (t 1,8) | +0,2 % (t 0,1) | +0,2 % (t 0,0) | nein |
-| Eisenerz 3 Monate | AUD | +6,2 % (t 1,8) | -3,3 % (t -1,2) | +5,5 % (t 2,0) | nein |
 
 ## Monat (1M)
 
@@ -74,14 +74,14 @@ Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 P
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 51,2 % / 50,0 % (43 %) | 47,6 % / 57,9 % (46 %) | nein | 43 % |
-| GBP | 54,8 % / 50,0 % (55 %) | 59,8 % / 68,9 % (55 %) | nein | 50 % |
-| AUD | 44,0 % / 45,2 % (74 %) | 47,6 % / 51,9 % (63 %) | nein | 35 % |
+| EUR | 53,6 % / 51,3 % (46 %) | 52,4 % / 57,9 % (46 %) | nein | 43 % |
+| GBP | 52,4 % / 50,0 % (55 %) | 59,8 % / 70,5 % (54 %) | nein | 47 % |
+| AUD | 47,6 % / 44,3 % (73 %) | 46,3 % / 52,9 % (62 %) | nein | 33 % |
 | NZD | 59,5 % / 59,5 % (44 %) | 52,4 % / 60,0 % (43 %) | nein | 44 % |
-| USD | 45,2 % / 39,4 % (39 %) | 46,3 % / 41,2 % (41 %) | nein | 56 % |
-| CAD | 47,6 % / 44,0 % (60 %) | 52,4 % / 49,0 % (62 %) | nein | 51 % |
+| USD | 41,7 % / 38,5 % (46 %) | 42,7 % / 38,7 % (38 %) | nein | 57 % |
+| CAD | 45,2 % / 44,0 % (60 %) | 52,4 % / 47,7 % (54 %) | nein | 48 % |
 | CHF | 56,0 % / 50,0 % (40 %) | 45,1 % / 47,7 % (54 %) | nein | 57 % |
-| JPY | 56,0 % / 53,7 % (49 %) | 58,5 % / 61,4 % (54 %) | nein | 46 % |
+| JPY | 51,2 % / 59,5 % (50 %) | 56,1 % / 59,5 % (51 %) | nein | 48 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
@@ -91,7 +91,7 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Arbeitslosigkeit 3 M. | CAD | +5,9 % (t 2,4) | -4,4 % (t -1,4) | +2,0 % (t 1,1) | nein |
 | Inflationsanstieg 3 M. | CAD | +4,5 % (t 2,1) | -1,4 % (t -0,5) | -0,6 % (t -0,4) | nein |
 | US-Rendite 2 J. 3 Monate | CHF | +4,6 % (t 2,1) | -2,5 % (t -0,8) | -0,1 % (t -0,1) | nein |
-| Rendite 2 J. 3 M. | USD | +4,5 % (t 1,9) | +2,6 % (t 1,0) | +3,5 % (t 1,0) | nein |
+| Rendite 2 J. 3 M. | USD | +4,7 % (t 2,1) | +1,5 % (t 0,6) | +2,6 % (t 0,8) | nein |
 | Eisenerz 1 Monat | AUD | +7,3 % (t 1,9) | +1,3 % (t 0,5) | +1,1 % (t 0,4) | nein |
 | Arbeitslosigkeit 6 M. | EUR | +3,5 % (t 1,8) | +1,8 % (t 0,9) | +1,9 % (t 1,1) | nein |
 | Kreditaufschlag 3 Monate | CHF | +4,0 % (t 1,8) | +2,0 % (t 0,7) | +1,7 % (t 0,9) | nein |
@@ -160,6 +160,6 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Rendite 2 J. Australien (RBA) | AUD | 2026-11-18 | ja | 24 |
 | Rendite 2 J. Kanada (Bank of Canada) | CAD | 2026-11-19 | ja | 24 |
 | Rendite 2 J. Euroraum (EZB-Zinsstrukturkurve) | EUR | 2026-11-19 | ja | 24 |
-| Rendite 5 J. Großbritannien (Bank of England; kürzeste verfügbare Reihe) | GBP | – | **nein** | 24 |
+| Rendite 5 J. Großbritannien (Bank of England; kürzeste verfügbare Reihe) | GBP | 2026-11-18 | ja | 24 |
 | Rendite 2 J. Japan (Finanzministerium) | JPY | 2026-11-19 | ja | 24 |
 | Rendite 2-jährige US-Staatsanleihe | USD | 2026-11-16 | ja | 39 |
