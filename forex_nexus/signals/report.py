@@ -66,7 +66,8 @@ def data_audit(conn, now: datetime | None = None) -> list[dict]:
         elif code == "VIXCLS":
             used = sum(1 for m in MODELS if m.family == "Risikostimmung" or f"drv_{code}_" in m.key)
         else:
-            used = sum(1 for m in MODELS if f"drv_{code}_" in m.key)
+            key = "BTP_BUND" if code == "IRLTLT01ITM156N" else code
+            used = sum(1 for m in MODELS if f"drv_{key}_" in m.key)
         age = None if released is None else (now - released).days
         out.append({"source": src, "code": code, "category": cat, "currency": ccy, "frequency": freq,
                     "description": descr, "last": None if last is None else str(last), "days_since_release": age,

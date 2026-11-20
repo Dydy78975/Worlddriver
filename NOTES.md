@@ -11,13 +11,13 @@ Stand: 18.11.2026 · Website: https://claude.ai/artifact/HbAihgkuZ3q8qsu7xAWUBj 
 - Nutzer: Deutsch, keine Programmierkenntnisse, iPhone/iPad.
 
 ## Fertig (Stand 19.11.2026)
-- **Modelle je Währung** (`forex_nexus/signals/`): 410 Modelle, 43–65 je Währung, aus Leitzins, Renditen 10 J. und 2 J.,
+- **Modelle je Währung** (`forex_nexus/signals/`): 443 Modelle, 50–68 je Währung, aus Leitzins, Renditen 10 J. und 2 J.,
   Zinserwartung, Inflation, Arbeitsmarkt, COT, Saison, Risikostimmung, Kursverlauf und eigenen Treibern
   (NZD Milch/Fleisch/Wolle/Holz, AUD Erze/Kohle/LNG/Agrar, CAD Öl/Gas/Holz/Metalle, Importeure Energie negativ,
-  sichere Häfen VIX). Gemessen an der Währungsstärke gegen die anderen 7; Tag, Woche, Monat.
+  sichere Häfen VIX, Risiko-Treiber Italien-Aufschlag/Kreditaufschlag/Finanzstress). Gemessen an der Währungsstärke gegen die anderen 7; Tag, Woche, Monat.
 - **Kombi-Modell je Währung** (logistische Regression): Bestätigung (Training ≤ 2012, Prüfung 2013–2019),
   Schlusstest (Training ≤ 2019, eingefroren, Prüfung ab 2020), Trefferquote je Sicherheitsstufe mit 95-%-Bereich.
-- **Ergebnis:** 0 Einzelmodelle bestehen; Kombi bestätigt nur CHF/Woche (57 % / 54 %). 70 % werden nicht verlässlich
+- **Ergebnis:** 0 Einzelmodelle bestehen; Kombi bestätigt nur CHF/Woche (58 % / 56 %, mit Risiko-Treibern). 70 % werden nicht verlässlich
   erreicht. Details: `docs/12_signal_abstimmung.md`, `reports/signals/README.md`.
 - Datenquellen: FRED, EZB, BIS (Inflation, Leitzinsen), CFTC, Forex Factory, neu 2-J.-Renditen von EZB, Bank of Canada,
   RBA, Finanzministerium Japan, Bank of England (5 J.; drosselt stark, braucht Pausen). Alle Reihen aktuell, jede

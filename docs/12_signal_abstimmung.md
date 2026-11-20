@@ -9,7 +9,7 @@ Stand: 19.11.2026 · Code: `forex_nexus/signals/` · Bericht: [reports/signals/R
 Rohstoffe für AUD, Leitzins und Renditen für alle); nichts als Füllmaterial; schwache Einzelsignale (COT, Saison …)
 kombinieren, um eine Richtung zu sehen; Ziel mindestens 70 % Aussagekraft; Tag, Woche (und Monat).
 
-* **410 Modelle** (`library.py`), 43–65 je Währung, jedes Modell genau einmal mit seiner ökonomisch erwarteten Richtung:
+* **443 Modelle** (`library.py`), 50–68 je Währung, jedes Modell genau einmal mit seiner ökonomisch erwarteten Richtung:
   * Makro, jeweils eigener Wert gegen den Durchschnitt der anderen 7: Leitzins (BIS/Fed/EZB), Leitzins-Kurs 3/6/12 M.,
     Rendite 10 J. und Anstieg 1/3/6 M., **Rendite 2 J.** (EZB, Bank of Canada, RBA, Finanzministerium Japan,
     Bank of England [5 J.], FRED) mit Anstieg 1/3/6 M. und Abstand zum Leitzins, Zinskurve, Realzins, Inflation (BIS),
@@ -21,6 +21,8 @@ kombinieren, um eine Richtung zu sehen; Ziel mindestens 70 % Aussagekraft; Tag, 
     Kohle, LNG, Kupfer, Aluminium, Weizen, Wolle, Rind; CAD Öl, Gas, Holz, Aluminium, Nickel; JPY Öl und LNG
     (Importeur, negativ), VIX, US-Rendite; CHF VIX, US-Rendite; EUR/GBP Gas und Öl (Importeure, negativ); USD VIX,
     US-Rendite.
+  * Risiko-Treiber (seit 20.11.2026): Italien-Aufschlag (Italien − Deutschland, 10 J.: EUR −, CHF +), Kreditaufschlag
+    BAA (CHF, USD, JPY +; GBP, AUD, NZD −), Finanzstress-Index der Chicago Fed (CHF, USD +), US-Rendite 2 J. für GBP (−).
   * Bewusst weggelassen: Spiegelbild-Modelle, zusätzliche Zeitfenster, schwach begründete Rohstoffe (Blei, Uran,
     Zink, Gerste …). Für CHF und NZD gibt es keine aktuelle 2-J.-Rendite (SNB-Reihen enden 07/2025, RBNZ sperrt
     automatische Abrufe) – dort keine 2-J.-Modelle statt wirkungsloser.
@@ -37,7 +39,8 @@ kombinieren, um eine Richtung zu sehen; Ziel mindestens 70 % Aussagekraft; Tag, 
 ### Ergebnis 19.11.2026 (Details im Bericht)
 
 * Kein Einzelmodell besteht die strenge Prüfung (Tag, Woche, Monat).
-* Kombi-Modelle: meist um 50 %. Bestätigt ist bisher nur **CHF auf Wochensicht** (Bestätigung 57 %, Schlusstest 54 %).
+* Kombi-Modelle: meist um 50 %. Bestätigt ist **CHF auf Wochensicht**; mit den Risiko-Treibern (20.11.2026)
+  Bestätigung 58 %, Schlusstest 56 % (ab 60 % Sicherheit: 61 % / 59 %).
   Auf Monatssicht liegen JPY und NZD in Bestätigung und Schlusstest bei 57–60 %, aber mit nur ~80 Monaten je Zeitraum
   noch nicht von Zufall unterscheidbar.
 * **70 % Trefferquote werden nicht verlässlich erreicht.** Wo einzelne Sicherheitsstufen 70 % oder mehr zeigen, beruht

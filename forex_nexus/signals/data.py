@@ -157,21 +157,29 @@ def load_inputs(conn) -> Inputs:
 
 
 def _drivers(conn, when, dates) -> dict:
-    """Änderung jeder Treiberreihe über 5 Zeitfenster, zum Entscheidungszeitpunkt bekannt.
-    Preise als Log-Änderung, Renditen (Kategorie yield_*) als Änderung in Prozentpunkten."""
-    from forex_nexus.signals.library import DRIVERS
+    """Änderung jeder Treiberreihe über 3 Zeitfenster, zum Entscheidungszeitpunkt bekannt.
+    Preise als Log-Änderung; Renditen, Aufschläge und Indizes (LEVEL_CODES) als Änderung in Punkten."""
+    from forex_nexus.signals.library import DRIVERS, LEVEL_CODES
     codes = sorted({code for lst in DRIVERS.values() for code, *_ in lst})
-    rows = conn.execute("SELECT source_code, category FROM ref.series WHERE source_code = ANY(%s)", (codes,)).fetchall()
     out = {}
-    for code, cat in rows:
-        df, freq = load_periods(conn, code)
+    for code in codes:
+        if code == "BTP_BUND":                                   # Italien-Aufschlag = Italien − Deutschland
+            it, freq = load_periods(conn, "IRLTLT01ITM156N")
+            de, _ = load_periods(conn, "IRLTLT01DEM156N")
+            if it.empty or de.empty:
+                continue
+            df = it.join(de, rsuffix="_de", how="inner")
+            df = pd.DataFrame({"value": df["value"].astype(float) - df["value_de"].astype(float),
+                               "avail": df[["avail", "avail_de"]].max(axis=1)})
+        else:
+            df, freq = load_periods(conn, code)
         if df.empty:
             continue
         v = df["value"].astype(float)
-        v = v if cat.startswith("yield") else np.log(v.where(v > 0))
-        windows = WINDOWS_DAILY if freq == "D" else WINDOWS_MONTHLY
+        v = v if code in LEVEL_CODES else np.log(v.where(v > 0))
+        windows = WINDOWS_MONTHLY if freq in ("M", "Q") else WINDOWS_DAILY
         for n, _ in windows:
-            ch = change(v, days=n) if freq == "D" else change(v, months=n)
+            ch = change(v, months=n) if freq in ("M", "Q") else change(v, days=n)
             out[(code, n)] = as_of(ch, df["avail"], when, freq).set_axis(dates)
     return out
 

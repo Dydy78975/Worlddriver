@@ -31,7 +31,8 @@ DRIVERS = {
             ("PBEEFUSDM", "Rindfleisch", 1, "Fleisch ist ein großer Exportposten"),
             ("PLAMBUSDM", "Lammfleisch", 1, "Neuseeland ist größter Lammexporteur"),
             ("PWOOLCUSDM", "Wolle", 1, "Wolle (grob) ist ein traditioneller Export"),
-            ("PLOGSKUSDM", "Rundholz", 1, "Holz geht vor allem nach China")],
+            ("PLOGSKUSDM", "Rundholz", 1, "Holz geht vor allem nach China"),
+            ("BAA10Y", "Kreditaufschlag", -1, "Der Neuseeland-Dollar leidet, wenn Kreditrisiken steigen")],
     "AUD": [("PIORECRUSDM", "Eisenerz", 1, "Eisenerz ist Australiens größter Export"),
             ("PCOALAUUSDM", "Kohle", 1, "Kohle ist ein Hauptexport"),
             ("PNGASJPUSDM", "Flüssiggas (Asien)", 1, "Australien ist großer LNG-Exporteur"),
@@ -39,7 +40,8 @@ DRIVERS = {
             ("PALUMUSDM", "Aluminium", 1, "Aluminium und Bauxit"),
             ("PWHEAMTUSDM", "Weizen", 1, "Getreideexporte"),
             ("PWOOLFUSDM", "Wolle", 1, "Australien ist größter Exporteur feiner Wolle"),
-            ("PBEEFUSDM", "Rindfleisch", 1, "Australien ist großer Rindfleischexporteur")],
+            ("PBEEFUSDM", "Rindfleisch", 1, "Australien ist großer Rindfleischexporteur"),
+            ("BAA10Y", "Kreditaufschlag", -1, "Der Australische Dollar leidet, wenn Kreditrisiken steigen")],
     "CAD": [("DCOILWTICO", "Rohöl WTI", 1, "Öl ist Kanadas wichtigster Export"),
             ("DHHNGSP", "Erdgas USA", 1, "Gas geht in die USA"),
             ("WPU081", "Schnittholz", 1, "Holz ist ein großer Export in die USA"),
@@ -48,19 +50,29 @@ DRIVERS = {
     "JPY": [("DCOILWTICO", "Rohöl", -1, "Japan importiert fast alle Energie"),
             ("PNGASJPUSDM", "Flüssiggas (Asien)", -1, "Japan ist großer LNG-Importeur"),
             ("VIXCLS", "Angst-Index VIX", 1, "Der Yen ist ein sicherer Hafen"),
-            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen machen Yen-Kredite attraktiver (Carry)")],
+            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen machen Yen-Kredite attraktiver (Carry)"),
+            ("BAA10Y", "Kreditaufschlag", 1, "Bei steigenden Kreditrisiken werden Yen-Kredite zurückgezahlt")],
     "CHF": [("VIXCLS", "Angst-Index VIX", 1, "Der Franken ist ein sicherer Hafen"),
-            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen lassen Kapital aus dem Franken abfließen")],
+            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen lassen Kapital aus dem Franken abfließen"),
+            ("BTP_BUND", "Italien-Aufschlag", 1, "In Eurokrisen flieht Kapital aus dem Euro in den Franken"),
+            ("BAA10Y", "Kreditaufschlag", 1, "Steigende Kreditrisiken treiben Anleger in den sicheren Franken"),
+            ("NFCI", "Finanzstress-Index", 1, "Bei Finanzstress ist der Franken gefragt")],
     "EUR": [("PNGASEUUSDM", "Erdgas Europa", -1, "Die Eurozone importiert ihr Gas"),
             ("DCOILBRENTEU", "Rohöl Brent", -1, "Die Eurozone importiert ihr Öl"),
-            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen stärken den Dollar gegen den Euro")],
+            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen stärken den Dollar gegen den Euro"),
+            ("BTP_BUND", "Italien-Aufschlag", -1, "Ein steigender Aufschlag Italiens zeigt Eurokrisen-Angst")],
     "GBP": [("PNGASEUUSDM", "Erdgas Europa", -1, "Großbritannien importiert Gas"),
-            ("DCOILBRENTEU", "Rohöl Brent", -1, "Großbritannien ist Netto-Energieimporteur")],
+            ("DCOILBRENTEU", "Rohöl Brent", -1, "Großbritannien ist Netto-Energieimporteur"),
+            ("DGS2", "US-Rendite 2 J.", -1, "Steigende US-Zinsen stärken den Dollar gegen das Pfund"),
+            ("BAA10Y", "Kreditaufschlag", -1, "Das Pfund leidet, wenn Kreditrisiken steigen (großer Finanzsektor)")],
     "USD": [("VIXCLS", "Angst-Index VIX", 1, "Der Dollar ist in Krisen gefragt"),
-            ("DGS2", "US-Rendite 2 J.", 1, "Steigende kurzfristige US-Zinsen ziehen Kapital an")],
+            ("DGS2", "US-Rendite 2 J.", 1, "Steigende kurzfristige US-Zinsen ziehen Kapital an"),
+            ("BAA10Y", "Kreditaufschlag", 1, "Bei steigenden Kreditrisiken ist der Dollar als Weltreservewährung gefragt"),
+            ("NFCI", "Finanzstress-Index", 1, "Bei Finanzstress steigt die Nachfrage nach Dollar")],
 }
 NO_SHORT_YIELD = {"CHF", "NZD"}       # keine aktuelle Quelle für 2-jährige Renditen (siehe ingestion/yields.py)
-DAILY_CODES = {"DCOILWTICO", "DCOILBRENTEU", "DHHNGSP", "VIXCLS", "DGS2"}
+DAILY_CODES = {"DCOILWTICO", "DCOILBRENTEU", "DHHNGSP", "VIXCLS", "DGS2", "BAA10Y", "NFCI"}   # Fenster in Tagen
+LEVEL_CODES = {"DGS2", "BAA10Y", "NFCI", "BTP_BUND"}        # Änderung in Punkten statt in Prozent
 
 # Gemeinsame Makro-Modelle: (Schlüssel, Familie, Name, Idee, Faktor, Schwelle, Richtung, stimmt mit)
 MACRO = [
@@ -174,7 +186,7 @@ def _risk(c, kind):
 
 
 def _driver(code, n, d):
-    dz = 0.05 if code == "DGS2" else 0.01                    # Rendite: 0,05 Prozentpunkte; Preise: 1 %
+    dz = 0.05 if code in LEVEL_CODES else 0.01               # Renditen/Aufschläge: 0,05 Punkte; Preise: 1 %
     return lambda i: sign(i.drivers[(code, n)], dz, d) if (code, n) in i.drivers else pd.Series(0, index=i.closes.index)
 
 

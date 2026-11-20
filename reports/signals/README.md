@@ -1,23 +1,23 @@
-# Prüfung der Modelle je Währung – Stand 19.11.2026
+# Prüfung der Modelle je Währung – Stand 20.11.2026
 
-Automatisch erzeugt von `python -m forex_nexus signals`. 410 Modelle (EUR 47, GBP 44, AUD 65, NZD 55, USD 47, CAD 56, CHF 43, JPY 53). Regeln: [docs/12_signal_abstimmung.md](../../docs/12_signal_abstimmung.md).
+Automatisch erzeugt von `python -m forex_nexus signals`. 443 Modelle (EUR 50, GBP 50, AUD 68, NZD 58, USD 53, CAD 56, CHF 52, JPY 56). Regeln: [docs/12_signal_abstimmung.md](../../docs/12_signal_abstimmung.md).
 
 ## Tag (1D)
 
-**Gültige Einzelmodelle: 0 von 410.**
+**Gültige Einzelmodelle: 0 von 443.**
 
 Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 Prozentpunkten Sicherheit, Anteil dieser Fälle):
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 48,9 % / 54,1 % (15 %) | 52,0 % / 57,1 % (11 %) | nein | 51 % |
-| GBP | 50,9 % / 59,5 % (5 %) | 51,5 % / 52,1 % (6 %) | nein | 45 % |
-| AUD | 49,5 % / 46,3 % (24 %) | 50,6 % / 51,3 % (9 %) | nein | 50 % |
-| NZD | 50,5 % / 49,3 % (39 %) | 51,6 % / 49,0 % (9 %) | nein | 57 % |
-| USD | 49,7 % / 46,4 % (7 %) | 50,6 % / 47,0 % (4 %) | nein | 53 % |
+| EUR | 49,4 % / 50,3 % (19 %) | 51,6 % / 57,7 % (11 %) | nein | 50 % |
+| GBP | 49,8 % / 56,6 % (8 %) | 51,3 % / 45,9 % (6 %) | nein | 47 % |
+| AUD | 49,4 % / 49,1 % (28 %) | 51,5 % / 49,3 % (13 %) | nein | 53 % |
+| NZD | 50,2 % / 49,6 % (39 %) | 50,9 % / 53,5 % (11 %) | nein | 60 % |
+| USD | 50,5 % / 51,3 % (9 %) | 50,5 % / 52,6 % (7 %) | nein | 46 % |
 | CAD | 50,8 % / 49,7 % (19 %) | 51,3 % / 52,9 % (14 %) | nein | 40 % |
-| CHF | 49,5 % / 50,9 % (16 %) | 51,3 % / 47,8 % (3 %) | nein | 48 % |
-| JPY | 49,3 % / 52,6 % (13 %) | 51,3 % / 57,6 % (13 %) | nein | 35 % |
+| CHF | 48,2 % / 48,8 % (25 %) | 50,8 % / 45,9 % (6 %) | nein | 47 % |
+| JPY | 49,0 % / 51,3 % (13 %) | 51,6 % / 57,9 % (13 %) | nein | 35 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
@@ -29,27 +29,27 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Gegen Kleinanleger | AUD | +13,9 % (t 2,0) | +1,5 % (t 0,3) | +2,1 % (t 0,5) | nein |
 | Inflationsanstieg 12 M. | USD | +4,3 % (t 1,9) | -2,4 % (t -0,9) | +3,3 % (t 1,2) | nein |
 | Rendite 2 J. 6 M. | EUR | +4,1 % (t 1,8) | -2,9 % (t -1,3) | +3,3 % (t 1,7) | nein |
+| Kreditaufschlag 1 Monat | JPY | +7,3 % (t 1,8) | -7,4 % (t -1,9) | +1,3 % (t 0,3) | nein |
 | Arbeitslosigkeit 6 M. | CAD | +4,5 % (t 1,8) | -0,5 % (t -0,2) | +2,2 % (t 1,0) | nein |
 | Rendite 2 J. 3 M. | USD | +4,1 % (t 1,8) | +0,9 % (t 0,4) | +1,4 % (t 0,4) | nein |
 | Zinskurve 6 M. | NZD | +5,4 % (t 1,7) | +3,4 % (t 1,0) | +1,6 % (t 0,6) | nein |
-| Inflation | NZD | +5,2 % (t 1,7) | +2,2 % (t 0,6) | -0,7 % (t -0,2) | nein |
 
 ## Woche (1W)
 
-**Gültige Einzelmodelle: 0 von 410.**
+**Gültige Einzelmodelle: 0 von 443.**
 
 Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 Prozentpunkten Sicherheit, Anteil dieser Fälle):
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 52,1 % / 50,0 % (35 %) | 48,6 % / 49,4 % (45 %) | nein | 40 % |
-| GBP | 47,7 % / 50,4 % (36 %) | 55,6 % / 52,8 % (25 %) | nein | 49 % |
-| AUD | 50,1 % / 49,7 % (52 %) | 52,5 % / 53,2 % (35 %) | nein | 27 % |
-| NZD | 47,1 % / 51,2 % (44 %) | 49,7 % / 50,3 % (49 %) | nein | 52 % |
-| USD | 49,0 % / 50,7 % (37 %) | 49,7 % / 57,0 % (28 %) | nein | 73 % |
+| EUR | 50,1 % / 48,9 % (52 %) | 48,9 % / 50,3 % (46 %) | nein | 41 % |
+| GBP | 51,0 % / 50,3 % (50 %) | 52,8 % / 51,7 % (25 %) | nein | 53 % |
+| AUD | 51,8 % / 51,6 % (51 %) | 51,4 % / 51,7 % (41 %) | nein | 33 % |
+| NZD | 47,1 % / 52,5 % (44 %) | 50,6 % / 50,6 % (48 %) | nein | 55 % |
+| USD | 51,2 % / 48,9 % (36 %) | 48,3 % / 51,0 % (29 %) | nein | 67 % |
 | CAD | 51,8 % / 52,6 % (48 %) | 48,9 % / 46,3 % (41 %) | nein | 30 % |
-| CHF | 57,3 % / 57,1 % (19 %) | 53,9 % / 59,1 % (38 %) | ja | 41 % |
-| JPY | 48,8 % / 49,7 % (45 %) | 53,4 % / 55,3 % (39 %) | nein | 36 % |
+| CHF | 58,4 % / 61,0 % (32 %) | 56,4 % / 59,4 % (47 %) | ja | 42 % |
+| JPY | 48,2 % / 49,0 % (42 %) | 53,1 % / 55,9 % (41 %) | nein | 35 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
@@ -61,27 +61,27 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Rendite 10 J. | EUR | +4,7 % (t 2,0) | -0,5 % (t -0,3) | -1,0 % (t -0,6) | nein |
 | Inflation | NZD | +6,1 % (t 2,0) | +1,2 % (t 0,3) | -1,5 % (t -0,5) | nein |
 | US-Rendite 2 J. 1 Monat | JPY | +7,6 % (t 2,0) | -10,7 % (t -2,6) | +1,0 % (t 0,3) | nein |
+| Kreditaufschlag 1 Monat | JPY | +7,6 % (t 1,8) | -8,7 % (t -2,1) | +1,0 % (t 0,3) | nein |
 | Inflationsanstieg 12 M. | USD | +4,0 % (t 1,8) | -2,6 % (t -1,0) | +2,8 % (t 1,0) | nein |
 | US-Rendite 2 J. 1 Woche | USD | +4,9 % (t 1,8) | +0,2 % (t 0,1) | +0,2 % (t 0,0) | nein |
 | Eisenerz 3 Monate | AUD | +6,2 % (t 1,8) | -3,3 % (t -1,2) | +5,5 % (t 2,0) | nein |
-| Arbeitslosigkeit 6 M. | CAD | +4,3 % (t 1,8) | -0,7 % (t -0,2) | +2,3 % (t 1,2) | nein |
 
 ## Monat (1M)
 
-**Gültige Einzelmodelle: 0 von 410.**
+**Gültige Einzelmodelle: 0 von 443.**
 
 Kombi-Modell je Währung – Trefferquote (alle Fälle / nur Fälle mit ≥ 10 Prozentpunkten Sicherheit, Anteil dieser Fälle):
 
 | Währung | Bestätigung 2013–2019 | Schlusstest ab 2020 | bestätigt | aktuell P(stärker) |
 |---|---|---|---|---|
-| EUR | 56,0 % / 51,4 % (44 %) | 48,8 % / 57,5 % (49 %) | nein | 43 % |
-| GBP | 48,8 % / 51,4 % (44 %) | 63,4 % / 70,0 % (37 %) | nein | 51 % |
-| AUD | 40,5 % / 44,1 % (70 %) | 52,4 % / 53,1 % (60 %) | nein | 30 % |
-| NZD | 57,1 % / 65,8 % (45 %) | 59,8 % / 57,6 % (40 %) | nein | 41 % |
-| USD | 46,4 % / 37,9 % (35 %) | 47,6 % / 40,6 % (39 %) | nein | 60 % |
+| EUR | 51,2 % / 50,0 % (43 %) | 47,6 % / 57,9 % (46 %) | nein | 43 % |
+| GBP | 54,8 % / 50,0 % (55 %) | 59,8 % / 68,9 % (55 %) | nein | 50 % |
+| AUD | 44,0 % / 45,2 % (74 %) | 47,6 % / 51,9 % (63 %) | nein | 35 % |
+| NZD | 59,5 % / 59,5 % (44 %) | 52,4 % / 60,0 % (43 %) | nein | 44 % |
+| USD | 45,2 % / 39,4 % (39 %) | 46,3 % / 41,2 % (41 %) | nein | 56 % |
 | CAD | 47,6 % / 44,0 % (60 %) | 52,4 % / 49,0 % (62 %) | nein | 51 % |
-| CHF | 56,0 % / 48,3 % (35 %) | 42,7 % / 43,2 % (54 %) | nein | 65 % |
-| JPY | 56,0 % / 54,1 % (44 %) | 58,5 % / 60,0 % (43 %) | nein | 53 % |
+| CHF | 56,0 % / 50,0 % (40 %) | 45,1 % / 47,7 % (54 %) | nein | 57 % |
+| JPY | 56,0 % / 53,7 % (49 %) | 58,5 % / 61,4 % (54 %) | nein | 46 % |
 
 Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten, t-Wert):
 
@@ -94,9 +94,9 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Rendite 2 J. 3 M. | USD | +4,5 % (t 1,9) | +2,6 % (t 1,0) | +3,5 % (t 1,0) | nein |
 | Eisenerz 1 Monat | AUD | +7,3 % (t 1,9) | +1,3 % (t 0,5) | +1,1 % (t 0,4) | nein |
 | Arbeitslosigkeit 6 M. | EUR | +3,5 % (t 1,8) | +1,8 % (t 0,9) | +1,9 % (t 1,1) | nein |
+| Kreditaufschlag 3 Monate | CHF | +4,0 % (t 1,8) | +2,0 % (t 0,7) | +1,7 % (t 0,9) | nein |
 | Trend 1 Monat | NZD | +4,4 % (t 1,7) | -4,6 % (t -1,5) | -4,0 % (t -1,6) | nein |
 | Arbeitslosigkeit 6 M. | CAD | +3,9 % (t 1,7) | -0,2 % (t -0,1) | +2,9 % (t 1,9) | nein |
-| Gegenbewegung 1 Tag | CHF | +3,5 % (t 1,7) | +1,6 % (t 0,7) | -2,4 % (t -1,4) | nein |
 
 ## Datenstand und Nutzen
 
@@ -129,6 +129,7 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Kupfer | – | 2026-09-01 | ja | 3 |
 | Eisenerz | – | 2026-09-01 | ja | 3 |
 | Nickel | – | 2026-09-01 | ja | 3 |
+| Finanzstress-Index der Chicago Fed (NFCI) | – | 2026-11-13 | ja | 6 |
 | Volatilitätsindex VIX (Risikostimmung) | – | 2026-11-16 | ja | 27 |
 | Leitzins Reserve Bank of Australia (BIS) | AUD | 2026-11-05 | ja | 86 |
 | Leitzins Bank of Canada (BIS) | CAD | 2026-11-09 | ja | 86 |
@@ -138,6 +139,8 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Leitzins Bank of Japan (BIS) | JPY | 2026-11-10 | ja | 86 |
 | Leitzins Reserve Bank of New Zealand (BIS) | NZD | 2026-11-06 | ja | 86 |
 | Effektiver Leitzins USA (Fed Funds) | USD | 2026-11-16 | ja | 86 |
+| Kreditaufschlag Unternehmensanleihen BAA gegenüber US-Staatsanleihen | – | 2026-11-18 | ja | 18 |
+| Rendite 10 J. Italien (für den Italien-Aufschlag) | – | 2026-10-01 | ja | 6 |
 | Arbeitslosenquote Australien (OECD) | AUD | 2026-09-01 | ja | 32 |
 | Arbeitslosenquote Kanada (OECD) | CAD | 2026-10-01 | ja | 32 |
 | Arbeitslosenquote Schweiz (OECD, Quartal) | CHF | 2026-04-01 | ja | 32 |
@@ -159,4 +162,4 @@ Die 10 stärksten Einzelmodelle in der Entdeckung (Rendite pro Jahr nach Kosten,
 | Rendite 2 J. Euroraum (EZB-Zinsstrukturkurve) | EUR | 2026-11-17 | ja | 24 |
 | Rendite 5 J. Großbritannien (Bank of England; kürzeste verfügbare Reihe) | GBP | – | **nein** | 24 |
 | Rendite 2 J. Japan (Finanzministerium) | JPY | 2026-11-18 | ja | 24 |
-| Rendite 2-jährige US-Staatsanleihe | USD | 2026-11-16 | ja | 36 |
+| Rendite 2-jährige US-Staatsanleihe | USD | 2026-11-16 | ja | 39 |
