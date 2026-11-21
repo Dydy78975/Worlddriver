@@ -1,13 +1,13 @@
 # Phase 1 – Kursdaten und Datenqualität
 
-Erstellt am 20.11.2026 · automatisch erzeugt von `python -m forex_nexus report-fx`
+Erstellt am 21.11.2026 · automatisch erzeugt von `python -m forex_nexus report-fx`
 
 ## Datenbestand
 
 | Quelle | Paare | von | bis | Tageswerte |
 |---|---|---|---|---|
 | FRED H.10 + Kreuzkurse | 28 | 04.01.1999 | 13.11.2026 | 195.664 |
-| EZB-Referenzkurse | 7 | 04.01.1999 | 19.11.2026 | 49.980 |
+| EZB-Referenzkurse | 7 | 04.01.1999 | 20.11.2026 | 49.987 |
 
 ![Kursdiagramme](kurse_28_paare.png)
 
