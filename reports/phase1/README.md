@@ -1,13 +1,13 @@
 # Phase 1 – Kursdaten und Datenqualität
 
-Erstellt am 21.11.2026 · automatisch erzeugt von `python -m forex_nexus report-fx`
+Erstellt am 24.11.2026 · automatisch erzeugt von `python -m forex_nexus report-fx`
 
 ## Datenbestand
 
 | Quelle | Paare | von | bis | Tageswerte |
 |---|---|---|---|---|
-| FRED H.10 + Kreuzkurse | 28 | 04.01.1999 | 13.11.2026 | 195.664 |
-| EZB-Referenzkurse | 7 | 04.01.1999 | 20.11.2026 | 49.987 |
+| FRED H.10 + Kreuzkurse | 28 | 04.01.1999 | 20.11.2026 | 195.804 |
+| EZB-Referenzkurse | 7 | 04.01.1999 | 23.11.2026 | 49.994 |
 
 ![Kursdiagramme](kurse_28_paare.png)
 
@@ -29,13 +29,13 @@ Kleine Unterschiede sind daher normal; große Unterschiede deuten auf Datenfehle
 
 | Paar | gemeinsame Tage | mittlere Abweichung | 99-%-Abweichung | Tage > 2 % |
 |---|---|---|---|---|
-| EURAUD | 6897 | 0.175 % | 1.099 % | 9 |
-| EURCAD | 6897 | 0.212 % | 1.182 % | 5 |
-| EURCHF | 6897 | 0.086 % | 0.716 % | 3 |
-| EURGBP | 6897 | 0.139 % | 0.855 % | 0 |
-| EURJPY | 6897 | 0.183 % | 1.227 % | 9 |
-| EURNZD | 6897 | 0.182 % | 1.151 % | 6 |
-| EURUSD | 6897 | 0.179 % | 1.138 % | 5 |
+| EURAUD | 6902 | 0.175 % | 1.099 % | 9 |
+| EURCAD | 6902 | 0.212 % | 1.182 % | 5 |
+| EURCHF | 6902 | 0.086 % | 0.716 % | 3 |
+| EURGBP | 6902 | 0.139 % | 0.855 % | 0 |
+| EURJPY | 6902 | 0.183 % | 1.226 % | 9 |
+| EURNZD | 6902 | 0.182 % | 1.151 % | 6 |
+| EURUSD | 6902 | 0.179 % | 1.138 % | 5 |
 
 ## Einzelbefunde
 
